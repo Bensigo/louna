@@ -1,7 +1,11 @@
 packages:
-  - apps/expo
-  - apps/nextjs
-  - packages/api
-  - packages/auth
-  - packages/db
-  - packages/config/*
+    - apps/mobile
+    - apps/partners
+    - apps/admin-seed-script
+    - apps/admin
+    - packages/api
+    - packages/auth
+    - packages/admin-api
+    - packages/partner-api
+    - packages/db
+    - packages/config/*

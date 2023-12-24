@@ -6,17 +6,14 @@
  * tl;dr - this is where all the tRPC server stuff is created and plugged in.
  * The pieces you will need to use are documented accordingly near the end
  */
-import type {
-  SignedInAuthObject,
-  SignedOutAuthObject,
-} from "@clerk/nextjs/api";
-import { getAuth } from "@clerk/nextjs/server";
-import { initTRPC, TRPCError } from "@trpc/server";
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import superjson from "superjson";
-import { ZodError } from "zod";
+import type { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/api"
+import { getAuth } from "@clerk/nextjs/server"
+import { initTRPC, TRPCError } from "@trpc/server"
+import { type CreateNextContextOptions } from "@trpc/server/adapters/next"
+import superjson from "superjson"
+import { ZodError } from "zod"
 
-import { prisma } from "@acme/db";
+import { prisma } from "@solu/db"
 
 /**
  * 1. CONTEXT
@@ -28,8 +25,8 @@ import { prisma } from "@acme/db";
  *
  */
 type CreateContextOptions = {
-  auth: SignedInAuthObject | SignedOutAuthObject;
-};
+    auth: SignedInAuthObject | SignedOutAuthObject
+}
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use
@@ -41,11 +38,11 @@ type CreateContextOptions = {
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
-  return {
-    auth: opts.auth,
-    prisma,
-  };
-};
+    return {
+        auth: opts.auth,
+        prisma,
+    }
+}
 
 /**
  * This is the actual context you'll use in your router. It will be used to
@@ -53,10 +50,10 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  * @link https://trpc.io/docs/context
  */
 export const createTRPCContext = (opts: CreateNextContextOptions) => {
-  return createInnerTRPCContext({
-    auth: getAuth(opts.req),
-  });
-};
+    return createInnerTRPCContext({
+        auth: getAuth(opts.req),
+    })
+}
 
 /**
  * 2. INITIALIZATION
@@ -65,18 +62,20 @@ export const createTRPCContext = (opts: CreateNextContextOptions) => {
  * transformer
  */
 const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: superjson,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
-    };
-  },
-});
+    transformer: superjson,
+    errorFormatter({ shape, error }) {
+        return {
+            ...shape,
+            data: {
+                ...shape.data,
+                zodError:
+                    error.cause instanceof ZodError
+                        ? error.cause.flatten()
+                        : null,
+            },
+        }
+    },
+})
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
@@ -89,7 +88,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
  * This is how you create new routers and subrouters in your tRPC API
  * @see https://trpc.io/docs/router
  */
-export const createTRPCRouter = t.router;
+export const createTRPCRouter = t.router
 
 /**
  * Public (unauthed) procedure
@@ -98,22 +97,58 @@ export const createTRPCRouter = t.router;
  * tRPC API. It does not guarantee that a user querying is authorized, but you
  * can still access user session data if they are logged in
  */
-export const publicProcedure = t.procedure;
+export const publicProcedure = t.procedure
 
 /**
  * Reusable middleware that enforces users are logged in before running the
  * procedure
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.auth.userId) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
-  }
-  return next({
-    ctx: {
-      auth: ctx.auth,
-    },
-  });
-});
+    if (!ctx.auth.userId) {
+        throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Not authenticated",
+        })
+    }
+    return next({
+        ctx: {
+            auth: ctx.auth,
+        },
+    })
+})
+
+
+
+const enforceUserIsPartner = t.middleware(async ({ ctx, next }) => {
+
+    if (!ctx.auth.userId) {
+        throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Not authenticated",
+        })
+    }
+    const user = await prisma.user.findFirst({
+        where: {
+            id: ctx.auth.userId
+        }
+    })
+    console.log({ user })
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    if(user && !user.roles.includes('INSTRUCTOR')){
+        throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Not authenticated",
+        })
+    }
+   
+    return next({
+        ctx: {
+            auth: ctx.auth,
+        },
+    })
+   
+})
 
 /**
  * Protected (authed) procedure
@@ -124,4 +159,11 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed)
+
+
+/**
+ *  partner proceude
+ *  only accessable to INSTRUCTORS
+ */
+export const partnerProtectedProcedure = t.procedure.use(enforceUserIsPartner)

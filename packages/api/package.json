@@ -1,5 +1,5 @@
 {
-  "name": "@acme/api",
+  "name": "@solu/api",
   "version": "0.1.0",
   "main": "./index.ts",
   "types": "./index.ts",
@@ -11,7 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@acme/db": "^0.1.0",
+    "@solu/db": "^0.1.0",
     "@google-cloud/storage": "^6.11.0",
     "@trpc/client": "^10.27.1",
     "@trpc/server": "^10.27.1",
@@ -22,7 +22,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@acme/eslint-config": "^0.1.0",
+    "@solu/eslint-config": "^0.1.0",
     "eslint": "^8.42.0",
     "typescript": "^5.1.3"
   }

@@ -1,0 +1,10 @@
+[
+    {
+        "userId": "1",
+        "email": "solu@admin.com",
+        "firstName": "Solu",
+        "lastName": "Admin",
+        "password": "$2y$10$eo0HbVb0duOHnXxLwz3.9OHqLSIBIFmdeXqdVFh5QqVyaX2kWarwO",
+        "passwordHasher": "bcrypt"
+    }
+]

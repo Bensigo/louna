@@ -1,6 +1,5 @@
 import schemas from "../../schemas"
 import { protectedProcedure } from "../../trpc"
-import { blurhashFromURL } from "../../utils/blurhashFromUrl"
 import {
     generateReadSignedUrl,
     generateWriteSignedUrl,
@@ -12,6 +11,9 @@ export const getProfile = protectedProcedure.query(({ ctx }) => {
         where: {
             id: auth.userId,
         },
+        include: {
+            wallet: true
+        }
     })
 })
 

@@ -1,27 +1,17 @@
-import { z } from "zod";
+import { createCommentController } from "../controllers/post/createComment";
+import { createPostController } from "../controllers/post/createPost";
+import { getPostController } from "../controllers/post/getPost";
+import { likePostController } from "../controllers/post/likePost";
+import { listCommentController } from "../controllers/post/listComments";
+import { listPostController } from "../controllers/post/listPost";
+import { createTRPCRouter } from "../trpc";
 
-import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const postRouter = createTRPCRouter({
-  all: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.post.findMany({ orderBy: { id: "desc" } });
-  }),
-  byId: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.prisma.post.findFirst({ where: { id: input.id } });
-    }),
-  create: publicProcedure
-    .input(
-      z.object({
-        title: z.string().min(1),
-        content: z.string().min(1),
-      }),
-    )
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.post.create({ data: input });
-    }),
-  delete: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
-    return ctx.prisma.post.delete({ where: { id: input } });
-  }),
-});
+    createPost: createPostController,
+    getPost: getPostController,
+    listPost: listPostController,
+    likePost: likePostController,
+    createComment: createCommentController,
+    listComment: listCommentController
+})

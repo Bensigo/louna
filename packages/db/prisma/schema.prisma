@@ -3,6 +3,7 @@
 
 generator client {
     provider = "prisma-client-js"
+    previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -10,27 +11,184 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id       String @id @default(cuid())
-    title    String
-    content  String
-    author   User   @relation(fields: [authorId], references: [id])
-    authorId String
-}
-
 model User {
     id        String    @id
     email     String    @unique
-    role      UserRole  @default(CLIENT)
+    roles      UserRole[]  @default([USER])
+    metadata   Json?
+    imageUrl String?
+    likes Like[]
+    Comments    Comment[]
+    recipeLikes RecipeLike[]
+
     firstname String?
     lastname  String?
     birthdate DateTime?
-    posts     Post[]
+    wallet    Wallet?
+    post  Post[]
+    perference Preference?
+    partnerProfile PartnerProfile?
 }
+
+
+
 
 enum UserRole {
     ADMIN
-    MANAGER
-    EMPLOYEE
-    CLIENT
+    BUSINESS
+    INSTRUCTOR
+    USER
+}
+
+enum BusinessType {
+    WELLNESS
+    FITNESS
+}
+
+
+model Venue {
+ id   String   @id @default(cuid())  
+ address   String
+ latitude  Float?
+ longitude Float?
+ city String
+ countryCode String
+ ownerId String
+ owner   PartnerProfile     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+
+model PartnerProfile {
+   id   String   @id @default(cuid())  
+   userId String   @unique
+   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+   businessType BusinessType
+   bio String 
+   activities  String[]
+   title String
+   venue Venue[]
+
+}
+
+enum PreferenceType {
+    RECIPE
+    BOOKING
+    FITNESS
+    
+}
+
+model Preference {
+    id     String   @id @default(cuid())
+    type PreferenceType 
+    userId String   @unique
+    user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    config  Json
+}
+
+enum PostType {
+    MEDIA
+    TEXT
+}
+
+
+
+model Post {
+    id          String      @id @default(cuid())
+    type        PostType
+    text        String?
+    likes        Like[]
+    Comments    Comment[]
+    mediaUri    String?
+    metadata    Json?
+    userId      String
+    user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    deleted     Boolean     @default(false)
+}
+
+model Comment {
+  id    String  @id @default(cuid())
+  userId      String
+  text String
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String
+  post        Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Like {
+  id    String  @id @default(cuid())
+  userId      String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId String
+  post        Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  isDeleted   Boolean @default(false)
+  updatedAt   DateTime    @updatedAt
+}
+
+model RecipeLike {
+  id    String  @id @default(cuid())
+  userId      String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipeId String
+  recipe    Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  isDeleted   Boolean @default(false)
+  updatedAt   DateTime    @updatedAt
+}
+
+
+model Wallet {
+    id     String   @id @default(cuid())
+    userId String   @unique
+    user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    point  Float    @default(10.00)
+    reward Reward[]
+}
+
+model Reward {
+    id       String  @id @default(cuid())
+    name     String
+    token    Int
+    walletId String
+    wallet   Wallet  @relation(fields: [walletId], references: [id], onDelete: Cascade)
+    isUsed   Boolean
+}
+
+enum CATEGORY  {
+    BREAKFAST
+    LAUNCH
+    DINNER
+    SNACK
+}
+
+model Recipe {
+    id    String  @id @default(cuid()) 
+    Name String
+    duration Int
+    description String
+    ingredent  String[]
+    category  CATEGORY
+    steps String[]
+    likes  RecipeLike[]
+    bookmarks Bookmark[]
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    deleted     Boolean     @default(false)
+
+}
+
+
+model Bookmark {
+   id    String  @id @default(cuid())   
+   userId String
+   recipeId String
+   recipe Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade) 
+   createdAt   DateTime    @default(now())
+   updatedAt   DateTime    @updatedAt
+   isDeleted     Boolean     @default(false)
 }

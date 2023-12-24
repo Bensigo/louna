@@ -1,7 +1,7 @@
 /** @type {import("eslint").Linter.Config} */
 const config = {
     root: true,
-    extends: ["@acme/eslint-config"], // uses the config in `packages/config/eslint`
+    extends: ["@solu/eslint-config"], // uses the config in `packages/config/eslint`
     parser: "@typescript-eslint/parser",
     parserOptions: {
         ecmaVersion: "latest",
@@ -9,6 +9,7 @@ const config = {
         project: [
             "./tsconfig.json",
             "./apps/*/tsconfig.json",
+            "./scripts/tsconfig.json",
             "./packages/*/tsconfig.json",
         ],
     },
@@ -22,6 +23,9 @@ const config = {
         "no-anonymous-default-export": "off",
         "@typescript-eslint/no-unsafe-return": "off",
         "@typescript-eslint/no-floating-promises": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-var-requires": "off"
     },
 }
 
