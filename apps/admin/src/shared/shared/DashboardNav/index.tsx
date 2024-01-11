@@ -37,6 +37,7 @@ import {
   BiMale,
   BiMaleFemale,
   BiMoon,
+  BiRun,
   BiSun,
 
 } from "react-icons/bi";
@@ -52,6 +53,7 @@ interface LinkItemProps {
 export const navItems: Array<LinkItemProps> = [
   { name: "Home", icon: BiHome },
   { name: "recipes",  icon: BiFoodMenu },
+  { name: "SMW",  icon: BiRun },
   { name: "Partners", icon: BiMaleFemale },
   { name: "Profile", icon: BiMale },
 ];

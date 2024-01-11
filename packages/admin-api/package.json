@@ -1,30 +1,32 @@
 {
-    "name": "@solu/admin-api",
-    "version": "0.1.0",
-    "main": "./index.ts",
-    "types": "./index.ts",
-    "license": "MIT",
-    "scripts": {
-      "clean": "rm -rf .turbo node_modules",
-      "lint": "eslint .",
-      "lint:fix": "pnpm lint --fix",
-      "type-check": "tsc --noEmit"
-    },
-    "dependencies": {
-      "@solu/db": "^0.1.0",
-      "@google-cloud/storage": "^6.11.0",
-      "@trpc/client": "^10.27.1",
-      "@trpc/server": "^10.27.1",
-      "blurhash": "^2.0.5",
-      "image-size": "^1.0.2",
-      "sharp": "^0.32.1",
-      "superjson": "1.9.1",
-      "zod": "^3.21.4"
-    },
-    "devDependencies": {
-      "@solu/eslint-config": "^0.1.0",
-      "eslint": "^8.42.0",
-      "typescript": "^5.1.3"
-    }
+  "name": "@solu/admin-api",
+  "version": "0.1.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "eslint .",
+    "lint:fix": "pnpm lint --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.484.0",
+    "@aws-sdk/s3-presigned-post": "^3.484.0",
+    "@aws-sdk/s3-request-presigner": "^3.484.0",
+    "@google-cloud/storage": "^6.11.0",
+    "@solu/db": "^0.1.0",
+    "@trpc/client": "^10.27.1",
+    "@trpc/server": "^10.27.1",
+    "blurhash": "^2.0.5",
+    "image-size": "^1.0.2",
+    "sharp": "^0.32.1",
+    "superjson": "1.9.1",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@solu/eslint-config": "^0.1.0",
+    "eslint": "^8.42.0",
+    "typescript": "^5.1.3"
   }
-  
+}

@@ -10,6 +10,8 @@ export const listPostController = protectedProcedure
     const { prisma } = ctx;
     const { skip, limit } = input;
 
+    console.log("called api")
+
     // Fetch posts ordered by createdAt to get the latest posts
     const latestPosts = await prisma.post.findMany({
       take: limit,

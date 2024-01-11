@@ -13,9 +13,13 @@ const LayoutView = () => {
 
 
     useEffect(() => {
+        console.log("========= called =======")
+        router.replace('recipes/(preference)')
         const isPreferenceSet = async () => await haveRecipePreference();
+        console.log({ isPreferenceSet })
         if(rootNav?.isReady()) {
             isPreferenceSet().then(val => {
+                console.log({ tttt: val })
                 if (val === null || val === undefined){
                     router.replace('recipes/(preference)')
                 }
@@ -36,6 +40,10 @@ const LayoutView = () => {
                 <Stack.Screen
                     name="(preference)"
                     options={{ headerShown: false }}
+                ></Stack.Screen>
+                  <Stack.Screen
+                    name="[id]"
+                    options={{ headerShown:false   }}
                 ></Stack.Screen>
             </Stack>
         </CustomSaveAreaView>

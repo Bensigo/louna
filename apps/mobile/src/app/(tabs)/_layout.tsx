@@ -12,6 +12,8 @@ const TabScreen = () => {
     const { isSignedIn } = useAuth()
     const path = usePathname()
 
+    console.log({ path })
+
     if (!isSignedIn) {
         return <Redirect href={"login"} />
     }
@@ -24,24 +26,21 @@ const TabScreen = () => {
                     headerShown: false,
                     tabBarStyle: {
                         display: hideTabbarRoute.includes(path) ? 'none': 'flex',
-                        
-                        
                     },
                  
                 }}
                 sceneContainerStyle={{
                     backgroundColor: "transparent",
-                    
-                    
+                
                 }}
              
             >
                 <Tabs.Screen
-                    name="bookings"
+                    name="home"
                     options={{
-                        tabBarLabel: "Bookings",
+                        tabBarLabel: "Home",
                         tabBarIcon: () => (
-                            <Ionicons name="bonfire-outline" size={30} />
+                            <Ionicons name="home-outline" size={30} />
                         ),
                     }}
                 ></Tabs.Screen>
@@ -65,11 +64,11 @@ const TabScreen = () => {
                     }}
                 ></Tabs.Screen>
                 <Tabs.Screen
-                    name="activites"
+                    name="bookings"
                     options={{
-                        tabBarLabel: "Activites",
+                        tabBarLabel: "Bookings",
                         tabBarIcon: () => (
-                            <Ionicons name="home-outline" size={30} />
+                            <Ionicons name="calendar-outline" size={30} />
                         ),
                     }}
                 ></Tabs.Screen>

@@ -11,6 +11,8 @@ import { PostWithMemo as Post , Comments } from "../../../components/community"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { useRouter } from "expo-router"
 
+const image =
+    "https://frommybowl.com/wp-content/uploads/2020/01/One_Pot_Pasta_Vegetables_Vegan_FromMyBowl-10.jpg"
 
 
 export default function CommunityForum() {
@@ -23,6 +25,9 @@ export default function CommunityForum() {
    
     const { data: posts, isLoading: isLoadingPost, refetch } =
         api.post.listPost.useQuery({ limit })
+
+
+    console.log({ posts })    
     
     const [postId, setPostId] = useState()
 
@@ -34,7 +39,26 @@ export default function CommunityForum() {
         return posts?.map((item) => item);
     }, [posts]);
 
-
+    transformedPosts?.push({
+        id: '43656872498093',
+        metadata: {},
+        createdAt: new Date(),
+        updatedAt: new Date,
+        text: 'Hello world',
+        type: 'TEXT',
+        mediaUri: image,
+        deleted: false,
+        likes: [],
+        Comments: [],
+        trendScore: 0,
+        userId: "dksjdsufhekf",
+        user: {
+            id: 'jdhgfsofujdigfdf',
+            imageUri: '',
+            firstname: 'Sarah',
+            lastname: 'Ahmed'
+        }
+    })
 
     const handleRefeshData = useCallback(() => {
         setLimit((prev) => prev + 10)

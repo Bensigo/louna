@@ -159,23 +159,38 @@ model Reward {
     isUsed   Boolean
 }
 
-enum CATEGORY  {
+enum MealType  {
     BREAKFAST
     LAUNCH
     DINNER
     SNACK
 }
 
+enum DietType {
+    Standard
+    Vegetarian
+    Vegan
+    Paleo
+}
+
+
+
 model Recipe {
     id    String  @id @default(cuid()) 
-    Name String
+    name String
     duration Int
+    calories Int
     description String
-    ingredent  String[]
-    category  CATEGORY
+    ingredents  Json[]
+    images Json[]
+    nutrients Json[]
+    mealType  MealType
+    dietType DietType
+    categories String[]
     steps String[]
     likes  RecipeLike[]
-    bookmarks Bookmark[]
+    bookmarks Bookmark[] 
+    isApproved Boolean @default(false)
     createdAt   DateTime    @default(now())
     updatedAt   DateTime    @updatedAt
     deleted     Boolean     @default(false)
@@ -191,4 +206,16 @@ model Bookmark {
    createdAt   DateTime    @default(now())
    updatedAt   DateTime    @updatedAt
    isDeleted     Boolean     @default(false)
+}
+
+
+model File {
+  id    String  @id @default(cuid())   
+  contentType String
+  baseId String
+  repo String
+  key String
+  isValid Boolean @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }

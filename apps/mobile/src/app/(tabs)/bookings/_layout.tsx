@@ -10,6 +10,10 @@ const LayoutView = () => {
                     name="index"
                     options={{ headerShown: false }}
                 ></Stack.Screen>
+                  <Stack.Screen
+                    name="upcoming"
+                    options={{ headerShown: false }}
+                ></Stack.Screen>
             </Stack>
         </CustomSaveAreaView>
     )

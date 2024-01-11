@@ -4,7 +4,6 @@ import { type AppRouter } from "./src/root"
 
 export { appRouter, type AppRouter } from "./src/root"
 export { createTRPCContext } from "./src/trpc"
-export { cronManager } from "./src/crons"
 
 /**
  * Inference helpers for input types

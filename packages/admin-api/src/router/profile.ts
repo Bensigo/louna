@@ -6,6 +6,7 @@ import { createTRPCRouter } from "../trpc"
 
 const profileRouters = createTRPCRouter({
     get: getProfileController,
+
 })
 
 

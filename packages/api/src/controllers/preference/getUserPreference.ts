@@ -8,7 +8,7 @@ const getUserPreferenceController = protectedProcedure.query(async ({ ctx }) => 
             userId
         }
     })
-
+   console.log({ preferences })
     return preferences;
 })
 

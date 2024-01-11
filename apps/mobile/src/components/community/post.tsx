@@ -4,7 +4,7 @@ import { useAuth } from "@clerk/clerk-expo"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { formatDistanceToNow } from "date-fns"
 import { Skeleton } from "moti/skeleton"
-import { Avatar, Card, H6, Text, View, XStack, YStack } from "tamagui"
+import { Avatar, Card, H6, Image, Text, View, XStack, YStack } from "tamagui"
 
 type PostType = {
     post: {
@@ -82,7 +82,7 @@ const Post: React.FC<PostType> = (props) => {
                                     </Text>
                                 </View>
                             </XStack>
-                            <View paddingVertical="$1" width={"100%"}>
+                            {post.text && <View paddingVertical="$1" width={"100%"}>
                                 <Text
                                     fontSize={"$5"}
                                     fontWeight={"$2"}
@@ -90,7 +90,10 @@ const Post: React.FC<PostType> = (props) => {
                                 >
                                     {post.text}
                                 </Text>
-                            </View>
+                            </View>}
+                            {post.mediaUri && (
+                                <Image height={300} width={'100%'} source={{ uri: post.mediaUri }} />
+                            )}
                             <XStack space>
                                 <TouchableHighlight
                                     underlayColor={"inherit"}

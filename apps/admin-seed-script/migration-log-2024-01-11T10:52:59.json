@@ -1,0 +1,16 @@
+
+{
+  "userId": "1",
+  "status": 422,
+  "clerkTraceId": "2ef45d4a8cd02519c72d1317e86e33c9",
+  "clerkError": true,
+  "errors": [
+    {
+      "code": "form_identifier_exists",
+      "message": "That email address is taken. Please try another.",
+      "meta": {}
+    }
+  ],
+  "originalLine": 155,
+  "originalColumn": 12
+}
