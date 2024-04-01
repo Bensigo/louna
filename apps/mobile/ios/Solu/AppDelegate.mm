@@ -17,8 +17,8 @@
                                             launchOptions:launchOptions];
   [[RCTAppleHealthKit new] initializeBackgroundObservers:bridge];
 
-  // return [super application:application didFinishLaunchingWithOptions:launchOptions];
-  return YES;
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+  // return YES;
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge

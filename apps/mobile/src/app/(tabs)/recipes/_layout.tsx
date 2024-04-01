@@ -23,10 +23,17 @@ const LayoutView = () => {
                  <Stack.Screen
                     name="bookmarks"
                    
+               
+
                     options={{
-                        headerTitle: "Bookmarks",
-                        headerTransparent: true,
-                        headerLeft: () => <LeftBackButton  route='/recipes' />,
+                        title: "Bookmarks",
+                         headerShadowVisible: false,
+                         headerStyle: {
+                          backgroundColor: 'transparent'
+                         },
+                        headerLeft: () => (
+                            <LeftBackButton route="/recipes" bg="black" />
+                        ),
                     }}
                 ></Stack.Screen>
             </Stack>

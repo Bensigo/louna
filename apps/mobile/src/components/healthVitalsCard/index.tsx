@@ -15,14 +15,14 @@ export const HealthVitalsCard: React.FC<HealthVitalsCard> = ({ onVitalsData }) =
 
 
     useEffect(() => {
-        // AppleHealthKit.initHealthKit(PERMISSIONS,(err, permission) => {
-        //     if(err){
-        //         console.log({err})
-        //         return
-        //     }
-        //     console.log({ permission })
-        //     setHasPermissions(true)
-        // })
+        AppleHealthKit.initHealthKit(PERMISSIONS,(err, permission) => {
+            if(err){
+                console.log({err})
+                return
+            }
+            console.log({ permission })
+            setHasPermissions(true)
+        })
     }, [])
 
 

@@ -33,7 +33,7 @@ const Bookmarks = () => {
  
 
     return (
-        <View  flex={1} mb={"$3"} mt={"$8"} paddingHorizontal={"$3.5"}>
+        <View  flex={1} mb={"$3"} pt={'$10'} px='$4'>
           
                  <FlatList
                  data={bookmarks}

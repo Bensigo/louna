@@ -15,7 +15,7 @@ export const CreateRecipesWrapper = () => {
                 Back
             </Button>
                 <Heading >Create Recipe</Heading>
-                <CreateRecipeForm/ >        
+                <CreateRecipeForm/>        
         </Box>
     )
 }
