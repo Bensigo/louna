@@ -1,5 +1,5 @@
 import { Box, Button, Heading } from "@chakra-ui/react"
-import CreateRecipeForm from "./components/CreateRecipeForm"
+// import CreateRecipeForm from "./components/CreateRecipeForm"
 import { BiArrowBack } from "react-icons/bi"
 import { useRouter } from "next/router"
 
@@ -14,8 +14,8 @@ export const CreateRecipeWrapper = () => {
               <Button leftIcon={<BiArrowBack />} onClick={goBack}>
                 Back
             </Button>
-                <Heading >Create Recipe</Heading>
-                <CreateRecipeForm/>        
+            <Heading>Create Recipe</Heading>
+            {/* <CreateRecipeForm/>         */}
         </Box>
     )
 }
