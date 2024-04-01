@@ -10,9 +10,6 @@ export const listPostController = protectedProcedure
     const { prisma } = ctx;
     const { skip, limit } = input;
 
-    console.log("called api")
-
-    // Fetch posts ordered by createdAt to get the latest posts
     const latestPosts = await prisma.post.findMany({
       take: limit,
       skip,
@@ -29,6 +26,8 @@ export const listPostController = protectedProcedure
         user: true,
       },
     });
+
+    // console.log({ latestPosts })
 
     const today = new Date()
     // const todayStart = startOfDay(today);
@@ -60,6 +59,8 @@ export const listPostController = protectedProcedure
       },
     });
 
+    console.log({ trendingPosts }, '========')
+
     // Merge and deduplicate the posts
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -69,7 +70,8 @@ export const listPostController = protectedProcedure
   });
 
 type CustomPost =  Post & { likes: Like[], Comments: Comment[] }
-  const calculateTrendScore = (post: CustomPost): number => {
+
+const calculateTrendScore = (post: CustomPost): number => {
     const likeCount = post.likes?.length || 0;
     const commentCount = post.Comments?.length || 0;
   
@@ -80,19 +82,7 @@ type CustomPost =  Post & { likes: Like[], Comments: Comment[] }
   };
 
 
-  
-  // const mergeAndDeduplicatePosts = (latestPosts: CustomPost[], trendingPosts: CustomPost[], limit: number) => {
-  // const allPosts = [...latestPosts, ...trendingPosts];
-  // // Calculate trend scores for all posts
-  // const postsWithScore = allPosts.map((post) => ({
-  //   ...post,
-  //   trendScore: calculateTrendScore(post),
-  // }));
-  // postsWithScore.sort((a, b) => b.trendScore - a.trendScore);
-  // const mergedPosts = postsWithScore.slice(0, limit);
 
-  // return mergedPosts;
-  // };
   const mergeAndDeduplicatePosts = (latestPosts: CustomPost[], trendingPosts: CustomPost[], limit: number) => {
     const uniquePostIds = new Set<string>();
     const mergedPosts: CustomPost[] = [];

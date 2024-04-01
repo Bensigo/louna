@@ -1,49 +1,45 @@
-import { TRPCError } from "@trpc/server";
 import { LikeRecipeSchema } from "../../schemas/recipe";
 import { protectedProcedure } from "../../trpc";
 
 
-export const likeRecipeController = protectedProcedure.input(LikeRecipeSchema).query(async ({ ctx, input}) => {
+export const likeRecipeController = protectedProcedure.input(LikeRecipeSchema).mutation(async ({ ctx, input}) => {
     const { auth, prisma } = ctx
 
     const recipe = await prisma.recipe.findFirst({
         where: {
-            id: input.id
-        },
-        include: {
+            id: input.id,
             likes: {
-                where: {
+                some: {
                     userId: auth.userId,
-                    isDeleted: false
+                    isDeleted: false 
                 }
             }
+        },
+        include: {
+            likes: true
         }
     })
 
-    if (!recipe){
-        throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'recipe not found'
-        })
-    }
 
-    if (recipe.likes){
+    if (recipe?.likes){
         // unlike recipe
-        await prisma.recipeLike.update({
+       const updated =  await prisma.recipeLike.updateMany({
             where: {
-                id: recipe.likes[0]?.id
-               
+                recipeId: input.id,
+                isDeleted: false,
+                userId: auth.userId
             },
             data: {
                 isDeleted: true
             }
         })
+        return updated
     }
 
     // create a new like 
     const like = await prisma.recipeLike.create({
         data: {
-            recipeId: recipe.id,
+            recipeId: input.id,
             userId: auth.userId,
 
         }

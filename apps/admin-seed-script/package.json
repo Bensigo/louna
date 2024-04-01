@@ -8,7 +8,7 @@
     "license": "ISC",
     "scripts": {
       "start": "bun index.ts",
-      "dev": "bun index.ts"
+      "dev": ""
     },
     "dependencies": {
       "@clerk/clerk-sdk-node": "^4.12.21",

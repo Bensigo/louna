@@ -8,7 +8,7 @@ const s3Client = new  S3Client({
     credentials: {
         accessKeyId: env.AWS_ACCESS_KEY,
         secretAccessKey: env.AWS_SECRET_KEY
-    }
+    },
 })
 
 export { s3Client as S3 };

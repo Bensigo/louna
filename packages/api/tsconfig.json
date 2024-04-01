@@ -1,5 +1,5 @@
 {
     "extends": "../../tsconfig.json",
 
-    "include": ["src", "index.ts"]
+    "include": ["src", "index.ts", "../admin-api/src/controllers/resources", "../admin-api/src/schema/resource.ts"]
 }

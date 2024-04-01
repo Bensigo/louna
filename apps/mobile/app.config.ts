@@ -2,7 +2,6 @@ import type { ExpoConfig } from "@expo/config"
 
 const CLERK_PUBLISHABLE_KEY =
     "pk_test_cmFyZS1tb2NjYXNpbi04Mi5jbGVyay5hY2NvdW50cy5kZXYk"
-
 const defineConfig = (): ExpoConfig => ({
     name: "Solu",
     slug: "Solu",
@@ -22,7 +21,7 @@ const defineConfig = (): ExpoConfig => ({
     assetBundlePatterns: ["**/*"],
     ios: {
         supportsTablet: true,
-        bundleIdentifier: "your.bundle.identifier",
+        bundleIdentifier: "ae.soluapp.app",
     },
     android: {
         adaptiveIcon: {
@@ -32,11 +31,14 @@ const defineConfig = (): ExpoConfig => ({
     },
     extra: {
         eas: {
-            // projectId: "your-project-id",
+            projectId: "80a3324e-3bd7-466b-81e9-767e1e324a23",
         },
         CLERK_PUBLISHABLE_KEY,
     },
-    plugins: ["./expo-plugins/with-modify-gradle.js"],
+    plugins: ["./expo-plugins/with-modify-gradle.js", "expo-font",
+    "expo-secure-store", ["react-native-health", {
+        "isClinicalDataEnabled": true,
+    }]],
 })
 
 export default defineConfig

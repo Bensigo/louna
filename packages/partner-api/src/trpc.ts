@@ -117,7 +117,7 @@ const enforceIsAuthed = t.middleware(async ({ ctx, next }) => {
     })
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    if(user && !user.roles.includes('INSTRUCTOR')){ 
+    if(user && !user.roles.includes('PARTNER')){ 
         throw new TRPCError({ 
             code: "UNAUTHORIZED",
             message: "Not authenticated",

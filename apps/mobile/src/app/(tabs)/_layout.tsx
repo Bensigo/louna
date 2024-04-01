@@ -1,55 +1,108 @@
-import { Redirect, Tabs, usePathname } from "expo-router"
+import React, { useEffect } from "react"
+import {
+    Redirect,
+    Tabs,
+    usePathname,
+    useRootNavigation,
+    useRouter,
+} from "expo-router"
 import { SignedIn, useAuth } from "@clerk/clerk-expo"
-import Ionicons from "@expo/vector-icons/Ionicons"
-import { color } from "react-native-reanimated"
+// import Ionicons from "@expo/vector-icons/Ionicons"
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
-const hideTabbarRoute = [
-    '/community/communityForum',
-    // '/recipes/recipePreference'
-]
+import { useAsyncStorage } from "@react-native-async-storage/async-storage"
 
-const TabScreen = () => {
+import { PostLoadingSekeleton } from "../../components/community/post"
+import { api } from "../../utils/api"
+import { useColorScheme } from "react-native"
+import { Colors } from "../../constants/colors"
+import { CustomTabBar } from "../../components/CustomTabbar"
+
+
+
+
+
+
+const HAS_SET_USER_PREF = "HAS_SET_USER_PREF"
+
+
+const TabBarIcon = (props: { name: React.ComponentProps<typeof Ionicons>['name'], color: string}) => {
+    return <Ionicons size={28} style={{ marginBottom: -3 }} {...props} />
+}
+
+
+
+
+const TabScreenLayout = () => {
     const { isSignedIn } = useAuth()
-    const path = usePathname()
+    const router = useRouter()
+    const rootNav = useRootNavigation()
+    const { getItem: hasSetPref } = useAsyncStorage(HAS_SET_USER_PREF)
+    const colorScheme = useColorScheme();
 
-    console.log({ path })
+
+    const { data: user, isLoading } = api.auth.getProfile.useQuery()
+ 
+
+
+
+    useEffect(() => {
+        
+        if (isSignedIn && user) {
+            if (!user.hasPref) {
+                router.replace("(onboarding)")
+            }
+        }
+        return () => {}
+    }, [isSignedIn, hasSetPref, rootNav, router, user])
+
+    if (isLoading) {
+        return (
+            <>
+                <PostLoadingSekeleton />
+                <PostLoadingSekeleton />
+                <PostLoadingSekeleton />
+            </>
+        )
+    }
 
     if (!isSignedIn) {
         return <Redirect href={"login"} />
     }
+
     return (
         <SignedIn>
             <Tabs
                 initialRouteName="community"
-                
+            
                 screenOptions={{
                     headerShown: false,
-                    tabBarStyle: {
-                        display: hideTabbarRoute.includes(path) ? 'none': 'flex',
-                    },
-                 
+                    tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+                   tabBarItemStyle: {
+                      backgroundColor: 'transparent'
+                   }
                 }}
                 sceneContainerStyle={{
                     backgroundColor: "transparent",
-                
                 }}
-             
+                tabBar={(props) =>  <CustomTabBar {...props}/>}
+                
             >
                 <Tabs.Screen
                     name="home"
                     options={{
                         tabBarLabel: "Home",
-                        tabBarIcon: () => (
-                            <Ionicons name="home-outline" size={30} />
-                        ),
+                        tabBarIcon: ({ color }) => ( <TabBarIcon name={'home-outline'} color={color} />),
                     }}
                 ></Tabs.Screen>
                 <Tabs.Screen
                     name="recipes"
                     options={{
                         tabBarLabel: "Recipes",
-                        tabBarIcon: () => (
-                            <Ionicons name="fast-food-outline" size={30} />
+                        tabBarIcon: ({ color }) => (
+                            
+                            <MaterialCommunityIcons name="food-takeout-box-outline" size={28} color={color} />
                         ),
                     }}
                 ></Tabs.Screen>
@@ -58,27 +111,22 @@ const TabScreen = () => {
                     options={{
                         tabBarLabel: "Community",
                         tabBarHideOnKeyboard: true,
-                        tabBarIcon: () => (
-                            <Ionicons name="people-outline" size={30} />
-                        ),
+                        tabBarIcon: ({ color }) => ( <TabBarIcon name={"people-outline"} color={color} />),
                     }}
                 ></Tabs.Screen>
                 <Tabs.Screen
                     name="bookings"
                     options={{
                         tabBarLabel: "Bookings",
-                        tabBarIcon: () => (
-                            <Ionicons name="calendar-outline" size={30} />
-                        ),
+                        tabBarIcon: ({ color }) => ( <TabBarIcon name={"calendar-outline" } color={color} />),
+
                     }}
                 ></Tabs.Screen>
                 <Tabs.Screen
                     name="profile"
                     options={{
                         tabBarLabel: "Profile",
-                        tabBarIcon: () => (
-                            <Ionicons name="ios-woman-outline" size={30} />
-                        ),
+                        tabBarIcon: ({ color }) => ( <TabBarIcon name={'person-outline'} color={color} />),
                     }}
                 ></Tabs.Screen>
             </Tabs>
@@ -86,4 +134,4 @@ const TabScreen = () => {
     )
 }
 
-export default TabScreen
+export default TabScreenLayout

@@ -39,7 +39,7 @@ const QuestionnaireV2: React.FC<QuestionnaireProps> = ({
                         (index) => index !== optionIndex,
                     ),
                 )
-            } else if (selectedOptions.length < 3) {
+            } else if (selectedOptions.length <= 3) {
                 // Select the option if the maximum limit of 2 selections is not reached
                 setSelectedOptions([...selectedOptions, optionIndex])
             }

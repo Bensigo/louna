@@ -1,137 +1,185 @@
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import {
     FlatList,
     KeyboardAvoidingView,
+    RefreshControl,
     StyleSheet,
     TouchableHighlight,
 } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { api } from "../../../utils/api"
-import { PostWithMemo as Post , Comments } from "../../../components/community"
-import Ionicons from "@expo/vector-icons/Ionicons"
 import { useRouter } from "expo-router"
+import Ionicons from "@expo/vector-icons/Ionicons"
+import { Text } from "tamagui"
 
-const image =
-    "https://frommybowl.com/wp-content/uploads/2020/01/One_Pot_Pasta_Vegetables_Vegan_FromMyBowl-10.jpg"
+import { Comments, PostWithMemo as Post } from "../../../components/community"
+import { PostLoadingSekeleton } from "../../../components/community/post"
+import { api } from "../../../utils/api"
 
+const FETCH_BATCH = 10
 
 export default function CommunityForum() {
     const insets = useSafeAreaInsets()
+    const onEndReachedCalledDuringMomentum = useRef(true)
     const [showCommentSheet, setShowCommentSheet] = useState(false)
-    const router = useRouter();
+    const router = useRouter()
+    const postRef = useRef()
+    const [postId, setPostId] = useState<string>()
 
     const ctx = api.useUtils()
-    const  [limit, setLimit] = useState(100)
-   
-    const { data: posts, isLoading: isLoadingPost, refetch } =
-        api.post.listPost.useQuery({ limit })
+    const [limit, setLimit] = useState(FETCH_BATCH)
 
+    const [transformedPosts, setTransformedPosts] = useState([])
 
-    console.log({ posts })    
-    
-    const [postId, setPostId] = useState()
+    const { data: user } = api.auth.getProfile.useQuery()
+
+    const {
+        data: posts,
+        isLoading: isLoadingPost,
+        refetch,
+        isRefetching: postIsRefeching,
+    } = api.post.listPost.useQuery({ limit })
+
+    useEffect(() => {
+        if (!!posts?.length) {
+            setTransformedPosts(posts)
+        }
+        return () => {
+            setTransformedPosts([])
+        }
+    }, [posts])
 
     const { mutate: likePost } = api.post.likePost.useMutation()
 
-
-    const transformedPosts = useMemo(() => {
-    
-        return posts?.map((item) => item);
-    }, [posts]);
-
-    transformedPosts?.push({
-        id: '43656872498093',
-        metadata: {},
-        createdAt: new Date(),
-        updatedAt: new Date,
-        text: 'Hello world',
-        type: 'TEXT',
-        mediaUri: image,
-        deleted: false,
-        likes: [],
-        Comments: [],
-        trendScore: 0,
-        userId: "dksjdsufhekf",
-        user: {
-            id: 'jdhgfsofujdigfdf',
-            imageUri: '',
-            firstname: 'Sarah',
-            lastname: 'Ahmed'
-        }
-    })
-
     const handleRefeshData = useCallback(() => {
-        setLimit((prev) => prev + 10)
-        refetch()
+        if (!onEndReachedCalledDuringMomentum.current) {
+            setLimit((prev) => prev + 10)
+
+            onEndReachedCalledDuringMomentum.current = true
+        }
     }, [])
 
     const handleLike = (postId: string) => {
-            likePost(
-                {
-                    postId,
+        // Optimistically update the post data
+        const updatedPosts = transformedPosts.map((post) => {
+            if (post.id === postId && !!user) {
+                return {
+                    ...post,
+                    // Assuming the post data structure includes a likes array
+                    likes: [...post.likes, { userId: user?.id }],
+                }
+            }
+            return post
+        })
+        // Update the state with the optimistic changes
+        setTransformedPosts(updatedPosts)
+
+        // Make the actual API call to like the post
+        likePost(
+            {
+                postId,
+            },
+            {
+                onSuccess: () => {
+                    // If the API call is successful, no action needed
                 },
-                {
-                    onSuccess: () => {
-                     
-                        ctx.post.listPost.reset({ limit }) // fix this later
-                    },
+                onError: () => {
+                    // If the API call fails, revert the optimistic update
+                    setTransformedPosts(transformedPosts)
                 },
-            )
-    
+            },
+        )
     }
+
     const handleGtoCreatePost = () => {
         router.replace("community/createPost")
     }
+
+    //   const scrollToItem = (index) => {
+    //     postRef.current.scrollToIndex({ index: index, animated: false });
+    //   };
+
+    const renderItem = ({ item }) => (
+        <Post
+            post={item}
+            isLoading={isLoadingPost}
+            isRefetching={postIsRefeching}
+            onLike={handleLike}
+            onShowCommentSheet={(postId) => {
+                setPostId(postId)
+                setShowCommentSheet(true)
+            }}
+        />
+    )
+
     return (
         <KeyboardAvoidingView
             keyboardVerticalOffset={47 + insets.top}
-            style={{ flex: 1, bottom: 0 , marginTop: 10}}
+            style={{ flex: 1, bottom: 0, marginTop: 10 }}
             behavior="padding"
         >
-                <FlatList
-                    data={transformedPosts}
-                    
-                    scrollEnabled
-                    renderItem={({ item }) => (
-                        <Post
-                            post={{ ...item }}
-                            isLoading={isLoadingPost}
-                            onLike={handleLike}
-                            onShowCommentSheet={(postId) => {
-                                setPostId(postId)
-                                setShowCommentSheet(true)
-                            }}
-                        
-                        
-                        />
-                    )}
-                    keyExtractor={(item) => item.id}
-                    initialNumToRender={100}
-                    windowSize={100}
-                    // onEndReachedThreshold={0.1}
-                    // onEndReached={handleRefeshData}
+            <FlatList
+                data={transformedPosts}
+                ref={postRef}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                refreshControl={
+                    <RefreshControl
+                        onRefresh={refetch}
+                        refreshing={postIsRefeching}
+                    />
+                }
+                onEndReached={handleRefeshData}
+                ListEmptyComponent={() =>
+                    isLoadingPost ? (
+                        <>
+                            <PostLoadingSekeleton />
+                            <PostLoadingSekeleton />
+                        </>
+                    ) : (
+                        <Text>No post found</Text>
+                    )
+                }
+                maxToRenderPerBatch={FETCH_BATCH}
+                onMomentumScrollBegin={() => {
+                    onEndReachedCalledDuringMomentum.current = false
+                }}
+                initialScrollIndex={0}
+                onEndReachedThreshold={0.7}
+                onScrollToIndexFailed={({ index, averageItemLength }) => {
+                    postRef.current?.scrollToOffset({
+                        offset: index * averageItemLength,
+                        animated: true,
+                    })
+                }}
+            />
+            <TouchableHighlight
+                style={styles.createPostBtn}
+                onPress={handleGtoCreatePost}
+            >
+                <Ionicons size={25} name="pencil-outline" color={"white"} />
+            </TouchableHighlight>
+            {showCommentSheet && (
+                <Comments
+                    onShowComment={setShowCommentSheet}
+                    showComment={showCommentSheet}
+                    postId={postId}
                 />
-               <TouchableHighlight style={styles.createPostBtn} onPress={handleGtoCreatePost}>
-                    <Ionicons size={25}  name="pencil-outline" color={'white'} />
-               </TouchableHighlight>
-            {postId && <Comments onShowComment={setShowCommentSheet} showComment={showCommentSheet} postId={postId}  />}
+            )}
         </KeyboardAvoidingView>
     )
 }
-
 
 const styles = StyleSheet.create({
     createPostBtn: {
         borderRadius: 25,
         height: 50,
         width: 50,
-        position:'absolute',
+        position: "absolute",
         zIndex: 100,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
         bottom: 60,
         right: 25,
-        backgroundColor: 'black'
-    }
+        backgroundColor: "black",
+    },
 })
-

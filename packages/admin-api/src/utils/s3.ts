@@ -17,3 +17,5 @@ export const S3 = new S3Client({
         secretAccessKey: AWS_SECRET_KEY as string ,
     }
 });
+
+

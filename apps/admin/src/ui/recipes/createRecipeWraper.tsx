@@ -1,18 +1,21 @@
-import { Box, Heading } from "@chakra-ui/react"
-import { FileUploadForm } from "~/shared/shared/FileUpload"
-import { useState } from "react"
-import CreateRecipeForm from "./components/createRecipeForm"
+import { Box, Button, Heading } from "@chakra-ui/react"
+import CreateRecipeForm from "./components/CreateRecipeForm"
+import { BiArrowBack } from "react-icons/bi"
+import { useRouter } from "next/router"
 
 
 export const CreateRecipesWrapper = () => {
-    const [imageKeys, setImageKeys ] = useState<string[]>([])
-    console.log({imageKeys})
+    const router = useRouter()
+
+    const goBack = () => router.replace(`/dashboard/recipes`)
+
     return (
         <Box py={8}>
+              <Button leftIcon={<BiArrowBack />} onClick={goBack}>
+                Back
+            </Button>
                 <Heading >Create Recipe</Heading>
-                <CreateRecipeForm/ >
-                {/* <FileUploadForm onUploadComplete={val => setImageKeys(val)} contentType="image/png" /> */}
-  
+                <CreateRecipeForm/ >        
         </Box>
     )
 }

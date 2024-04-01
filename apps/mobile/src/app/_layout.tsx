@@ -17,6 +17,7 @@ import { Button, TamaguiProvider, Text, Theme } from "tamagui"
 import config from "../../tamagui.config"
 import { TRPCProvider } from "../utils/api"
 import { tokenCache } from "../utils/cache"
+import { CustomTabbarProvider } from "../context/useCustomTabbar"
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -68,6 +69,7 @@ const RootLayout = () => {
                                     : DarkTheme
                             }
                         >
+                            <CustomTabbarProvider>
                             <Stack>
                                 <Stack.Screen
                                     name="(auth)"
@@ -77,7 +79,13 @@ const RootLayout = () => {
                                     name="(tabs)"
                                     options={{ headerShown: false }}
                                 ></Stack.Screen>
+
+<Stack.Screen
+                                    name="(onboarding)"
+                                    options={{ headerShown: false }}
+                                ></Stack.Screen>
                             </Stack>
+                            </CustomTabbarProvider>
                         </ThemeProvider>
                     </Theme>
                 </TRPCProvider>

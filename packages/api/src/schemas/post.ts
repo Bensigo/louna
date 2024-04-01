@@ -3,6 +3,8 @@ import { z } from "zod";
 
 export const createPostSchema = z.object({
     text: z.string().optional(),
+    images: z.array(z.string()).optional(),
+    baseKey: z.string().optional()
 })
 
 export const getPostSchema = z.object({
@@ -31,3 +33,5 @@ export const listCommentSchema = z.object({
     postId: z.string(),
     limit: z.number().optional().default(100),
 })
+
+

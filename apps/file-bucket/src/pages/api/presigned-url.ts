@@ -19,12 +19,13 @@ const schema = z.object({
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse){
-    console.log("====== here ========")
+
     if (req.method !== 'POST'){
         return res.status(405).json({
             error: { message: `Method ${req.method} Not Allowed` },
           });
     }
+
     const response = schema.safeParse(req.body);
 
     if (!response.success) {
@@ -34,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           error: { message: "Invalid request", errors },
         });
       }
-
+    
       const { fileNames, contentType, expiration, repo, baseKey  } = response.data
     /// handle pre-signed url
     const preSignedPost =  await generatePresignedUrls(fileNames,contentType, expiration, repo);
@@ -65,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 
-const UPLOAD_MAX_FILE_SIZE = 10000000
+const UPLOAD_MAX_FILE_SIZE = 1000000000000
 
 export async function generatePresignedUrls(fileNames: string[], contentType: string, expiration: string, repo: string): Promise<PresignedPost[]> {
   

@@ -1,7 +1,7 @@
 import React from 'react'
-import { AuthGuard } from '~/shared/shared/AuthGuard'
-import AppLayout from '~/shared/shared/DashboardNav'
-import { CreateRecipesWrapper } from '~/ui/recipes/createRecipeWraper'
+import { AuthGuard } from '~/shared/AuthGuard'
+import AppLayout from '~/shared/DashboardNav'
+import { CreateRecipesWrapper } from '~/ui/recipes/CreateRecipeWraper'
 
 
 

@@ -5,7 +5,7 @@ import { api } from "../../../utils/api"
 
 const Home = () => {
     const { isLoading, data: profile } = api.auth.getProfile.useQuery()
-    console.log({ profile })
+  
     return (
         <View flex={1} mt="$4" marginHorizontal="$2">
             <H2 fontSize={"$9"} fontWeight={"$15"}>
@@ -27,9 +27,9 @@ const Home = () => {
                         </Tabs.Tab>
                     </Tabs.List>
                     <Tabs.Content value="For You">
-                        <ScrollView showsVerticalScrollIndicator={false}>
+                        
                             <WorkOutView />
-                        </ScrollView>
+                        
                     </Tabs.Content>
                     <Tabs.Content value="Guidance">
                         <H2>Guide</H2>

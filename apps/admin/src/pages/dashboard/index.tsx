@@ -1,13 +1,14 @@
 import React from 'react'
-import { AuthGuard } from '~/shared/shared/AuthGuard'
-import AppLayout from '~/shared/shared/DashboardNav'
+import { AuthGuard } from '~/shared/AuthGuard'
+import AppLayout from '~/shared/DashboardNav'
+import { HomeWrapper } from '~/ui/home/HomeWrapper'
 
 
 function DashboardHome() {
   return (
     <AuthGuard>
         <AppLayout>
-            <div>Home</div>
+            <HomeWrapper />
         </AppLayout>
           
     </AuthGuard>

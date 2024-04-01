@@ -2,17 +2,19 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
-  Image,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   View,
   TouchableWithoutFeedback,
   Animated,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import { XStack } from "tamagui";
+
+import CustomImage from "../CustomImage";
+import { buildFileUrl } from "../../utils/buildUrl";
 
 const defaults = {
   height: 200,
@@ -40,43 +42,52 @@ const Item = ({
   imageUrl: string;
   height: number;
   width: number;
-}) => (
-  <TouchableWithoutFeedback
+}) => {
+  return (
+    <TouchableWithoutFeedback
     style={[styles.imageContainer, { height: height, width: width }]}
   >
-    <Image
-      source={{ uri: imageUrl }}
-      style={[styles.image, { height: height }]}
-    />
+ 
+    <CustomImage  src={imageUrl} height={height} width={width} alt={"image"}/>
   </TouchableWithoutFeedback>
-);
+  )
+};
 
 type CarouselProps = {
-  data: string[];
+  data: {repo: string, key: string}[];
   height?: number;
   width?: number;
   delay?: number;
   onPress?: (id: string) => void;
   onBackPress?: () => void;
+  onLike: () => void;
+  isLike: boolean;
+  isLikePress: boolean
+  showLike?: boolean
 };
 
 export const Carousel: React.FC<CarouselProps> = ({
-  data,
+  data: images,
   height = defaults.height,
   width = defaults.width,
   delay = defaults.delay,
-  onPress,
-  onBackPress
+  onBackPress,
+  onLike,
+  isLike,
+  isLikePress,
+  showLike = true 
 
 }) => {
   const [selectedIndex, setselectedIndex] = useState(0);
   const scrollView = useRef<ScrollView>(null);
   const dotScale = useRef(new Animated.Value(1)).current;
 
+
+
   useEffect(() => {
     const fn = setInterval(() => {
       setselectedIndex((oldCount) =>
-        oldCount === data.length - 1 ? 0 : oldCount + 1
+        oldCount === images.length - 1 ? 0 : oldCount + 1
       );
     }, delay);
     return () => {
@@ -121,23 +132,34 @@ export const Carousel: React.FC<CarouselProps> = ({
         ref={scrollView}
         horizontal
         pagingEnabled
+        showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={setIndex}
         onContentSizeChange={() => scrollView.current?.scrollToEnd()}
       >
         <View style={styles.carouselContainer}>
-          {data.map((url, index) => (
-            <Item key={index} height={height} width={width} imageUrl={url} />
+          {images.map((image, index) => (
+            <Item key={image.key} height={height} width={width} imageUrl={buildFileUrl(image.repo, image.key)} />
           ))}
         </View>
       </ScrollView>
-      <TouchableOpacity style={styles.likeBtnContainer}  >
-             <Ionicons  name="heart-outline" size={30} color={'red'}  />  
-        </TouchableOpacity>
+     {showLike && <TouchableOpacity style={styles.likeBtnContainer} onPress={onLike}  >
+            
+             {isLikePress? (
+                                    <ActivityIndicator size={'small'} />
+                                ) : (
+                                    <Ionicons
+                                        name={isLike? 'heart': "heart-outline"}
+                                     
+                                        style={isLike && { color: 'red'}}
+                                        size={25}
+                                    />
+                                )}
+        </TouchableOpacity>}
         <TouchableOpacity style={styles.backBtnContainer} onPress={onBackPress}>
              <Ionicons  name="arrow-back-outline" size={30}  />  
         </TouchableOpacity>
       <View style={styles.dotsContainer}>
-        {data.map((_, index) => (
+        {images.map((_, index) => (
           <Dot
             key={index}
             active={index === selectedIndex}

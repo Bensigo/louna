@@ -19,8 +19,8 @@ import { useSignIn } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, type SubmitHandler } from "react-hook-form"
 import { z } from "zod"
-import { Guard } from "~/shared/shared/Guard"
-import { PasswordField } from "~/shared/shared/PasswordField"
+import { Guard } from "~/shared/Guard"
+import { PasswordField } from "~/shared/PasswordField"
 
 
 

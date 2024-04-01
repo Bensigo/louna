@@ -1,10 +1,14 @@
-import React, { useEffect } from "react"
-import { TouchableHighlight } from "react-native"
+import React, { useEffect, useState } from "react"
+import { Dimensions, TouchableHighlight } from "react-native"
 import { useAuth } from "@clerk/clerk-expo"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { formatDistanceToNow } from "date-fns"
 import { Skeleton } from "moti/skeleton"
-import { Avatar, Card, H6, Image, Text, View, XStack, YStack } from "tamagui"
+import { Avatar, Card, H6, Text, View, XStack, YStack } from "tamagui"
+
+import { buildFileUrl } from "../../utils/buildUrl"
+import CustomImage from "../CustomImage"
+import FullScreenImage from "../FullScreenImage"
 
 type PostType = {
     post: {
@@ -12,49 +16,58 @@ type PostType = {
         user: any
         text: string
         likes: any[]
+        files: string[]
+        repo: string
         Comments: any[]
         createdAt: Date
     }
-    isLoading: boolean
+    isLoading: boolean,
+    isRefetching: boolean,
     onLike: (postId: string) => void
-    isLiked: boolean
     onShowCommentSheet: (postId: string) => void
 }
+
+const { width: screenWidth } = Dimensions.get("window")
+
 const Post: React.FC<PostType> = (props) => {
-    const { post, onLike } = props
+    const { post, onLike, isRefetching } = props
     const { userId } = useAuth()
     const [isLiked, setIsLike] = React.useState(false)
 
     const [likeCount, setLikeCount] = React.useState(0)
+
+    const [fullScreenVisible, setFullScreenVisible] = useState(false)
+    const [selectedImage, setSelectedImage] = useState("")
 
     useEffect(() => {
         const userLike = post.likes.some((like) => like.userId === userId)
         setLikeCount(post.likes.length)
         setIsLike(userLike)
     }, [post.likes])
-    
+
     const handleLike = () => {
         setIsLike((prev) => !prev)
 
         if (!isLiked) {
-            console.log("here!!")
+    
             setLikeCount((prev) => prev + 1)
         } else {
             setLikeCount((prev) => prev - 1)
         }
-        // console.log('called')
         onLike(post.id)
     }
 
-    if (props.isLoading) {
-        return (
-            <>
-                <PostLoadingSekeleton />
-                <PostLoadingSekeleton />
-                <PostLoadingSekeleton />
-            </>
-        )
+    const handleImageClick = (imageUrl: string) => {
+        setSelectedImage(imageUrl)
+        setFullScreenVisible(true)
     }
+
+    const handleCloseFullScreen = () => {
+        setFullScreenVisible(false)
+        setSelectedImage("")
+    }
+
+
 
     return (
         <>
@@ -67,7 +80,10 @@ const Post: React.FC<PostType> = (props) => {
                     <XStack space>
                         <Avatar circular size="$2.5">
                             <Avatar.Image
-                                src={post.user.imageUrl ||  "http://placekitten.com/200/300"}
+                                src={
+                                    post.user.imageUrl ||
+                                    "http://placekitten.com/200/300"
+                                }
                             />
                             <Avatar.Fallback bc="red" />
                         </Avatar>
@@ -82,18 +98,39 @@ const Post: React.FC<PostType> = (props) => {
                                     </Text>
                                 </View>
                             </XStack>
-                            {post.text && <View paddingVertical="$1" width={"100%"}>
-                                <Text
-                                    fontSize={"$5"}
-                                    fontWeight={"$2"}
-                                    maxWidth={"90%"}
-                                >
-                                    {post.text}
-                                </Text>
-                            </View>}
-                            {post.mediaUri && (
-                                <Image height={300} width={'100%'} source={{ uri: post.mediaUri }} />
+                            {post.text && (
+                                <View paddingVertical="$1" width={"100%"}>
+                                    <Text
+                                        fontSize={"$5"}
+                                        fontWeight={"$2"}
+                                        maxWidth={"90%"}
+                                    >
+                                        {post.text}
+                                    </Text>
+                                </View>
                             )}
+
+                            <XStack space={2}>
+                                {props.post.files?.map((file, i) => (
+                                    <TouchableHighlight
+                                        key={i}
+                                        onPress={() =>
+                                            handleImageClick(
+                                                buildFileUrl("post", file),
+                                            )
+                                        }
+                                    >
+                                        <CustomImage
+                                            src={buildFileUrl("post", file)}
+                                            alt={file}
+                                            width={screenWidth / 2.5}
+                                            height={200}
+                                        />
+                                    </TouchableHighlight>
+                                ))}
+                            </XStack>
+                            <FullScreenImage visible={fullScreenVisible} imageUrl={selectedImage} onClose={handleCloseFullScreen} />
+
                             <XStack space>
                                 <TouchableHighlight
                                     underlayColor={"inherit"}
@@ -136,10 +173,9 @@ const Post: React.FC<PostType> = (props) => {
     )
 }
 
-export const PostWithMemo = React.memo(Post);
+export const PostWithMemo = React.memo(Post)
 
-
-const PostLoadingSekeleton = () => {
+export const PostLoadingSekeleton = () => {
     return (
         <Card
             paddingHorizontal="$2"
@@ -186,20 +222,26 @@ const PostLoadingSekeleton = () => {
                     </Text>
                 </View>
                 <XStack space>
-                    <Ionicons name="heart-outline" size={20}>
+                    <Skeleton
+                        colorMode="light"
+                        radius="round"
+                        height={15}
+                        width={15}
+                    ></Skeleton>
+
+                    <Skeleton
+                        colorMode="light"
+                        height={15}
+                        radius="round"
+                        width={15}
+                    ></Skeleton>
+                    {/* <Ionicons name="chatbox-outline" size={20}>
                         <Skeleton
                             colorMode="light"
                             height={15}
                             width={15}
                         ></Skeleton>
-                    </Ionicons>
-                    <Ionicons name="chatbox-outline" size={20}>
-                        <Skeleton
-                            colorMode="light"
-                            height={15}
-                            width={15}
-                        ></Skeleton>
-                    </Ionicons>
+                    </Ionicons> */}
                 </XStack>
             </Card.Footer>
         </Card>

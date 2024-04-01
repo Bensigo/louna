@@ -2,42 +2,66 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
     previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
 }
 
 model User {
-    id        String    @id
-    email     String    @unique
-    roles      UserRole[]  @default([USER])
-    metadata   Json?
-    imageUrl String?
-    likes Like[]
-    Comments    Comment[]
-    recipeLikes RecipeLike[]
-
-    firstname String?
-    lastname  String?
-    birthdate DateTime?
-    wallet    Wallet?
-    post  Post[]
-    perference Preference?
-    partnerProfile PartnerProfile?
+    id                    String          @id
+    email                 String          @unique
+    roles                 UserRole[]      @default([USER])
+    metadata              Json?
+    imageUrl              String?
+    likes                 Like[]
+    Comments              Comment[]
+    recipeLikes           RecipeLike[]
+    firstname             String?
+    lastname              String?
+    birthdate             Int?
+    wallet                Wallet?
+    post                  Post[]
+    sMWLikes              SMWLike[]
+    bookings     Booking[]
+    hasPref               Boolean         @default(false)
+    userPref              UserPref?
+    partnerProfile        PartnerProfile?
+    isDeleted             Boolean         @default(false)
+    hasActiveSubscription Boolean         @default(false)
+    createdAt             DateTime        @default(now())
+    updatedAt             DateTime        @default(now()) @updatedAt
 }
 
-
-
+model UserPref {
+    id               Int      @id @default(autoincrement())
+    foodDislike      String[]
+    diet             String
+    dietPref         String[]
+    mealFrequency    String
+    age              Int
+    height           Int?
+    weight           Int?
+    fitnesGoal       String[]
+    fitnessDiffculty String[]
+    fitnessLevel     String
+    healthConditions String[]
+    stressLevel      String
+    stressManagement String[]
+    userId           String   @unique
+    user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
 enum UserRole {
     ADMIN
     BUSINESS
     INSTRUCTOR
     USER
+    PARTNER
 }
 
 enum BusinessType {
@@ -45,109 +69,168 @@ enum BusinessType {
     FITNESS
 }
 
-
 model Venue {
- id   String   @id @default(cuid())  
- address   String
- latitude  Float?
- longitude Float?
- city String
- countryCode String
- ownerId String
- owner   PartnerProfile     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    id          String         @id @default(cuid())
+    address     String
+    latitude    Float?
+    longitude   Float?
+    city        String
+    countryCode String
+    ownerId     String
+    owner       PartnerProfile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 }
 
-
 model PartnerProfile {
-   id   String   @id @default(cuid())  
-   userId String   @unique
-   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-   businessType BusinessType
-   bio String 
-   activities  String[]
-   title String
-   venue Venue[]
-
+    id           String       @id @default(cuid())
+    userId       String       @unique
+    user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    businessType BusinessType
+    bio          String
+    activities   String[]
+    title        String
+    venue        Venue[]
 }
 
 enum PreferenceType {
     RECIPE
     BOOKING
     FITNESS
-    
-}
-
-model Preference {
-    id     String   @id @default(cuid())
-    type PreferenceType 
-    userId String   @unique
-    user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    config  Json
 }
 
 enum PostType {
     MEDIA
     TEXT
+    MEDIA_TEXT
 }
 
-
-
 model Post {
-    id          String      @id @default(cuid())
-    type        PostType
-    text        String?
-    likes        Like[]
-    Comments    Comment[]
-    mediaUri    String?
-    metadata    Json?
-    userId      String
-    user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
-    deleted     Boolean     @default(false)
+    id        String    @id @default(cuid())
+    type      PostType
+    text      String?
+    likes     Like[]
+    Comments  Comment[]
+    files     String[]
+    repo      String?
+    metadata  Json?
+    userId    String
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deleted   Boolean   @default(false)
 }
 
 model Comment {
-  id    String  @id @default(cuid())
-  userId      String
-  text String
-  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId String
-  post        Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+    id        String   @id @default(cuid())
+    userId    String
+    text      String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    postId    String
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Like {
-  id    String  @id @default(cuid())
-  userId      String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  postId String
-  post        Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
-  createdAt   DateTime    @default(now())
-  isDeleted   Boolean @default(false)
-  updatedAt   DateTime    @updatedAt
+    id        String   @id @default(cuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    postId    String
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    isDeleted Boolean  @default(false)
+    updatedAt DateTime @updatedAt
 }
 
 model RecipeLike {
-  id    String  @id @default(cuid())
-  userId      String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipeId String
-  recipe    Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  createdAt   DateTime    @default(now())
-  isDeleted   Boolean @default(false)
-  updatedAt   DateTime    @updatedAt
+    id        String   @id @default(cuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    recipeId  String
+    recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    isDeleted Boolean  @default(false)
+    updatedAt DateTime @updatedAt
+}
+
+model Wallet {
+    id           String         @id @default(cuid())
+    userId       String         @unique
+    user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+    point        Float          @default(0.00)
+    logs         walletLog[]
+    subscription subscription[]
+    reward       Reward[]
+}
+
+enum paymentType {
+    Credit
+    Debit
+}
+
+model walletLog {
+    id        String      @id @default(cuid())
+    walletId  String
+    wallet    Wallet      @relation(fields: [walletId], references: [id], onDelete: Cascade)
+    point     Float
+    type      paymentType
+    reasons   String[]
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
+}
+
+model subscription {
+    id         String   @id @default(cuid())
+    walletId   String
+    wallet     Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+    permissions String[]
+    amount Float
+    paymentId String @unique
+    metadata Json
+    points     Float
+    isExpired Boolean @default(false)
+    isCancelled Boolean @default(false)
+    expiryDate DateTime
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
 }
 
 
-model Wallet {
-    id     String   @id @default(cuid())
-    userId String   @unique
-    user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    point  Float    @default(10.00)
-    reward Reward[]
+enum PaymentStatus {
+  pending  
+  success
+  failed
+  decline
+  expired
+}
+
+enum PaymentMethod {
+    applePay
+    andriodPay
+    web
+}
+
+model payment {
+    id         String   @id @default(cuid())
+    paymentId String
+    amount Float
+    points Float
+    userId String
+    paymentMethod PaymentMethod
+    status PaymentStatus @default(pending)
+    reasonLogs String[]
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    logs PaymentLog[]
+}
+
+
+model PaymentLog {
+    id          String      @id @default(cuid())
+    paymentId   String   
+    metadata Json  
+    payment     payment     @relation(fields: [paymentId], references: [id])
+    status      PaymentStatus
+    timestamp   DateTime    @default(now())
 }
 
 model Reward {
@@ -159,9 +242,9 @@ model Reward {
     isUsed   Boolean
 }
 
-enum MealType  {
+enum MealType {
     BREAKFAST
-    LAUNCH
+    LUNCH
     DINNER
     SNACK
 }
@@ -173,49 +256,208 @@ enum DietType {
     Paleo
 }
 
+enum ContentType {
+    Freemium
+    Premium
+}
 
+enum DifficultyLevel {
+    EASY
+    MEDIUM
+    HARD
+}
+
+enum CuisineType {
+    ITALIAN
+    MEXICAN
+    CHINESE
+    INDIAN
+    FRENCH
+    AFRICAN
+    JAPANESE
+    THAI
+    AMERICAN
+    MEDITERRANEAN
+    OTHER
+}
 
 model Recipe {
-    id    String  @id @default(cuid()) 
-    name String
-    duration Int
-    calories Int
+    id          String           @id @default(cuid())
+    name        String
+    contentType ContentType      @default(Freemium)
+    duration    Int
+    calories    Int
     description String
-    ingredents  Json[]
-    images Json[]
-    nutrients Json[]
-    mealType  MealType
-    dietType DietType
-    categories String[]
-    steps String[]
-    likes  RecipeLike[]
-    bookmarks Bookmark[] 
-    isApproved Boolean @default(false)
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
-    deleted     Boolean     @default(false)
-
+    ingredients Json[]
+    images      Json[]
+    nutrients   Json[]
+    mealType    MealType
+    dietType    DietType
+    categories  String[]
+    tags        String[]
+    difficulty  DifficultyLevel?
+    cuisine     CuisineType?
+    steps       String[]
+    likes       RecipeLike[]
+    bookmarks   Bookmark[]
+    isApproved  Boolean          @default(false)
+    createdAt   DateTime         @default(now())
+    updatedAt   DateTime         @updatedAt
+    deleted     Boolean          @default(false)
 }
-
 
 model Bookmark {
-   id    String  @id @default(cuid())   
-   userId String
-   recipeId String
-   recipe Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade) 
-   createdAt   DateTime    @default(now())
-   updatedAt   DateTime    @updatedAt
-   isDeleted     Boolean     @default(false)
+    id        String   @id @default(cuid())
+    userId    String
+    recipeId  String
+    recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    isDeleted Boolean  @default(false)
+}
+
+model File {
+    id          String   @id @default(cuid())
+    contentType String
+    baseId      String
+    repo        String
+    key         String
+    isValid     Boolean  @default(false)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
+
+model SMWLike {
+    id        String   @id @default(cuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    smwId     String
+    smw       SMW      @relation(fields: [smwId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model SMW {
+    id            String             @id @default(cuid())
+    title         String
+    description   String
+    videoKey      String
+    subCategories String[]
+    thumbnailKey  String
+    thumbnailRepo String
+    category      InstructorCategory
+    instructorId  String
+    instructor    Instrutor          @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+    videoRepo     String
+    smwLikes      SMWLike[]
+    contentType   ContentType        @default(Freemium)
+    isPublished   Boolean            @default(false)
+    createdAt     DateTime           @default(now())
+    updatedAt     DateTime           @updatedAt
+    deleted       Boolean            @default(false)
+}
+
+enum InstructorCategory {
+    Fitness
+    Wellness
+}
+
+model Instrutor {
+    id            String             @id @default(cuid())
+    bio           String
+    imageKey      String
+    title         String
+    repo          String
+    firstname     String
+    lastname      String
+    calenderUrl   String?
+    smw           SMW[]
+    subCategories String[]
+    category      InstructorCategory
+    isActive      Boolean            @default(false)
+    createdAt     DateTime           @default(now())
+    updatedAt     DateTime           @updatedAt
+    deleted       Boolean            @default(false)
+}
+
+model Partner {
+    id          String             @id @default(cuid())
+    name        String             @unique
+    bio         String
+    images      Json[]
+    category    InstructorCategory
+    subCategories String[] 
+    addresses   Address[]
+    sessions    Session[]
+    phone       String
+    amenities   String[]
+    socials     Json[]
+    isPublished Boolean            @default(false)
+    createdAt   DateTime           @default(now())
+    updatedAt   DateTime           @updatedAt
+    deleted     Boolean            @default(false)
+}
+
+model Address {
+    id        String    @id @default(cuid())
+    name      String
+    building  String
+    floor     String
+    street    String?
+    lat       String
+    lng       String
+    sessions  Session[]
+    city      String
+    country   String
+    partnerId String
+    partner   Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deleted   Boolean   @default(false)
+}
+
+model Session {
+    id            String             @id @default(cuid())   
+    title         String
+    startTime     DateTime
+    endTime       DateTime
+    isPublish     Boolean            @default(false)
+    category      InstructorCategory
+    tags String[]
+    bookings Booking[]
+    point         Int
+    capacity      Int
+    addressId     String
+    address       Address            @relation(fields: [addressId], references: [id], onDelete: Cascade)
+    partnerId     String
+    partner       Partner            @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+    createdAt     DateTime           @default(now())
+    updatedAt     DateTime           @updatedAt
+    deleted       Boolean            @default(false)
 }
 
 
-model File {
-  id    String  @id @default(cuid())   
-  contentType String
-  baseId String
-  repo String
-  key String
-  isValid Boolean @default(false)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+model Booking {
+    id            String             @id @default(cuid())
+    userId  String
+    user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    sessionId String
+    session   Session            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+    points Float
+    isCanceled Boolean @default(false)
+    cancellationReasons String[]
+    createdAt     DateTime           @default(now())
+    updatedAt     DateTime           @updatedAt
+}
+
+model Resource {
+    id        String   @id @default(cuid())
+    isPublish Boolean  @default(false)
+    url       String
+    title     String
+    image     Json
+    tags      String[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    deleted   Boolean  @default(false)
 }

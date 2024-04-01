@@ -2,7 +2,6 @@ import { Redirect, Stack } from "expo-router"
 import { SignedOut, useAuth } from "@clerk/clerk-expo"
 
 import { LeftBackButton } from "../_layout"
-import { SuveryProvider } from "../../context/survey"
 
 const Auth = () => {
     const { isSignedIn } = useAuth()
@@ -13,7 +12,6 @@ const Auth = () => {
 
     return (
         <SignedOut>
-            <SuveryProvider>
                 <Stack
                     screenOptions={
                         {
@@ -44,7 +42,6 @@ const Auth = () => {
                     />
 
                 </Stack>
-            </SuveryProvider>
         </SignedOut>
     )
 }

@@ -31,5 +31,8 @@
     },
     "devDependencies": {
         "@prisma/nextjs-monorepo-workaround-plugin": "^5.6.0"
+    },
+    "resolutions": {
+        "@types/react": "^18.2.0"
     }
 }

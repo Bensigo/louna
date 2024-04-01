@@ -40,7 +40,7 @@ const SignUpSchema = z.object({
 
 type SignUpSchemaType = z.infer<typeof SignUpSchema>
 
-const ROLE = "INSTRUCTOR"
+const ROLE = "PARTNER"
 
 const Register = () => {
     const router = useRouter()

@@ -1,54 +1,134 @@
+import type { MealType, PrismaClient, UserPref } from "@solu/db"
 
-import { ListRecipeSchema } from "../../schemas/recipe";
-import { protectedProcedure } from "../../trpc";
+import { recommendRecipes } from "../../ml/recipe/contentBase"
+import { ListRecipeSchema } from "../../schemas/recipe"
+import { protectedProcedure } from "../../trpc"
 
-/**
- * 
- * for now we just list recipe base on the user nutrition prefrence 
- * in the future we we list base on recommendation and with the use of elastic search
- */
+const listRecipeController = protectedProcedure
+    .input(ListRecipeSchema)
+    .query(async ({ ctx, input }) => {
+        const { prisma, auth } = ctx
+        const userId = auth.userId
 
-const listRecipeController = protectedProcedure.input(ListRecipeSchema).query(async ({ ctx, input }) => {
-    const { prisma } = ctx;
+        const { filter, searchName } = input
 
-    const { filter, searchName  } = input;
+        let listFilter = {}
+        let orderBySearchRelevance = {}
 
-    let listFilter  = {}
-    let orderBySearchRelevance = {}
-
-    if(filter.category){
-        listFilter  = {
-            category: filter.category
-        }
-    }
-
-    if(searchName){
-        listFilter = {
-            ...listFilter,
-            Name: {
-                search: searchName
+        if (searchName) {
+            listFilter = {
+                ...listFilter,
+                OR: [
+                    {
+                        name: {
+                            contains: searchName,
+                            mode: "insensitive",
+                        },
+                        description: {
+                            contains: searchName,
+                            mode: "insensitive",
+                        },
+                    },
+                ],
             }
+            orderBySearchRelevance = {
+                _relevance: {
+                    fields: ["name", "description"],
+                    search: searchName,
+                    sort: "asc",
+                },
+            }
+        }
+
+        const recipes = await prisma.recipe.findMany({
+            where: {
+                ...listFilter,
+                mealType: filter.mealType,
+                deleted: false,
+           
+            },
+            include: {
+                likes: true
+            },
+            orderBy: {
+                ...orderBySearchRelevance,
+            },
+            skip: filter.skip || 0,
+            take: filter.limit || 50,
+        })
+
+        // const recommend = await getRecommendRecipes(
+        //     prisma,
+        //     userId,
+        //     filter.mealType,
+        //     searchName
+        // )
+        const recommend = []
+        return { recipes, recommend }
+    })
+
+export { listRecipeController }
+
+const getRecommendRecipes = async (
+    prisma: PrismaClient,
+    userId: string,
+    mealType: MealType,
+    searchName?: string
+) => {
+    const userPref = await prisma.userPref.findFirst({ where: { userId } })
+    if (!userPref) return
+    let query = {}
+    let orderBySearchRelevance = {}
+    if (searchName) {
+        query = {
+            OR: [
+                {
+                    name: {
+                        contains: searchName,
+                        mode: "insensitive",
+                    },
+                    description: {
+                        contains: searchName,
+                        mode: "insensitive",
+                    },
+                },
+            ],
         }
         orderBySearchRelevance = {
             _relevance: {
-                fields: ['Name'],
+                fields: ["name", "description"],
                 search: searchName,
-                sort: 'asc'
-            }
+                sort: "asc",
+            },
         }
     }
 
     const recipes = await prisma.recipe.findMany({
-        where: {
-          ...listFilter,
+        where: { mealType, deleted: false , ...query},
+        include: {
+            likes: true
         },
         orderBy: {
-           ...(orderBySearchRelevance),
-        },
-        skip: filter.skip || 0,
-        take: filter.limit || 50,
+            ...orderBySearchRelevance
+        }
     })
-    return recipes;
-})
 
-export {listRecipeController};
+    const currentUserPref = prepareUserPrefData(userPref)
+    return recommendRecipes(currentUserPref, recipes)
+}
+
+const prepareUserPrefData = (pref: UserPref) => {
+    const { foodDislike, mealFrequency, diet, dietPref } = pref
+    return {
+        foodDislike,
+        mealFrequency,
+        diet: diet as
+            | "Standard"
+            | "Vegetarian"
+            | "Vegan"
+            | "Paleo"
+            | "Pescetarian"
+            | "Others",
+        dietPref,
+    }
+}

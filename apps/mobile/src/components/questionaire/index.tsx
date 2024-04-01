@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Button, H3, Spinner, Text, View, XStack, YStack } from "tamagui";
+import { Button, H3, ScrollView, Spinner, Text, View, XStack, YStack } from "tamagui";
 
 import { CustomSaveAreaView } from "../CustomSaveAreaView";
+import { ActivityIndicator } from "react-native";
 
 type Option = {
   label: string;
@@ -16,6 +17,7 @@ export type QuestionnaireProps = {
   question: Question;
   isMultiSelect?: boolean;
   submitButtonText?: string;
+  isMannualCtrl?: boolean,
   route: string;
   onSave: (answer: string | string[]) => void;
   isLoading?: boolean;
@@ -26,6 +28,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({
   isMultiSelect = false,
   onSave,
   submitButtonText,
+  isMannualCtrl,
   isLoading,
 }) => {
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
@@ -38,14 +41,16 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({
         setSelectedOptions((prevSelectedOptions) =>
           prevSelectedOptions.filter((index) => index !== optionIndex)
         );
-      } else if (selectedOptions.length < 2) {
+      } else if (selectedOptions.length <= 3) {
         // Select the option if the maximum limit of 2 selections is not reached
         setSelectedOptions([...selectedOptions, optionIndex]);
       }
     } else {
       setSelectedOptions([optionIndex]);
       const selected = question.options[optionIndex]?.label as string;
-      onSave(selected);
+      if(!isMannualCtrl){
+        onSave(selected);
+      }
     }
   };
 
@@ -60,11 +65,13 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({
 
   return (
     <CustomSaveAreaView>
-      <View flex={1} mt={20} mb={"$1"} px="$3">
+      <ScrollView showsVerticalScrollIndicator={false}>
+      <View flex={1} mb={"$1"} px="$4">
         <H3 fontSize={"$8"} fontWeight={"$15"}>
           {question.question}
         </H3>
-        <YStack mt="$5" space="$2" flex={1}>
+        {isMultiSelect && <Text my={'$1'} fontSize={'$1'} color={'$gray11'}>can select multiple options</Text>}
+        <YStack mt="$5" space="$2" mb={'$10'}>
           {question.options.map((option, optionIndex) => (
             <Button
               key={`${option.label}-${optionIndex}`}
@@ -89,9 +96,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({
                   >
                     {option.label}
                   </Text>
-                  {isLoading && selectedOptions.includes(optionIndex) && (
-                    <Spinner size="small" color="black" style={{ marginLeft: 5 }} />
-                  )}
+               
                 </XStack>
               )}
             </Button>
@@ -99,17 +104,21 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({
         </YStack>
         {submitButtonText && (
           <Button
-            backgroundColor={"$green7"}
+            backgroundColor={selectedOptions.length > 0 ?"$green10": '$gray5'}
+            disabled={!selectedOptions.length}
+            
             mb="$2"
             color="white"
             fontSize={"$6"}
             h={"$5"}
             onPress={handleBtnPress}
           >
-            {submitButtonText}
+            
+            {isLoading ? <ActivityIndicator color={'white'} size={'small'}/> : submitButtonText}
           </Button>
         )}
       </View>
+      </ScrollView>
     </CustomSaveAreaView>
   );
 };

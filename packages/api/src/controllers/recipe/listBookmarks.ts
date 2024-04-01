@@ -5,6 +5,8 @@ import { protectedProcedure } from "../../trpc";
 const listBookmarkController = protectedProcedure.input(ListBookmarkSchema).query(async ({ ctx, input }) => {
     const { prisma, auth } = ctx;
 
+    const { page, limit } = input
+
     const userId = auth.userId;
 
 
@@ -16,8 +18,8 @@ const listBookmarkController = protectedProcedure.input(ListBookmarkSchema).quer
         include: {
             recipe: true
         },
-        take: input.limit,
-        skip: input.skip
+        take: limit,
+        skip: (page  -1) * limit
     })
     return bookmarks;
 })

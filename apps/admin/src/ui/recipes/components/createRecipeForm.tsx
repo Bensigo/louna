@@ -13,63 +13,27 @@ import {
     NumberInputStepper,
     Select,
     Stack,
+    HStack,
     Tag,
     Textarea,
+    useToast,
 } from "@chakra-ui/react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/router"
 import React from "react"
-import { useState } from "react"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { BiPlus, BiTrash } from "react-icons/bi"
-import { z } from "zod"
 
-import { MemorizeFileUploadForm } from "~/shared/shared/FileUpload"
-import { MultiFileUpload } from "~/shared/shared/MultiFileUpload"
+import { MemoV2FileUplaod } from "~/shared/V2FileUpload"
+import { api } from "~/utils/api"
+import   { RecipeFormSchema, type RecipeFormType } from "../schema/recipe"
+import { CuisineType, categories, tags } from "./EditRecipeForm"
 
-const createRecipeFormSchema = z.object({
-    name: z.string().trim().min(3),
-    duration: z.string().refine((data) => !isNaN(parseInt(data)), {
-        message: "Please enter a valid number for duration.",
-        path: ["duration"],
-    }),
-    calories: z.string().refine((data) => !isNaN(parseInt(data)), {
-        message: "Please enter a valid number for calories.",
-        path: ["calories"],
-    }),
-    description: z.string().trim().min(50),
-    mealType: z.enum(["BREAKFAST", "LUNCH", "DINNER", "SNACK"]),
-    dietType: z.enum(["Standard", "Vegan", "Paleo", "Vegetarian"]),
-    steps: z.array(
-        z.object({
-            value: z.string(),
-        }),
-    ),
-    nutrients: z.array(
-        z.object({
-            name: z.string(),
-            value: z.string(),
-            unit: z.enum(["g", "kcal"]),
-        }),
-    ),
-    ingredients: z.array(
-        z.object({
-            name: z.string(),
-            image: z.object({
-                key: z.string(),
-                repo: z.string()
-            })
-        }),
-    ),
-    images: z.array(z.object({
-        key: z.string(),
-        repo: z.string()
-    })),
-    categories: z.array(z.string())
-})
 
-type CreateRecipeFormType = z.infer<typeof createRecipeFormSchema>
 
-const categories = ["Under 15 mins", "8 ingredients", "Easy to prepare", "Meal prep", "On budget", "Family friendly"];
+
+
+  
 
 const CreateRecipeForm = () => {
     const {
@@ -80,10 +44,14 @@ const CreateRecipeForm = () => {
         setValue,
         getValues,
         watch,
-    } = useForm<CreateRecipeFormType>({
-        resolver: zodResolver(createRecipeFormSchema),
+    } = useForm<RecipeFormType>({
+        resolver: zodResolver(RecipeFormSchema),
+        
     })
     
+    const toast = useToast()
+    const router = useRouter()
+    const { mutate: createRecipe, isLoading  } = api.recipe.create.useMutation()
 
     const {
         fields: stepFields,
@@ -112,15 +80,46 @@ const CreateRecipeForm = () => {
         name: "ingredients",
     })
 
-  
+    const {
+        fields: imageFields,
+        append: appendImage,
+        remove: removeImage,
+        update: updateImage,
+    } = useFieldArray({
+        name: "images",
+        control,
+    })
 
-    const submitRecipe = (data: CreateRecipeFormType) => {
-        console.log("called")
+    const selectedTags = useWatch({ name: "tags", control }) || []
+
+
+    const submitRecipe = (data: RecipeFormType) => {
         // Handle form submission logic
-        console.log(data)
+        createRecipe(data, {
+            onSuccess: () => {
+                toast({
+                    title: "Created",
+                    description: 'Recipe created',
+                    status: "success",
+                    duration: 9000,
+                    isClosable: true,
+                })
+                router.push('/dashboard/recipes')
+            },
+            onError: (err) => {
+                
+                toast({
+                    title: "Error",
+                    description: err.errors[0].longMessage,
+                    status: "error",
+                    duration: 9000,
+                    isClosable: true,
+                })
+            }
+        });
     }
 
-    const handleAddNewIngredientImage = React.useCallback((keys: string[], index: number) => {
+    const handleAddNewIngredientImage = React.useCallback((key: string, index: number) => {
        
         // const key = keys[0] as string
         // const temp = ingredients || []
@@ -128,9 +127,8 @@ const CreateRecipeForm = () => {
         // setIngredients(temp)
         const ingredients = getValues().ingredients;
         const name = ingredients[index]?.name as string
-        ingredients[index] = { name, image: { key: keys[0] as string, repo: 'ingredients' }}
-        console.log({ ingredients  })
-        setValue(`ingredients.${index}.image`, { key: keys[0] as string, repo: 'ingredients' });
+        ingredients[index] = { name, image: { key, repo: 'ingredients' }}
+        setValue(`ingredients.${index}.image`, { key, repo: 'ingredients' });
     }, [])
 
     const selectedCategories = watch("categories") || [];
@@ -141,16 +139,47 @@ const CreateRecipeForm = () => {
         : [...selectedCategories, category];
       setValue("categories", currentCategories);
     };
+    const handleRemoveIngriedentImg = (file: string, index: number) => {
+        console.log({ file }, 'rm')
+        setValue(`ingredients.${index}.image`, { });
+    }
+
+
+    const handleAddImage = (key: string, index: number) => {
+        updateImage(index, { key, repo: 'recipes'})
+    }
+
+    const toggleTags= (tag: string) => {
+        const currentTags = selectedTags.includes(tag)
+            ? selectedTags.filter((c) => c !== tag)
+            : [...selectedTags, tag]
+        setValue("tags", currentTags)
+    }
 
     return (
         <Box p={4} maxW="xl">
             <form onSubmit={handleSubmit(submitRecipe)}>
+            <Stack direction={'row'} spacing={5}>
                 <FormControl isInvalid={!!errors.name}>
                     <FormLabel>Name</FormLabel>
                     <Input {...register("name")} />
                     <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
                 </FormControl>
-
+                <FormControl mt={4} isInvalid={!!errors.contentType}>
+                    <FormLabel>Content type</FormLabel>
+                    <Select
+                        placeholder="Select content type"
+                        {...register("contentType")}
+                    >
+                        <option value="Freemium">Freemium</option>
+                        <option value="Premium">Premium</option>
+                        
+                    </Select>
+                    <FormErrorMessage>
+                        {errors.contentType?.message}
+                    </FormErrorMessage>
+                </FormControl>
+               </Stack> 
                 <Stack direction={"row"}>
                     <FormControl mt={4} isInvalid={!!errors.duration}>
                         <FormLabel>Duration (minutes)</FormLabel>
@@ -218,6 +247,73 @@ const CreateRecipeForm = () => {
                 </FormControl>
                 </Stack>
 
+                <Stack direction={"row"} spacing={5}>
+                            <FormControl
+                                mt={4}
+                                isInvalid={!!errors.difficultyLevel}
+                            >
+                                <FormLabel>Difficulty Level</FormLabel>
+                                <Select
+                                    placeholder="Select Difficulty Level"
+                                    {...register("difficultyLevel")}
+                                >
+                                    <option value="EASY">EASY</option>
+                                    <option value="MEDIUM">MEDIUM</option>
+                                    <option value="HARD">HARD</option>
+                                </Select>
+                                <FormErrorMessage>
+                                    {errors.difficultyLevel?.message}
+                                </FormErrorMessage>
+                            </FormControl>
+                            <FormControl
+                                mt={4}
+                                isInvalid={!!errors.cusineType}
+                            >
+                                <FormLabel>Cuisine Type</FormLabel>
+                                <Select
+                                    placeholder="Select Cuisine Type"
+                                    {...register("cusineType")}
+                                >
+                                    <option value={CuisineType.ITALIAN}>
+                                        Italian
+                                    </option>
+                                    <option value={CuisineType.MEXICAN}>
+                                        Mexican
+                                    </option>
+                                    <option value={CuisineType.CHINESE}>
+                                        Chinese
+                                    </option>
+                                    <option value={CuisineType.INDIAN}>
+                                        Indian
+                                    </option>
+                                    <option value={CuisineType.FRENCH}>
+                                        French
+                                    </option>
+                                    <option value={CuisineType.JAPANESE}>
+                                        Japanese
+                                    </option>
+                                    <option value={CuisineType.THAI}>
+                                        Thai
+                                    </option>
+                                    <option value={CuisineType.AMERICAN}>
+                                        American
+                                    </option>
+                                    <option value={CuisineType.AFRICAN}>
+                                        African
+                                    </option>
+                                    <option value={CuisineType.MEDITERRANEAN}>
+                                        Mediterranean
+                                    </option>
+                                    <option value={CuisineType.OTHER}>
+                                        Other
+                                    </option>
+                                </Select>
+                                <FormErrorMessage>
+                                    {errors.cusineType?.message}
+                                </FormErrorMessage>
+                            </FormControl>
+                        </Stack>
+
                 <FormControl mt={4} isInvalid={!!errors.categories}>
                     <FormLabel>Categories</FormLabel>
                     <Stack spacing={2} direction="row" flexWrap="wrap">
@@ -240,6 +336,33 @@ const CreateRecipeForm = () => {
                         {errors.categories?.message}
                     </FormErrorMessage>
                 </FormControl>
+
+                <FormControl mt={4} isInvalid={!!errors.tags}>
+                            <FormLabel>Tags</FormLabel>
+                            <Stack spacing={2} direction="row" flexWrap="wrap">
+                                {tags.map((tag) => (
+                                    <Tag
+                                        key={tag}
+                                        size="lg"
+                                        variant="solid"
+                                        colorScheme={
+                                            selectedTags.includes(
+                                                tag,
+                                            )
+                                                ? "green"
+                                                : "gray"
+                                        }
+                                        cursor="pointer"
+                                        onClick={() => toggleTags(tag)}
+                                    >
+                                        {tag}
+                                    </Tag>
+                                ))}
+                            </Stack>
+                            <FormErrorMessage>
+                                {errors.tags?.message}
+                            </FormErrorMessage>
+                        </FormControl>
 
                 <FormControl mt={4} isInvalid={!!errors.description}>
                     <FormLabel>Description</FormLabel>
@@ -370,7 +493,20 @@ const CreateRecipeForm = () => {
                                         defaultValue={ingredient.name}
                                     />
                                   </FormControl>
-                                <MemorizeFileUploadForm
+                                  <Box height={'140px'} width={'150px'}>
+                                        <MemoV2FileUplaod
+                                          alt={`ing-${index}`}
+                                          file={ingredient?.image?.key}
+                                          repo={'ingredients'}
+                                          onRemove={(key) => {
+                                            handleRemoveIngriedentImg(key, index)
+                                          }}
+                                          onUpload={(key) => {
+                                            handleAddNewIngredientImage(key, index)
+                                          }}
+                                        />
+                                  </Box>
+                                {/* <MemorizeFileUploadForm
                                     h={140}
                                     w={200}
                                     repo="ingredients"
@@ -378,7 +514,7 @@ const CreateRecipeForm = () => {
                                         handleAddNewIngredientImage(keys, index)
                                     }}
                                     contentType="image/jpeg"
-                                />
+                                /> */}
                             </Stack>
                             <IconButton
                                 aria-label="remove"
@@ -406,19 +542,57 @@ const CreateRecipeForm = () => {
                 </FormControl>
 
                 {/* ... Submit button and closing tags ... */}
-                <FormControl mt={4} isInvalid={!!errors.images}>
-                    <FormLabel>Images</FormLabel>
-                    <MultiFileUpload
-                        onUploadComplete={(vals) => setValue("images", vals.map((t) =>( {key:  t, repo: 'recipes' })))}
-                        contentType="image/jpeg"
-                    />
-                    <FormErrorMessage>
-                        {errors.images?.message}
-                    </FormErrorMessage>
-                </FormControl>
+                <FormControl mt={4} isInvalid={!!errors.images} >
+                            <FormLabel>Images</FormLabel>
+                            <HStack spacing={3} overscrollX={'auto'}>
+                                {imageFields.map((image, index) => (
+                          
+                                       <Box
+                                        key={index}
+                                        maxH={"200px"}
+                                        height={"200px"}
+                                        width={"230px"}
+                                    >
+                                        <MemoV2FileUplaod
+                                            alt={`recipe-${index}`}
+                                            file={
+                                                image.key
+                                                    ? `recipes/${image.key}`
+                                                    : undefined
+                                            }
+                                            repo={"recipes"}
+                                            onRemove={() => {
+                                                removeImage(index)
+                                            }}
+                                            onUpload={(key) => {
+                                                handleAddImage(key, index)
+                                            }}
+                                        />
+                                    </Box>
+                            
+                            
+                                ))}
+                            </HStack>
+                            <Button
+                                mt={5}
+                                type="button"
+                                rightIcon={<BiPlus />}
+                                onClick={() =>
+                                    appendImage({  })
+                                }
+                                colorScheme="green"
+                                size="sm"
+                            >
+                                Add Image
+                            </Button>
+                            <FormErrorMessage>
+                                {errors.images?.message}
+                            </FormErrorMessage>
+                        </FormControl>
                 <Button
                     mt={10}
                     colorScheme="green"
+                    isLoading={isLoading}               
                     type="submit"
                     width={"100%"}
                 >

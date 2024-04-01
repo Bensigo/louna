@@ -1,11 +1,11 @@
-import { addPrefrenceController } from "../controllers/preference/addPreference";
-import { getUserPreferenceController } from "../controllers/preference/getUserPreference";
+import { updatePrefController } from "../controllers/preference/update";
+import { upsertUserPrefrenceController } from "../controllers/preference/upsert";
 import { createTRPCRouter } from "../trpc";
 
 
 const preferenceRouter = createTRPCRouter({
-    createPreference: addPrefrenceController,
-    getUserPreference: getUserPreferenceController
+    update: updatePrefController,
+    upsert: upsertUserPrefrenceController
 })
 
 export { preferenceRouter }
