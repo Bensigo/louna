@@ -4,7 +4,7 @@ import { BiArrowBack } from "react-icons/bi"
 import { useRouter } from "next/router"
 
 
-export const CreateRecipesWrapper = () => {
+export const CreateRecipeWrapper = () => {
     const router = useRouter()
 
     const goBack = () => router.replace(`/dashboard/recipes`)
