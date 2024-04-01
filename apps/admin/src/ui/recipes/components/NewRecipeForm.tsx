@@ -35,7 +35,7 @@ import { CuisineType, categories, tags } from "./EditRecipeForm"
 
   
 
-const CreateRecipeForm = () => {
+const NewRecipeForm = () => {
     const {
         register,
         handleSubmit,
@@ -607,4 +607,4 @@ const CreateRecipeForm = () => {
 
 
 
-export  {CreateRecipeForm}
+export  {NewRecipeForm}
