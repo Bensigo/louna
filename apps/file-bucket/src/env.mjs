@@ -11,11 +11,12 @@ export const env = createEnv({
         AWS_REGION: z.string(),
         INTERNAL_API_KEY: z.string()
     },
+    client: {},
     runtimeEnv: {
-        AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,
-        AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY,
-        AWS_SECRET_KEY: process.env.AWS_SECRET_KEY,
-        AWS_REGION: process.env.AWS_REGION,
+        AWS_BUCKET_NAME: process.env.SOLU_AWS_BUCKET_NAME,
+        AWS_ACCESS_KEY: process.env.SOLU_AWS_ACCESS_KEY,
+        AWS_SECRET_KEY: process.env.SOLU_AWS_SECRET_KEY,
+        AWS_REGION: process.env.SOLU_AWS_REGION,
         INTERNAL_API_KEY: process.env.INTERNAL_API_KEY
     }
 })

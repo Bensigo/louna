@@ -22,7 +22,7 @@ export { type RouterInputs, type RouterOutputs } from "@solu/api"
 export const TRPCProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
-    const API_URL = process.env.EXPO_PUBLIC_API_URL
+    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://solu-web.vercel.app/'
     const { getToken } = useAuth()
     const [queryClient] = React.useState(() => new QueryClient())
     const [trpcClient] = React.useState(() =>
