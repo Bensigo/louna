@@ -1,6 +1,5 @@
 packages:
     - apps/mobile
-    - apps/partners
     - apps/admin-seed-script
     - apps/admin
     - apps/web
@@ -8,6 +7,5 @@ packages:
     - packages/api
     - packages/auth
     - packages/admin-api
-    - packages/partner-api
     - packages/db
     - packages/config/*
