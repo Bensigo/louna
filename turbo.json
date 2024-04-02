@@ -53,7 +53,8 @@
         "SOLU_AWS_ACCESS_KEY",
         "SOLU_AWS_SECRET_KEY",
         "SOLU_AWS_REGION",
-        "IMG_SERVER_URL"
+        "IMG_SERVER_URL",
+        "NEXT_PUBLIC_IMG_SERVER_URL"
 
     ]
 }

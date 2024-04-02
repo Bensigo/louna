@@ -197,7 +197,7 @@ const ListRecipeWrapper = () => {
             {data && data.recipes.length ? (
                 <HStack spacing={5} flexFlow={'wrap'} width={'inherit'} >
 
-                    {[...data.recipes, ...data.recipes].map(recipe => (
+                    {data.recipes.map(recipe => (
                         <Skeleton  isLoaded={!isLoading} key={recipe.id}> 
                             <RecipeCard recipe={recipe}  />
                         </Skeleton>
