@@ -1,7 +1,7 @@
-import React, { useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useSession } from "@clerk/nextjs"
 
-import { api } from "~/utils/api"
+import { api, type RouterOutputs } from "~/utils/api"
 
 export enum UserRole {
     INSTRUCTOR = "INSTRUCTOR",
@@ -10,21 +10,11 @@ export enum UserRole {
     BUSINESS = "BUSINESS",
 }
 
-type UserData = {
-    // Define the structure of your user data
-    firstname: string | null
-    lastname: string | null
-    wallet: any
-    email: string
-    imageUrl: string | null
-    birthdate: Date | null
-    roles: UserRole[]
-    metadata?: any
-}
+type UserData = RouterOutputs["user"]["get"]
 
 const AuthContext = React.createContext<Context | null>(null)
 
-export const AuthProvider = ({ children }: any) => {
+const Provider = ({ children }: any) => {
     const { isSignedIn, isLoaded } = useSession()
     const { data, isFetched } = api.profile.get.useQuery()
 
@@ -32,31 +22,29 @@ export const AuthProvider = ({ children }: any) => {
     const [hasSetup, setHasSetup] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
 
-    React.useEffect(() => {
-        if (isSignedIn && isFetched && data && isLoaded) {
-            if ("roles" in data && "metadata" in data) {
-                const roles = data.roles as string[] // Cast to string[] if not already inferred
-                const metadata = data.metadata as { hasSetup?: boolean }
-                setHasSetup(!!metadata?.hasSetup)
-
-                setIsAdmin(!!roles.includes("ADMIN"))
+    useEffect(() => {
+        if (isFetched && isLoaded) {
+            setIsLoading(false)
+            if (isSignedIn && data) {
+                const { roles, metadata } = data
+                const isAdmin = roles.includes(UserRole.ADMIN)
+                const hasSetup = (metadata?.hasSetup as boolean) || false
+                setIsAdmin(isAdmin)
+                setHasSetup(hasSetup)
             }
-            setIsLoading(false)
         }
-
-        if(isFetched && isLoaded && !isSignedIn){
-            setIsLoading(false)
-        }
-
     }, [data, isSignedIn, isFetched, isLoaded])
 
-    const contextValue = {
-        user: data,
-        isSignedIn,
-        isAdmin,
-        hasSetup,
-        isLoading,
-    }
+    const contextValue = useMemo(
+        () => ({
+            user: data,
+            isSignedIn,
+            isAdmin,
+            hasSetup,
+            isLoading,
+        }),
+        [data, isSignedIn, isAdmin, hasSetup, isLoading],
+    )
 
     return (
         <AuthContext.Provider value={contextValue}>
@@ -64,6 +52,8 @@ export const AuthProvider = ({ children }: any) => {
         </AuthContext.Provider>
     )
 }
+
+export const  AuthProvider = React.memo(Provider)
 
 type Context = {
     isSignedIn: boolean | undefined

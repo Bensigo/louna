@@ -15,8 +15,8 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "api.soluapp-dev.ae",
-        "EXPO_PUBLIC_IMAGE_SERVER_URL": "image.soluappe-dev.ae"
+        "EXPO_PUBLIC_API_URL": "https://solu-web.vercel.app",
+        "EXPO_PUBLIC_IMAGE_SERVER_URL": "https://solu-file-bucket.vercel.app"
       }
 
     },
