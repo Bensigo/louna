@@ -3,10 +3,21 @@ import { AuthGuard } from '~/shared/AuthGuard'
 import AppLayout from '~/shared/DashboardNav'
 import { PartnerListWrapper } from '~/ui/partners/Wrapper'
 
+import { withServerSideAuth } from "@clerk/nextjs/ssr"
 
-function PartnerList() {
+export const getServerSideProps = withServerSideAuth((context) => {
+    const { sessionId, userId } = context.req.auth
+    return {
+        props: {
+            userId,
+            sessionId,
+        },
+    }
+})
+
+function PartnerList({ userId }: { userId: string }) {
   return (
-    <AuthGuard>
+    <AuthGuard userId={userId}>
         <AppLayout>
             <PartnerListWrapper />
         </AppLayout>

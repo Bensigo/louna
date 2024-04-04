@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { useRouter } from "next/router"
 import {
     Box,
@@ -19,8 +19,10 @@ import { useSignIn } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, type SubmitHandler } from "react-hook-form"
 import { z } from "zod"
-import { Guard } from "~/shared/Guard"
 import { PasswordField } from "~/shared/PasswordField"
+
+
+
 
 
 
@@ -29,11 +31,36 @@ const LoginUserSchema = z.object({
     password: z.string().min(8).max(20),
 })
 
+
+
+
 type LoginUserType = z.infer<typeof LoginUserSchema>
 
-const Login = () => {
+
+import { withServerSideAuth } from "@clerk/nextjs/ssr"
+
+export const getServerSideProps = withServerSideAuth((context) => {
+    const { sessionId, userId } = context.req.auth
+    return {
+        props: {
+            userId,
+            sessionId,
+        },
+    }
+})
+
+const Login = ({ userId }: { userId: string }) => {
     const router = useRouter()
     const toast = useToast()
+
+
+    useEffect(() => {
+        if (userId){
+            router.push('/dashboard')
+        }
+    }, [router, userId])
+
+
     const {
         register,
         handleSubmit,
@@ -52,11 +79,12 @@ const Login = () => {
             const result = await signIn.create({
                 password: data.password,
                 identifier: data.email,
+                redirectUrl: '/dashboard'
             })
 
             if (result.status === "complete") {
                 setActive({ session: result.createdSessionId })
-                router.push("/dashboard/")
+                // router.push("/dashboard/")
             }
         } catch (err: any) {
             toast({
@@ -72,7 +100,7 @@ const Login = () => {
 
 
     return (
-     <Guard >
+     <>
             <Container
                 maxW="lg"
                 py={{ base: "12", md: "24" }}
@@ -141,7 +169,7 @@ const Login = () => {
                     </Box>
                 </Stack>
             </Container>
-         </Guard>
+         </>
         
     )
 }

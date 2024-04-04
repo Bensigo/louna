@@ -2,9 +2,21 @@ import { AuthGuard } from "~/shared/AuthGuard";
 import AppLayout from "~/shared/DashboardNav";
 import { CreatePartnerWrapper } from "~/ui/partners/CreatePartnerWrapper";
 
-function CreatePartner() {
+import { withServerSideAuth } from "@clerk/nextjs/ssr"
+
+export const getServerSideProps = withServerSideAuth((context) => {
+    const { sessionId, userId } = context.req.auth
+    return {
+        props: {
+            userId,
+            sessionId,
+        },
+    }
+})
+
+function CreatePartner({ userId }: { userId: string }) {
     return (
-      <AuthGuard>
+      <AuthGuard userId={userId}>
           <AppLayout>
                 <CreatePartnerWrapper />
           </AppLayout>

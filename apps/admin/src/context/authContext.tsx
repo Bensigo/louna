@@ -14,36 +14,36 @@ type UserData = RouterOutputs["user"]["get"]
 
 const AuthContext = React.createContext<Context | null>(null)
 
-const Provider = ({ children }: any) => {
-    const { isSignedIn, isLoaded } = useSession()
-    const { data, isFetched } = api.profile.get.useQuery()
+const Provider = ({ children  }: any) => {
+    // const { isSignedIn, isLoaded } = useSession()
+    const { data } = api.profile.get.useQuery({ })
 
     const [isAdmin, setIsAdmin] = useState(false)
-    const [hasSetup, setHasSetup] = useState(false)
+    // const [hasSetup, setHasSetup] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        if (isFetched && isLoaded) {
-            setIsLoading(false)
-            if (isSignedIn && data) {
+        
+        if ( data) {
+                setIsLoading(false)
                 const { roles, metadata } = data
                 const isAdmin = roles.includes(UserRole.ADMIN)
-                const hasSetup = (metadata?.hasSetup as boolean) || false
+                // const hasSetup = (metadata?.hasSetup as boolean) || false
                 setIsAdmin(isAdmin)
-                setHasSetup(hasSetup)
-            }
+                // setHasSetup(hasSetup)
+            
         }
-    }, [data, isSignedIn, isFetched, isLoaded])
+    }, [data])
 
     const contextValue = useMemo(
         () => ({
             user: data,
-            isSignedIn,
+            isSignedIn: !!data,
             isAdmin,
-            hasSetup,
+            // hasSetup,
             isLoading,
         }),
-        [data, isSignedIn, isAdmin, hasSetup, isLoading],
+        [data, isAdmin, isLoading],
     )
 
     return (

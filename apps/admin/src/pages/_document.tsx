@@ -6,6 +6,7 @@ class CustomDocument extends Document {
     return (
       <Html lang='en'>
         <Head>
+          
           <link rel='preconnect' href='https://fonts.googleapis.com' />
           <link rel='preconnect' href='https://fonts.gstatic.com' />
           <link
@@ -15,6 +16,7 @@ class CustomDocument extends Document {
           <link rel='apple-touch-icon' sizes='180x180' href='/images/apple-touch-icon.png' />
           <link rel='shortcut icon' href='/images/favicon.png' />
         </Head>
+        
         <body>
           <Main />
           <NextScript />

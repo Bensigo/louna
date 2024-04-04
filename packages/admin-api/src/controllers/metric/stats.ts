@@ -24,20 +24,15 @@ const getStatsController = protectedProcedure.query(async ({ ctx } ) => {
         }
     })
 
-    const totalPartner = await prisma.user.count({
+    const totalPartner = await prisma.partner.count({
         where: {
-             roles: {
-                has: UserRole.PARTNER
-             }
+            
         }
     }) 
 
-    const totalActivePartner = await prisma.user.count({
+    const totalActivePartner = await prisma.partner.count({
         where: {
-            roles: {
-                has: UserRole.PARTNER
-             },
-             isDeleted: false
+            isPublished: true
         }
     })
 

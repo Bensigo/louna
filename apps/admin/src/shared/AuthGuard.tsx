@@ -1,28 +1,28 @@
-import React, { type ReactNode } from "react"
-import { useRouter } from "next/router"
-import { Container, Skeleton } from "@chakra-ui/react"
+import React, { type ReactNode, useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { Container, Skeleton } from "@chakra-ui/react";
+import { api } from "~/utils/api";
 
-import { useCustomAuth } from "~/context/authContext"
-
-const AuthGuard: React.FC<{ useLoader?: boolean; children: ReactNode }> = ({
+const AuthGuard: React.FC<{ useLoader?: boolean; children: ReactNode, userId?: string }> = ({
     children,
+    userId,
     useLoader = true,
 }) => {
-    const router = useRouter()
-    const { isAdmin, isSignedIn, isLoading } = useCustomAuth()
+    const router = useRouter();
+    const [redirected, setRedirected] = useState(false);
+    const { data, isLoading, isFetched } = api.profile.get.useQuery({ userId: userId || '' });
 
-    React.useEffect(() => {
-        if (!isLoading && !isSignedIn) {
-            router.replace("/")
+    useEffect(() => {
+        if (isFetched && !data) {
+            console.log("No data fetched");
+            router.push('/')
+            setRedirected(true);
         }
-        if (!isLoading && isSignedIn) {
-            if (!isAdmin) {
-                router.replace("/")
-            }
-        }
-    }, [isAdmin, isSignedIn, isLoading, router])
+    }, [data, isFetched, redirected]);
 
-    if (useLoader && isLoading && !isSignedIn) {
+    console.log({data})
+
+    if (useLoader && isLoading) {
         return (
             <Container
                 maxW="100%"
@@ -31,10 +31,10 @@ const AuthGuard: React.FC<{ useLoader?: boolean; children: ReactNode }> = ({
             >
                 <Skeleton minH={500} width={"100%"}></Skeleton>
             </Container>
-        )
+        );
     }
 
-    return !isLoading && isSignedIn && isAdmin && <>{children}</>
-}
+    return data && data.roles.includes('ADMIN') && <>{children}</>;
+};
 
-export { AuthGuard }
+export { AuthGuard };

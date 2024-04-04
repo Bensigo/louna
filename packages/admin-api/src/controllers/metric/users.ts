@@ -70,7 +70,7 @@ export const getUsersMetricController = protectedProcedure
               date DESC;
           `;
           
-            console.log({ userData })
+     
             return userData
         } catch (error) {
             console.error("Error fetching user data:", error)

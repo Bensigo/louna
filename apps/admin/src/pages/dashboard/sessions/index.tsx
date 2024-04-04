@@ -3,10 +3,22 @@ import AppLayout from "~/shared/DashboardNav";
 import { ListSessionWrapper } from "~/ui/sessions/ListWrapper";
 
 
+import { withServerSideAuth } from "@clerk/nextjs/ssr"
 
-function SessionsPage() {
+export const getServerSideProps = withServerSideAuth((context) => {
+    const { sessionId, userId } = context.req.auth
+    return {
+        props: {
+            userId,
+            sessionId,
+        },
+    }
+})
+
+
+function SessionsPage({ userId }: { userId: string }) {
     return (
-      <AuthGuard>
+      <AuthGuard userId={userId}>
           <AppLayout>
              <ListSessionWrapper />
           </AppLayout>
