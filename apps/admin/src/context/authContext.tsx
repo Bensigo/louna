@@ -1,6 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react"
-import { useSession } from "@clerk/nextjs"
-
 import { api, type RouterOutputs } from "~/utils/api"
 
 export enum UserRole {

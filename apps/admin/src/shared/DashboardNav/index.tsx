@@ -65,7 +65,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     const { user, isLoaded } = useUser()
     const { signOut } = useClerk()
 
-    const handleSignout = async () => {
+    const handleSignout =  () => {
         signOut(() =>  router.push("/"))
     }
 

@@ -10,7 +10,6 @@ import {
     Heading,
     HStack,
     Input,
-    Link,
     Stack,
     Text,
     useToast,
