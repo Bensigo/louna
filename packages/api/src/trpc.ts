@@ -15,6 +15,9 @@ import { ZodError } from "zod"
 
 import { prisma } from "@solu/db"
 
+
+
+
 /**
  * 1. CONTEXT
  *
@@ -55,6 +58,8 @@ export const createTRPCContext = (opts: CreateNextContextOptions) => {
     })
 }
 
+
+
 /**
  * 2. INITIALIZATION
  *
@@ -64,6 +69,7 @@ export const createTRPCContext = (opts: CreateNextContextOptions) => {
 const t = initTRPC.context<typeof createTRPCContext>().create({
     transformer: superjson,
     errorFormatter({ shape, error }) {
+        console.log({ err })
         return {
             ...shape,
             data: {
@@ -75,6 +81,11 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
             },
         }
     },
+})
+
+t.middleware(({ ctx, next }) => {
+    console.log("new request")
+    return next()
 })
 
 /**
@@ -104,6 +115,7 @@ export const publicProcedure = t.procedure
  * procedure
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+    console.log({ auth: ctx.auth })
     if (!ctx.auth.userId) {
         throw new TRPCError({
             code: "UNAUTHORIZED",
@@ -115,39 +127,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
             auth: ctx.auth,
         },
     })
-})
-
-
-
-const enforceUserIsPartner = t.middleware(async ({ ctx, next }) => {
-
-    if (!ctx.auth.userId) {
-        throw new TRPCError({
-            code: "UNAUTHORIZED",
-            message: "Not authenticated",
-        })
-    }
-    const user = await prisma.user.findFirst({
-        where: {
-            id: ctx.auth.userId
-        }
-    })
-    console.log({ user })
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    if(user && !user.roles.includes('INSTRUCTOR')){
-        throw new TRPCError({
-            code: "UNAUTHORIZED",
-            message: "Not authenticated",
-        })
-    }
-   
-    return next({
-        ctx: {
-            auth: ctx.auth,
-        },
-    })
-   
 })
 
 /**
@@ -160,10 +139,3 @@ const enforceUserIsPartner = t.middleware(async ({ ctx, next }) => {
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed)
-
-
-/**
- *  partner proceude
- *  only accessable to INSTRUCTORS
- */
-export const partnerProtectedProcedure = t.procedure.use(enforceUserIsPartner)

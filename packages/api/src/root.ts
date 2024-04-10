@@ -8,6 +8,7 @@ import { recipeRouters } from "./router/recipe"
 import { resourceRouter } from "./router/resource"
 import { s3Router } from "./router/s3"
 import { sessionController } from "./router/session"
+import { smwRouter } from "./router/smw"
 import { createTRPCRouter } from "./trpc"
 
 export const appRouter = createTRPCRouter({
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
     resource: resourceRouter,
     payment: paymentRouter,
     partner: partnerRouter,
+    smw: smwRouter,
     booking: bookingRouter,
 
 })

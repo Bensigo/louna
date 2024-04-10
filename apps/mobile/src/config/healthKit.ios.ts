@@ -6,7 +6,10 @@ export const PERMISSIONS: HealthKitPermissions = {
     permissions: {
         read: [
             AppleHealthKit.Constants.Permissions.BodyMass,
+
             AppleHealthKit.Constants.Permissions.Vo2Max,
+            AppleHealthKit.Constants.Permissions.BloodPressureDiastolic,
+            AppleHealthKit.Constants.Permissions.BloodPressureSystolic,
             AppleHealthKit.Constants.Permissions.Steps,
             AppleHealthKit.Constants.Permissions.BodyMassIndex,
             AppleHealthKit.Constants.Permissions.Weight,

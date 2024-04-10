@@ -3,6 +3,7 @@ import {
     FlatList,
     KeyboardAvoidingView,
     RefreshControl,
+    Alert,
     StyleSheet,
     TouchableHighlight,
 } from "react-native"
@@ -24,13 +25,12 @@ export default function CommunityForum() {
     const router = useRouter()
     const postRef = useRef()
     const [postId, setPostId] = useState<string>()
-
-    const ctx = api.useUtils()
     const [limit, setLimit] = useState(FETCH_BATCH)
 
     const [transformedPosts, setTransformedPosts] = useState([])
 
-    const { data: user } = api.auth.getProfile.useQuery()
+    // const { data: user } = api.auth.getProfile.useQuery()
+    const user = {}
 
     const {
         data: posts,
@@ -82,9 +82,17 @@ export default function CommunityForum() {
                 onSuccess: () => {
                     // If the API call is successful, no action needed
                 },
-                onError: () => {
+                onError: (err) => {
                     // If the API call fails, revert the optimistic update
                     setTransformedPosts(transformedPosts)
+                    Alert.alert("Error", err.message, [
+                        {
+                            text: "Cancel",
+                            style: "cancel",
+                            onPress: () => console.log("Cancel Pressed"),
+                            
+                        }
+                    ])
                 },
             },
         )
@@ -94,9 +102,6 @@ export default function CommunityForum() {
         router.replace("community/createPost")
     }
 
-    //   const scrollToItem = (index) => {
-    //     postRef.current.scrollToIndex({ index: index, animated: false });
-    //   };
 
     const renderItem = ({ item }) => (
         <Post

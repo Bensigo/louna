@@ -31,7 +31,7 @@ const listResourcesController = protectedProcedure
 
      
 
-        return { resources, totalPages }
+        return { data: { resources, totalPages }, error: null }
     })
 
 export { listResourcesController,  }

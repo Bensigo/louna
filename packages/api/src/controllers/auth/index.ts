@@ -17,7 +17,7 @@ export const getProfile = protectedProcedure.query(async ({ ctx }) => {
             userPref: true
         }
     })
-    return user
+    return  user
 })
 
 export const updateProfile = protectedProcedure

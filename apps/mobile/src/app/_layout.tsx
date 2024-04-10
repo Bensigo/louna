@@ -75,6 +75,10 @@ const RootLayout = () => {
                                     name="(auth)"
                                     options={{ headerShown: false }}
                                 ></Stack.Screen>
+                                 <Stack.Screen
+                                    name="profile"
+                                    options={{ headerShown: false }}
+                                ></Stack.Screen>
                                 <Stack.Screen
                                     name="(tabs)"
                                     options={{ headerShown: false }}

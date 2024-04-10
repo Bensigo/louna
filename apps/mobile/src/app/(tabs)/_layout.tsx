@@ -15,9 +15,10 @@ import { useAsyncStorage } from "@react-native-async-storage/async-storage"
 
 import { PostLoadingSekeleton } from "../../components/community/post"
 import { api } from "../../utils/api"
-import { useColorScheme } from "react-native"
+import { ActivityIndicator, useColorScheme } from "react-native"
 import { Colors } from "../../constants/colors"
 import { CustomTabBar } from "../../components/CustomTabbar"
+import { View } from "tamagui";
 
 
 
@@ -38,17 +39,15 @@ const TabScreenLayout = () => {
     const { isSignedIn } = useAuth()
     const router = useRouter()
     const rootNav = useRootNavigation()
-    const { getItem: hasSetPref } = useAsyncStorage(HAS_SET_USER_PREF)
+    const { getItem: hasSetPref , setItem} = useAsyncStorage(HAS_SET_USER_PREF)
     const colorScheme = useColorScheme();
 
 
     const { data: user, isLoading } = api.auth.getProfile.useQuery()
- 
-
+  
 
 
     useEffect(() => {
-        
         if (isSignedIn && user) {
             if (!user.hasPref) {
                 router.replace("(onboarding)")
@@ -59,11 +58,9 @@ const TabScreenLayout = () => {
 
     if (isLoading) {
         return (
-            <>
-                <PostLoadingSekeleton />
-                <PostLoadingSekeleton />
-                <PostLoadingSekeleton />
-            </>
+            <View flex={1} alignItems="center" justifyContent="center" >
+               <ActivityIndicator size={'large'} />
+            </View>
         )
     }
 
@@ -90,10 +87,10 @@ const TabScreenLayout = () => {
                 
             >
                 <Tabs.Screen
-                    name="home"
+                    name="today"
                     options={{
-                        tabBarLabel: "Home",
-                        tabBarIcon: ({ color }) => ( <TabBarIcon name={'home-outline'} color={color} />),
+                        tabBarLabel: "Today",
+                        tabBarIcon: ({ color }) => ( <TabBarIcon name={'today-outline'} color={color} />),
                     }}
                 ></Tabs.Screen>
                 <Tabs.Screen
@@ -123,10 +120,10 @@ const TabScreenLayout = () => {
                     }}
                 ></Tabs.Screen>
                 <Tabs.Screen
-                    name="profile"
+                    name="smw"
                     options={{
-                        tabBarLabel: "Profile",
-                        tabBarIcon: ({ color }) => ( <TabBarIcon name={'person-outline'} color={color} />),
+                        tabBarLabel: "SMW",
+                        tabBarIcon: ({ color }) => ( <TabBarIcon name={'fitness-outline'} color={color} />),
                     }}
                 ></Tabs.Screen>
             </Tabs>

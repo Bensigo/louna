@@ -37,7 +37,7 @@ const CreatePost = () => {
     >([])
 
     const { mutate: createPost } = api.post.createPost.useMutation()
-    const { data, isLoading } = api.auth.getProfile.useQuery()
+    const { data: user, isLoading } = api.auth.getProfile.useQuery()
     const { mutateAsync: getPreSignedUrls, isLoading: isUploading } =
         api.s3.presigned.useMutation()
 
@@ -182,7 +182,7 @@ const CreatePost = () => {
                 <View style={styles.inputContainer}>
                     <View style={styles.avatarContainer}>
                         <Avatar circular size="$3">
-                            <Avatar.Image src={data?.imageUrl} />
+                            <Avatar.Image src={user?.imageUrl} />
                             <Avatar.Fallback bc="gray" />
                         </Avatar>
                     </View>

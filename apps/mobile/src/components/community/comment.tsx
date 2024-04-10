@@ -62,7 +62,7 @@ export const CommentItem = ({
         <View style={{ flex: 1 }} width={"100%"} marginBottom="$5">
             <XStack alignItems="center" space>
                 <Avatar circular size="$3">
-                    <Avatar.Image src={"http://placekitten.com/200/300"} />
+                    <Avatar.Image src={comment.user.imageUrl} />
                     <Avatar.Fallback bc="red" />
                 </Avatar>
                 <YStack space="$2">

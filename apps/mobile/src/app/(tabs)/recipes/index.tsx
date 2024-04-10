@@ -1,8 +1,8 @@
 import { useRef, useState } from "react"
-import { FlatList, RefreshControl, SectionList, TouchableOpacity } from "react-native"
+import { FlatList, RefreshControl, SectionList, TouchableHighlight, TouchableOpacity } from "react-native"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { DefaultTheme } from "@react-navigation/native"
-import { H3, Input, SizableText, Tabs, Text, View, XStack, YStack, useDebounce } from "tamagui"
+import { Avatar, H3, Input, SizableText, Tabs, Text, View, XStack, YStack, useDebounce } from "tamagui"
 
 import { RecipeItem, RecipeSkeleton } from "../../../components/recipeItem"
 import { api } from "../../../utils/api"
@@ -11,11 +11,13 @@ import { usePathname, useRouter } from "expo-router"
 
 const meals = ["Breakfast", "Lunch", "Snack", "Dinner"]
 type MealType = "Breakfast" | "Lunch" | "Snack" | "Dinner"
-const Recipe = () => {
+const RecipeScreen = () => {
     const [activeTab, setActiveTab] = useState<MealType>("Breakfast")
     const [searchTerm, setSearchTerm] = useState<string>()
     const router = useRouter()
     const pathname = usePathname()
+
+    const { isLoading: isLoadingProfile , data } = api.auth.getProfile.useQuery()
 
     const {
         data: recipes,
@@ -50,14 +52,28 @@ const Recipe = () => {
         router.push(`/recipes/bookmarks`)
     }
 
+    const goToProfile = () => {
+        router.push('/profile')
+    }
+
     return (
         <View flex={1}>
             <View flex={1} mb={"$3"} mt={"$5"} paddingHorizontal={"$4"}>
                 <XStack justifyContent="space-between" alignItems="center">
-                    <H3>Today&rsquo;s Recipes</H3>
+                    <H3 fontSize={"$9"} fontWeight={"$15"}>Recipes</H3>
+                    <XStack gap={'$4'} alignItems="center">
                     <TouchableOpacity onPress={handleGoToRecipeBookmark}>
-                        <Ionicons name="bookmark-outline" size={20} />
+                        <Ionicons name="bookmark-outline" size={25} />
                     </TouchableOpacity>
+                    <TouchableHighlight onPress={goToProfile}>
+                        <Avatar circular size="$3">
+                           {!isLoadingProfile && data &&   <Avatar.Image src={data?.imageUrl} />}
+                            <Avatar.Fallback bc="$blue3" />
+                        </Avatar>
+                    </TouchableHighlight>
+                  
+                    </XStack>
+                   
                 </XStack>
                 <XStack
                     mt={10}
@@ -68,6 +84,7 @@ const Recipe = () => {
                     paddingHorizontal={10}
                     paddingVertical={5}
                 >
+                   
                     <Input
                         flex={1}
                         backgroundColor={"transparent"}
@@ -77,7 +94,7 @@ const Recipe = () => {
                     />
                     <Ionicons name="search-outline" size={20} />
                 </XStack>
-
+                
                 <View mt="$4" mb={"$15"}>
                     <Tabs
                         defaultValue={activeTab}
@@ -98,7 +115,7 @@ const Recipe = () => {
                             <RecipeList
                                 recipes={[
                                     {
-                                        data: recipes?.recommend  || [],
+                                        data: recipes?.recipes  || [],
                                         isHorizontal: true,
                                         title: "Made for you",
                                     },
@@ -181,7 +198,7 @@ const Recipe = () => {
     )
 }
 
-export default Recipe
+export default RecipeScreen
 
 const RecipeList = ({
     recipes,
@@ -224,13 +241,14 @@ const RecipeList = ({
                             backgroundColor={DefaultTheme.colors.background}
                             py={"$1"}
                         >
-                            <Text mb={"$2"} fontSize={"$6"}>
+                            {/* <Text mb={"$2"} fontSize={"$6"}>
                                 {section.title}
-                            </Text>
+                            </Text> */}
                         </View>
 
                         {isLoading && <RecipeSkeleton />  }
                         {section.data.length === 0 && !isLoading && <Text color={'$gray10'}>Recipe not found</Text>}
+                        {/* 
                         {section.isHorizontal && (
                             <FlatList
                                 data={section.data}
@@ -241,7 +259,7 @@ const RecipeList = ({
                                     return <RecipeItem recipe={item} />
                                 }}
                             />
-                        )}
+                        )} */}
                     </View>
                 )
             }}

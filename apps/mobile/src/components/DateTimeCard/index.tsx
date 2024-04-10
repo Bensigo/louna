@@ -37,7 +37,8 @@ const DateCalendarTabs = ({ onDatePress }: { onDatePress: (date: Date) => void})
         console.log({ curr })
         onDatePress(selectedD);
     }
-  
+   
+
 
  
 

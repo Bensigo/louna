@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
+import { TRPCError } from "@trpc/server";
 
 const UpdateUserPrefSchema = z.object({
   height: z.number().optional(),
@@ -26,7 +27,10 @@ export const updatePrefController = protectedProcedure
     });
 
     if (!existingUserPref) {
-      throw new Error("User preferences not found");
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: "User preferences not found"
+      });
     }
 
     let data = {};

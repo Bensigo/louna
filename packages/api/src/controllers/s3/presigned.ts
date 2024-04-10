@@ -6,7 +6,8 @@ import { UploadImagesSchema } from '../../schemas/s3'
 
 export const getPreSignedUrlController = protectedProcedure.input(UploadImagesSchema).mutation(async ({ input, ctx }) => {
     const { fileNames, contentType, repo, expiration, baseKey } =input  
-    const resp = await axios.post('http://localhost:6060/api/presigned-url', {
+    const BASEURL = process.env.IMG_SERVER_URL
+    const resp = await axios.post(`${BASEURL}/api/presigned-url`, { 
       fileNames,
       contentType, 
       expiration,
