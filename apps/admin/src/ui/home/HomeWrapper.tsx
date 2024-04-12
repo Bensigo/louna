@@ -17,8 +17,8 @@ const HomeWrapper = () => {
     const [interval, setInterval ] = useState(intervalParam || 'day')
 
 
-    // const { data: stats, isLoading: isLoadingStats } =
-    //     api.metric.stats.useQuery()
+    const { data: stats, isLoading: isLoadingStats } =
+        api.metric.stats.useQuery()
 
 
 
@@ -37,7 +37,7 @@ const HomeWrapper = () => {
     return (
         <Box>
                <Text  my={3} fontWeight={'bold'} fontSize={'x-large'}>Overview and Metrics</Text>
-            {/* <HStack spacing={3} >
+            <HStack spacing={3} >
                 <Skeleton isLoaded={!isLoadingStats}>
                     <StatsCard
                         name="Active User"
@@ -76,7 +76,7 @@ const HomeWrapper = () => {
                         helpText="Total Subscribers"
                     />
                 </Skeleton>
-            </HStack> */}
+            </HStack>
            <Skeleton isLoaded={!isLoading}>
          <Box mt={5}  px={6} py={5} boxShadow={'md'}  >
                   <HStack>
