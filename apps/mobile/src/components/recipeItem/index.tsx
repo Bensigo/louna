@@ -56,6 +56,8 @@ const RecipeItem = ({ recipe }: { recipe: Recipe }) => {
     const router = useRouter()
     const { id, name, duration, category, likes, images } = recipe
 
+    console.log({ recipe })
+
     const handleGoToDetail = () => {
         router.push(`recipes/${id}`)
     }
@@ -65,13 +67,12 @@ const RecipeItem = ({ recipe }: { recipe: Recipe }) => {
                 <CustomImage
                     src={buildFileUrl(images[0].repo, images[0].key)}
                     alt={name}
-                    width={"100%"}
-                    height={200}
+                    width={"auto"}
+                    height={120}
                 />
                 <View style={styles.detailsContainer}>
                     <Text style={styles.title}>{name}</Text>
                     <Text style={styles.duration}>{duration} mins</Text>
-                    <Text style={styles.category}>{category}</Text>
                     {likes?.length > 0 && (<XStack space={2} style={styles.likesContainer} alignItems="center"> 
    
                             <Text style={styles.likes}>

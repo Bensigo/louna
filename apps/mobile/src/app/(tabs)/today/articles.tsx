@@ -3,7 +3,7 @@ import { api } from "../../../utils/api"
 import { View, Text } from "tamagui"
 import { Skeleton } from "moti/skeleton"
 import { FlatList, RefreshControl } from "react-native"
-import { ResourceItem } from "../../../components/MadeForYou"
+import { ResourceItem } from "../../../components/RecommendedArticle"
 
 
 

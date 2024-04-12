@@ -5,7 +5,7 @@ import {
 } from "react-native"
 import { H2, H6, ScrollView, Text, View, XStack, Avatar, YStack } from "tamagui"
 
-import { MadeForYou } from "../../../components/MadeForYou"
+import { RecommendedArticles } from "../../../components/RecommendedArticle"
 import { RecipeItem, RecipeSkeleton } from "../../../components/recipeItem"
 import { api } from "../../../utils/api"
 import { useRouter } from "expo-router"
@@ -43,9 +43,9 @@ const TodayScreen = () => {
                     </TouchableHighlight>
                 </XStack>
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <MadeForYou />
+                    <RecommendedArticles />
                     <RecommendedRecipes />
-                    <MadeForYou />
+                    <RecommendedArticles />
                 </ScrollView>
             </View>
         </View>

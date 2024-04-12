@@ -5,7 +5,7 @@ import { StatsCard } from "./component/StatsCard"
 import AreaChart from "./component/AreaChart"
 import { useSearchParams, usePathname } from "next/navigation"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import {  useState } from "react"
 
 const HomeWrapper = () => {
     const params = useSearchParams()
@@ -22,9 +22,9 @@ const HomeWrapper = () => {
 
 
 
-    const { data: userMetrics , isLoading } = api.metric.userMetrics.useQuery({ timeRange: intervalParam || 'day' })  
+    // const { data: userMetrics , isLoading } = api.metric.userMetrics.useQuery({ timeRange: interval || 'day' })  
 
-    console.log({ interval, intervalParam , userMetrics})   
+    console.log({ interval })   
 
     const handleChange = (e: any) => {
         const value = e.target.value as string
@@ -77,7 +77,7 @@ const HomeWrapper = () => {
                     />
                 </Skeleton>
             </HStack>
-           <Skeleton isLoaded={!isLoading}>
+           {/* <Skeleton isLoaded={!isLoading}> */}
          <Box mt={5}  px={6} py={5} boxShadow={'md'}  >
                   <HStack>
                      <Text>User Growth Metrics</Text>
@@ -96,9 +96,9 @@ const HomeWrapper = () => {
                         
                     </Select>
                   </HStack>
-                    <AreaChart  data={userMetrics || []} interval={interval === 'day'? 'hour': interval}/>
+                    {/* <AreaChart  data={userMetrics || []} interval={interval === 'day'? 'hour': interval}/> */}
                 </Box>
-           </Skeleton>
+           {/* </Skeleton> */}
         </Box>
     )
 }
