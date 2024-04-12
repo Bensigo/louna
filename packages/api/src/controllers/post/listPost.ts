@@ -9,8 +9,6 @@ export const listPostController = protectedProcedure
   .query(async ({ ctx, input }) => {
     const { prisma } = ctx;
     const { skip, limit } = input;
-
-    console.log("======== called sucessfully ========")
     const latestPosts = await prisma.post.findMany({
       take: limit,
       skip,
@@ -66,7 +64,6 @@ export const listPostController = protectedProcedure
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const mergedPosts = mergeAndDeduplicatePosts(latestPosts, trendingPosts, limit);
-    console.log({ mergedPosts })
 
     return mergedPosts
   });

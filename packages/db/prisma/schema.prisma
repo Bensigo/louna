@@ -35,6 +35,8 @@ model User {
     hasActiveSubscription Boolean         @default(false)
     createdAt             DateTime        @default(now())
     updatedAt             DateTime        @default(now()) @updatedAt
+
+    @@index([id, roles, isDeleted])
 }
 
 model UserPref {
@@ -54,6 +56,8 @@ model UserPref {
     stressManagement String[]
     userId           String   @unique
     user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([id, userId])
 }
 
 enum UserRole {
@@ -89,6 +93,8 @@ model PartnerProfile {
     activities   String[]
     title        String
     venue        Venue[]
+
+    @@index([id, userId])
 }
 
 enum PreferenceType {
@@ -117,6 +123,9 @@ model Post {
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
     deleted   Boolean   @default(false)
+
+
+    @@index([id, userId, createdAt, deleted, updatedAt])
 }
 
 model Comment {
@@ -139,6 +148,9 @@ model Like {
     createdAt DateTime @default(now())
     isDeleted Boolean  @default(false)
     updatedAt DateTime @updatedAt
+
+
+    @@index([postId])
 }
 
 model RecipeLike {
@@ -150,6 +162,9 @@ model RecipeLike {
     createdAt DateTime @default(now())
     isDeleted Boolean  @default(false)
     updatedAt DateTime @updatedAt
+
+
+    @@index([recipeId])
 }
 
 model Wallet {
@@ -160,6 +175,9 @@ model Wallet {
     logs         walletLog[]
     subscription subscription[]
     reward       Reward[]
+
+
+    @@index([userId, id])
 }
 
 enum paymentType {
@@ -176,6 +194,8 @@ model walletLog {
     reasons   String[]
     createdAt DateTime    @default(now())
     updatedAt DateTime    @updatedAt
+
+    @@index([walletId, id])
 }
 
 model subscription {
@@ -192,6 +212,8 @@ model subscription {
     expiryDate DateTime
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
+
+    @@index([walletId, isExpired, expiryDate,paymentId])
 }
 
 
@@ -221,6 +243,9 @@ model payment {
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
     logs PaymentLog[]
+
+
+    @@index([paymentId, id, userId])
 }
 
 
@@ -231,6 +256,8 @@ model PaymentLog {
     payment     payment     @relation(fields: [paymentId], references: [id])
     status      PaymentStatus
     timestamp   DateTime    @default(now())
+
+    @@index([paymentId, id])
 }
 
 model Reward {
@@ -304,6 +331,9 @@ model Recipe {
     createdAt   DateTime         @default(now())
     updatedAt   DateTime         @updatedAt
     deleted     Boolean          @default(false)
+
+
+    @@index([id, mealType, name])
 }
 
 model Bookmark {
@@ -314,6 +344,9 @@ model Bookmark {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     isDeleted Boolean  @default(false)
+
+
+    @@index([userId])
 }
 
 model File {
@@ -325,6 +358,8 @@ model File {
     isValid     Boolean  @default(false)
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
+
+    @@index([id])
 }
 
 model SMWLike {
@@ -355,6 +390,9 @@ model SMW {
     createdAt     DateTime           @default(now())
     updatedAt     DateTime           @updatedAt
     deleted       Boolean            @default(false)
+
+
+    @@index([id])
 }
 
 enum InstructorCategory {
@@ -378,6 +416,8 @@ model Instrutor {
     createdAt     DateTime           @default(now())
     updatedAt     DateTime           @updatedAt
     deleted       Boolean            @default(false)
+
+    @@index([id])
 }
 
 model Partner {
@@ -396,6 +436,8 @@ model Partner {
     createdAt   DateTime           @default(now())
     updatedAt   DateTime           @updatedAt
     deleted     Boolean            @default(false)
+
+    @@index([id, isPublished, deleted])
 }
 
 model Address {
@@ -414,6 +456,8 @@ model Address {
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
     deleted   Boolean   @default(false)
+
+    @@index([id])
 }
 
 model Session {
@@ -434,6 +478,9 @@ model Session {
     createdAt     DateTime           @default(now())
     updatedAt     DateTime           @updatedAt
     deleted       Boolean            @default(false)
+
+
+    @@index([id, startTime, endTime])
 }
 
 
@@ -448,6 +495,8 @@ model Booking {
     cancellationReasons String[]
     createdAt     DateTime           @default(now())
     updatedAt     DateTime           @updatedAt
+
+    @@index([id, sessionId])
 }
 
 model Resource {
@@ -460,4 +509,7 @@ model Resource {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     deleted   Boolean  @default(false)
+
+
+    @@index([id])
 }
