@@ -71,7 +71,6 @@ export const getUploadPreSignedUrl = protectedProcedure.input(UploadImagesSchema
         'x-secret': process.env.INTERNAL_API_KEY as string
       }
     })
-    console.log({ resp })
     return resp.data;
     
 })
