@@ -10,7 +10,7 @@ const ReadMoreCollapsible = ({ text, len  = 100}: { text: string, len?: number }
     }
 
     return (
-        <View>
+        <View flex={1} py="$3">
             <Text>{isCollapsed ? `${text.slice(0, len)}...` : text}</Text>
             <TouchableOpacity onPress={toggleCollapsible}>
                 <Text color={"$blue10"}>

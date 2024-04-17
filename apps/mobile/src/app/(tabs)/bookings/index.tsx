@@ -1,12 +1,9 @@
 import React, { useRef, useState } from "react"
 import {
-    FlatList,
-    RefreshControl,
     TouchableHighlight,
     TouchableOpacity,
     useWindowDimensions,
 } from "react-native"
-import { isLoading } from "expo-font"
 import { useRouter } from "expo-router"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { Avatar, H2, H3, Image, ScrollView, Text, View, XStack, YStack } from "tamagui"

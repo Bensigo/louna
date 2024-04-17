@@ -21,7 +21,7 @@ import { CustomTabbarProvider } from "../context/useCustomTabbar"
 
 void SplashScreen.preventAutoHideAsync()
 
-export const LeftBackButton = ({ route, bg }: { route: string, bg?: string  }) => {
+export const LeftBackButton = ({ route, bg }: { route?: string, bg?: string  }) => {
     const router = useRouter()
     return (
         <Button
@@ -29,7 +29,13 @@ export const LeftBackButton = ({ route, bg }: { route: string, bg?: string  }) =
             py="$2"
             pr="$2"
             mt={3}
-            onPress={() => router.replace(route)}
+            onPress={() => {
+                if (route){
+                    router.replace(route)
+                }else {
+                    router.back()
+                }
+            }}
             icon={<FontAwesomIcon size={20} name="chevron-left" color={bg ? bg: 'black'} />}
         ></Button>
     )

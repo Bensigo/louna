@@ -59,8 +59,8 @@ export const getUploadPreSignedUrl = protectedProcedure.input(UploadImagesSchema
     //   data: files
     // })
     // //  Promise.all(files);
-  
-    const resp = await axios.post('http://localhost:6060/api/presigned-url', {
+    const base_url = process.env.IMG_SERVER_URL || 'http://localhost:6060'
+    const resp = await axios.post(`${base_url}/api/presigned-url`, {
       fileNames,
       contentType, 
       expiration,

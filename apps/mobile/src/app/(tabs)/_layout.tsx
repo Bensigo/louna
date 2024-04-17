@@ -71,8 +71,7 @@ const TabScreenLayout = () => {
     return (
         <SignedIn>
             <Tabs
-                initialRouteName="community"
-            
+                initialRouteName="today"
                 screenOptions={{
                     headerShown: false,
                     tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
@@ -84,6 +83,7 @@ const TabScreenLayout = () => {
                     backgroundColor: "transparent",
                 }}
                 tabBar={(props) =>  <CustomTabBar {...props}/>}
+                
                 
             >
                 <Tabs.Screen
@@ -104,14 +104,6 @@ const TabScreenLayout = () => {
                     }}
                 ></Tabs.Screen>
                 <Tabs.Screen
-                    name="community"
-                    options={{
-                        tabBarLabel: "Community",
-                        tabBarHideOnKeyboard: true,
-                        tabBarIcon: ({ color }) => ( <TabBarIcon name={"people-outline"} color={color} />),
-                    }}
-                ></Tabs.Screen>
-                <Tabs.Screen
                     name="bookings"
                     options={{
                         tabBarLabel: "Bookings",
@@ -119,11 +111,20 @@ const TabScreenLayout = () => {
 
                     }}
                 ></Tabs.Screen>
-                <Tabs.Screen
-                    name="smw"
+                  <Tabs.Screen
+                    name="workout"
                     options={{
-                        tabBarLabel: "SMW",
+                        tabBarLabel: "Workout",
                         tabBarIcon: ({ color }) => ( <TabBarIcon name={'fitness-outline'} color={color} />),
+                    }}
+                ></Tabs.Screen>
+               
+               <Tabs.Screen
+                    name="community"
+                    options={{
+                        tabBarLabel: "Community",
+                        tabBarHideOnKeyboard: true,
+                        tabBarIcon: ({ color }) => ( <TabBarIcon name={"people-outline"} color={color} />),
                     }}
                 ></Tabs.Screen>
             </Tabs>
