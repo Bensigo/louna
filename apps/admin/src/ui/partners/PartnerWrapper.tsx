@@ -23,16 +23,27 @@ import Link from "next/link"
 
 const PartnerInfo = ({ id }: { id: string }) => {
     const { data: partner, isLoading } = api.partner.get.useQuery({ id })
+
+    const { mutate: publish, isLoading: isUpdating } = api.partner.publish.useMutation()
     const pathname = usePathname()
+
+    const publishPartner = () => {
+        publish({
+            id
+        })
+    }
+
 
     return (
         <Box>
+          
             <HStack>
                 <Skeleton isLoaded={!isLoading}>
                     <Text fontWeight={"bold"} fontSize={"larger"}>
                         {partner?.name}
                     </Text>
                 </Skeleton>
+                
                 <Skeleton isLoaded={!isLoading}>
                     {partner && (
                         <Tag colorScheme="blue">{partner?.category}</Tag>
@@ -56,9 +67,14 @@ const PartnerInfo = ({ id }: { id: string }) => {
                     ))}
             </HStack>
             </Skeleton>
-            <Skeleton minH={200} isLoaded={!isLoading}>
+            <Skeleton my={2} minH={'100%'} isLoaded={!isLoading}>
                 {partner && <Text fontSize={"md"}>{partner?.bio}</Text>}
             </Skeleton>
+            {partner &&  <Button colorScheme="green" onClick={publishPartner} isLoading={isUpdating}>
+                                        {partner?.isPublished
+                                            ? "Unpublish"
+                                            : "Publish"}
+                                    </Button>}
             <Skeleton minH={200} isLoaded={!isLoading}>
                 <Button leftIcon={<BiCalendar />}  as={Link} href={`${pathname}/sessions`}>View Sessions</Button>
             </Skeleton>

@@ -20,6 +20,7 @@ export const CreateSessionSchema = z.object({
 export const ListSessionSchema = ListSchemaBase.extend({
     filter: z.object({
         search: z.string().optional(),
+        partnerId: z.string().optional(),
         startTime: z.string().optional(),
         endTime: z.string().optional(),
         status: z.enum(['Published', 'Unpublished', 'All']).default('All'),

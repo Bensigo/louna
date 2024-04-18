@@ -148,6 +148,7 @@ const ListSessionWrapper = () => {
         page,
         limit: PAGE_LIMIT,
         filter: {
+            partnerId: id,
             ...(search ? { search } : {}),
             ...(status ? {  status } : { }),
             ...(categoryFilter ? { category: categoryFilter } : {}),

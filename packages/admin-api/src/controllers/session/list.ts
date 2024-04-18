@@ -6,7 +6,7 @@ export const listSessionController = protectedProcedure
   .input(ListSessionSchema)
   .query(async ({ input, ctx }) => {
     const { page, filter, limit } = input;
-    const { search: searchTerm, category, status, startTime, endTime } =
+    const { search: searchTerm, category, status, startTime, endTime, partnerId } =
       filter || {};
 
     const { prisma } = ctx;
@@ -77,6 +77,7 @@ export const listSessionController = protectedProcedure
     const sessions = await prisma.session.findMany({
       where: { 
         ...query,
+        ...( partnerId ? { partnerId }: {} )
       
          },
       include: {
