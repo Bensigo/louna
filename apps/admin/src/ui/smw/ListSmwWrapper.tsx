@@ -95,7 +95,7 @@ const ListSMWWrapper = () => {
     }
 
 
-    const { isLoading, data } = api.smw.list.useQuery({
+    const { isLoading, data, isFetched } = api.smw.list.useQuery({
         page,
         limit: PAGE_LIMIT,
         filter: {
@@ -217,7 +217,7 @@ const ListSMWWrapper = () => {
                 </Box>
                 </VStack>
             </Collapse>
-            {data && data.smws.length ? (
+            {isFetched  && data.smws.length && (
                 <Stack mt={5} width={'100%'}>
                     <HStack  spacing={5} flexFlow={"wrap"} width={"inherit"} mb={5}>
                         {[...data.smws, ...data.smws].map(
@@ -237,7 +237,9 @@ const ListSMWWrapper = () => {
                         goToPage={handleChangePage}
                     />
                 </Stack>
-            ) : (
+            ) }
+            
+            {isFetched && !data  && (
                 <Box
                     display={"flex"}
                     flexDir={"row"}
@@ -248,6 +250,7 @@ const ListSMWWrapper = () => {
                     <Text>SMW not found</Text>
                 </Box>
             )}
+            {isLoading && <Skeleton minH={400} width={'100%'} />}
         </Box>
     )
 }

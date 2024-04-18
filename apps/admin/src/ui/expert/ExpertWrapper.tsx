@@ -39,7 +39,7 @@ const ExpertWrapper = () => {
     const [isValid, setIsValid] = useState<boolean>(isApproved === "true")
     const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
-    const { isLoading, data } = api.instructor.list.useQuery({
+    const { isLoading, data, isFetched } = api.instructor.list.useQuery({
         page,
         limit: PAGE_LIMIT,
         filter: {
@@ -177,7 +177,7 @@ const ExpertWrapper = () => {
                     </Box>
                 </VStack>
             </Collapse>
-            {data && data.instructors.length ? (
+            {isFetched && data.instructors.length &&  (
                 <Stack mt={5} width={'100%'}>
                     <HStack  spacing={5} flexFlow={"wrap"} width={"inherit"} mb={5}>
                         {[...data.instructors, ...data.instructors].map(
@@ -197,7 +197,7 @@ const ExpertWrapper = () => {
                         goToPage={handleChangePage}
                     />
                 </Stack>
-            ) : (
+            )} { isFetched && !data && (
                 <Box
                     display={"flex"}
                     flexDir={"row"}
@@ -208,6 +208,7 @@ const ExpertWrapper = () => {
                     <Text>Instructors not found</Text>
                 </Box>
             )}
+            {isLoading && <Skeleton minH={400} width={'100%'} />}
         </Box>
     )
 }

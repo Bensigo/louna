@@ -20,8 +20,8 @@ import { BiFilter, BiPlus, BiSearch } from "react-icons/bi"
 import { useDebouncedCallback } from "use-debounce"
 
 import { api } from "~/utils/api"
-import RecipeCard from "./components/RecipeCard"
 import { Paginator } from "~/shared/Paginator"
+import RecipeCard from "./components/RecipeCard"
 
 const ListRecipeWrapper = () => {
     const params = useSearchParams()
@@ -63,7 +63,7 @@ const ListRecipeWrapper = () => {
         replace(`${pathname}?${currentParams.toString()}`)
     }
 
-    const { isLoading, data } = api.recipe.list.useQuery({
+    const { isLoading, data, isFetched } = api.recipe.list.useQuery({
         page,
         limit: PAGE_LIMIT,
         filter: {
@@ -101,126 +101,134 @@ const ListRecipeWrapper = () => {
 
     return (
         <>
-        <Text  my={3} fontWeight={'bold'} fontSize={'x-large'}>Recipes</Text>
-        <VStack spacing={6} align="start" width={'100%'}>
-            <Button
-           
-                alignSelf={'end'}
-               
-                leftIcon={<BiPlus />}
-                onClick={goToCreatePage}
-            >
-                Create Recipe
-            </Button>
-            <Box w="50%" display={'flex'} alignItems={'center'}>
-                <InputGroup mr={4}>
-                    <Input
-                     borderWidth={3}
-                        placeholder="Search..."
-                        onChange={handleTextChange}
-                        value={searchTerm}
-                    />
-                    <InputLeftElement>
-                        <IconButton
-                           
-                            aria-label="Search"
-                            disabled
-                            icon={<BiSearch />}
-                            variant="ghost"
-                            colorScheme="green"
-                        />
-                    </InputLeftElement>
-                </InputGroup>
+            <Text my={3} fontWeight={"bold"} fontSize={"x-large"}>
+                Recipes
+            </Text>
+            <VStack spacing={6} align="start" width={"100%"}>
                 <Button
-                leftIcon={<BiFilter />}
-                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                size="md"
-      
-            >
-                filters
-            </Button>  
-            </Box>
-
-            <Collapse in={isFiltersOpen} animateOpacity>
-                <VStack align="start" spacing={4}>
-                    <Box>
-                        <Checkbox
-                            onChange={handleIsApproveChange}
-                            isChecked={isApprove}
-                            colorScheme="teal"
-                        >
-                            Approved
-                        </Checkbox>
-                    </Box>
-                    <Box>
-                        <Text fontSize="md" fontWeight="semibold" mb={2}>
-                            Meal Type
-                        </Text>
-                        <Stack direction="row" spacing={4}>
+                    alignSelf={"end"}
+                    leftIcon={<BiPlus />}
+                    onClick={goToCreatePage}
+                >
+                    Create Recipe
+                </Button>
+                <Box w="50%" display={"flex"} alignItems={"center"}>
+                    <InputGroup mr={4}>
+                        <Input
+                            borderWidth={3}
+                            placeholder="Search..."
+                            onChange={handleTextChange}
+                            value={searchTerm}
+                        />
+                        <InputLeftElement>
+                            <IconButton
+                                aria-label="Search"
+                                disabled
+                                icon={<BiSearch />}
+                                variant="ghost"
+                                colorScheme="green"
+                            />
+                        </InputLeftElement>
+                    </InputGroup>
+                    <Button
+                        leftIcon={<BiFilter />}
+                        onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                        size="md"
+                    >
+                        filters
+                    </Button>
+                </Box>
+                <Collapse in={isFiltersOpen} animateOpacity>
+                    <VStack align="start" spacing={4}>
+                        <Box>
                             <Checkbox
-                                onChange={() =>
-                                    handleMealTypeChange("BREAKFAST")
-                                }
-                                isChecked={mealTypeFilters.includes(
-                                    "BREAKFAST",
-                                )}
+                                onChange={handleIsApproveChange}
+                                isChecked={isApprove}
                                 colorScheme="teal"
                             >
-                                Breakfast
+                                Approved
                             </Checkbox>
-                            <Checkbox
-                                onChange={() => handleMealTypeChange("LUNCH")}
-                                isChecked={mealTypeFilters.includes("LUNCH")}
-                                colorScheme="teal"
-                            >
-                                Lunch
-                            </Checkbox>
-                            <Checkbox
-                                onChange={() => handleMealTypeChange("DINNER")}
-                                isChecked={mealTypeFilters.includes("DINNER")}
-                                colorScheme="teal"
-                            >
-                                Dinner
-                            </Checkbox>
-                            <Checkbox
-                                onChange={() => handleMealTypeChange("SNACK")}
-                                isChecked={mealTypeFilters.includes("SNACK")}
-                                colorScheme="teal"
-                            >
-                                Snack
-                            </Checkbox>
-                        </Stack>
-                    </Box>
-                </VStack>
-            </Collapse>
-           
-            {data && data.recipes.length ? (
-                <HStack spacing={5} flexFlow={'wrap'} width={'inherit'} >
-
-                    {data.recipes.map(recipe => (
-                        <Skeleton  isLoaded={!isLoading} key={recipe.id}> 
-                            <RecipeCard recipe={recipe}  />
+                        </Box>
+                        <Box>
+                            <Text fontSize="md" fontWeight="semibold" mb={2}>
+                                Meal Type
+                            </Text>
+                            <Stack direction="row" spacing={4}>
+                                <Checkbox
+                                    onChange={() =>
+                                        handleMealTypeChange("BREAKFAST")
+                                    }
+                                    isChecked={mealTypeFilters.includes(
+                                        "BREAKFAST",
+                                    )}
+                                    colorScheme="teal"
+                                >
+                                    Breakfast
+                                </Checkbox>
+                                <Checkbox
+                                    onChange={() =>
+                                        handleMealTypeChange("LUNCH")
+                                    }
+                                    isChecked={mealTypeFilters.includes(
+                                        "LUNCH",
+                                    )}
+                                    colorScheme="teal"
+                                >
+                                    Lunch
+                                </Checkbox>
+                                <Checkbox
+                                    onChange={() =>
+                                        handleMealTypeChange("DINNER")
+                                    }
+                                    isChecked={mealTypeFilters.includes(
+                                        "DINNER",
+                                    )}
+                                    colorScheme="teal"
+                                >
+                                    Dinner
+                                </Checkbox>
+                                <Checkbox
+                                    onChange={() =>
+                                        handleMealTypeChange("SNACK")
+                                    }
+                                    isChecked={mealTypeFilters.includes(
+                                        "SNACK",
+                                    )}
+                                    colorScheme="teal"
+                                >
+                                    Snack
+                                </Checkbox>
+                            </Stack>
+                        </Box>
+                    </VStack>
+                </Collapse>
+                (
+                <HStack spacing={5} flexFlow={"wrap"} width={"inherit"}>
+                    {data  && data.recipes.map((recipe) => (
+                        <Skeleton isLoaded={!isLoading} key={recipe.id}>
+                            <RecipeCard recipe={recipe} />
                         </Skeleton>
                     ))}
-                    <Paginator
+                    {!data && isFetched && (
+                        <Box
+                            display={"flex"}
+                            flexDir={"row"}
+                            justifyContent={"center"}
+                            py={5}
+                            width={"100%"}
+                        >
+                            <Text>Recipe not found</Text>
+                        </Box>
+                    )}
+                   {data && isFetched && <Paginator
                         currentPage={page}
                         totalPages={data?.totalPages || 0}
                         goToPage={handleChangePage}
-                    />
+                    />}
+                    {isLoading && <Skeleton minH={400} width={'100%'} />}
                 </HStack>
-            ) : (
-                <Box
-                    display={"flex"}
-                    flexDir={"row"}
-                    justifyContent={"center"}
-                    py={5}
-                    width={"100%"}
-                >
-                    <Text>Recipe not found</Text>
-                </Box>
-            )}
-       
-        </VStack>
+                )
+            </VStack>
         </>
     )
 }
