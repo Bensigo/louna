@@ -11,8 +11,7 @@ function MyApp({ pageProps, Component }: AppProps) {
     return (
         <ClerkProvider {...pageProps}>
             <ChakraProvider>
-                    <Component {...pageProps} />
-          
+                    <Component {...pageProps} />   
             </ChakraProvider>
         </ClerkProvider>
     )

@@ -1,11 +1,20 @@
-import { AuthGuard } from "~/shared/AuthGuard"
+import { withServerSideAuth } from "@clerk/nextjs/ssr"
+
 import AppLayout from "~/shared/DashboardNav"
 import { UpdateSessionWrapper } from "~/ui/partners/sessions/UpdateSessionWrapper"
 
-import { withServerSideAuth } from "@clerk/nextjs/ssr"
-
-export const getServerSideProps = withServerSideAuth((context) => {
+export const getServerSideProps = withServerSideAuth(async (context) => {
     const { sessionId, userId } = context.req.auth
+
+    if (!userId) {
+        return {
+            redirect: {
+                destination: "/",
+                permanent: false,
+            },
+        }
+    }
+
     return {
         props: {
             userId,
@@ -14,17 +23,12 @@ export const getServerSideProps = withServerSideAuth((context) => {
     }
 })
 
-function ViewUpdateSesssionPage({ userId }: { userId: string }) {
+function ViewUpdateSesssionPage() {
     return (
-      <AuthGuard userId={userId}>
-          <AppLayout>
-               <UpdateSessionWrapper />
-          </AppLayout>
-            
-      </AuthGuard>
-    
-  
+        <AppLayout>
+            <UpdateSessionWrapper />
+        </AppLayout>
     )
-  }
+}
 
-  export default  ViewUpdateSesssionPage
+export default ViewUpdateSesssionPage

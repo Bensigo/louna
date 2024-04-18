@@ -8,6 +8,16 @@ import { withServerSideAuth } from '@clerk/nextjs/ssr';
 
 export const getServerSideProps = withServerSideAuth(async context => {
   const { sessionId, userId } = context.req.auth;
+
+  if (!userId) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+  
   return {
     props: {
       userId,
@@ -19,11 +29,11 @@ export const getServerSideProps = withServerSideAuth(async context => {
 
 function DashboardHome({ userId }: any ) {
   return (
-    <AuthGuard userId={userId} >
+
         <AppLayout>
             <HomeWrapper />
        </AppLayout> 
-    </AuthGuard>
+   
   
 
   )

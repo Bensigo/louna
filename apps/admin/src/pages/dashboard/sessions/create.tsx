@@ -1,28 +1,37 @@
-import { AuthGuard } from "~/shared/AuthGuard";
 import AppLayout from "~/shared/DashboardNav";
 import { CreateSessionWrapper } from "~/ui/sessions/CreateWrapper";
 
 import { withServerSideAuth } from "@clerk/nextjs/ssr"
 
-export const getServerSideProps = withServerSideAuth((context) => {
-    const { sessionId, userId } = context.req.auth
+export const getServerSideProps = withServerSideAuth(async context => {
+  const { sessionId, userId } = context.req.auth;
+
+  if (!userId) {
     return {
-        props: {
-            userId,
-            sessionId,
-        },
-    }
-})
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+  
+  return {
+    props: {
+      userId,
+      sessionId
+    },
+  };
+});
 
 
 function CreateSessionsPage({ userId }: { userId: string }) {
     return (
-      <AuthGuard userId={userId}>
+   
           <AppLayout>
             < CreateSessionWrapper />
           </AppLayout>
             
-      </AuthGuard>
+
     
   
     )
