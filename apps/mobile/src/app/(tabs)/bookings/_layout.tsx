@@ -32,7 +32,7 @@ const LayoutView = () => {
                           backgroundColor: 'transparent'
                          },
                         headerLeft: () => (
-                            <LeftBackButton route="/bookings/list" bg="black" />
+                            <LeftBackButton bg="black" />
                         ),
                     }}
                 ></Stack.Screen>
@@ -45,7 +45,7 @@ const LayoutView = () => {
                          backgroundColor: 'transparent'
                         },
                        headerLeft: () => (
-                           <LeftBackButton route="/bookings" bg="black" />
+                           <LeftBackButton  bg="black" />
                        ),
                     }}
                 ></Stack.Screen>

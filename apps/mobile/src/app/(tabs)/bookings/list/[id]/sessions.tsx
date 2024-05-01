@@ -1,16 +1,25 @@
 import { router, useLocalSearchParams } from "expo-router"
 import { View , Text, Button, XStack, YStack, Card, H5  } from "tamagui"
 import { api } from "../../../../../utils/api"
-import { useRef, useState } from "react"
+import { useRef, useState , useEffect} from "react"
 import { RefreshControl, TouchableOpacity, FlatList, ActivityIndicator, Alert } from "react-native"
 import { format } from "date-fns"
+import { useCustomTabbar } from "../../../../../context/useCustomTabbar"
 
 const SessionsScreen = () => {
     const { id, date } = useLocalSearchParams()
     const [selectedSession, setSelectedSession] = useState(null)
     const sessionsRef = useRef()
+    const { hideTabBar, showTabBar } = useCustomTabbar()
 
-    console.log({ date })
+    useEffect(() => {
+        hideTabBar()
+        return () => {
+            showTabBar()
+        }
+    }, [hideTabBar, showTabBar])
+
+ 
 
     const { data: partner, isLoading, isRefetching, refetch } = api.partner.get.useQuery({ id: id as string , date : new Date(date)})
     const { sessions } = partner || {}

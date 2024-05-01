@@ -86,7 +86,9 @@ export const listSessionController = protectedProcedure
       skip: startIndex,
       take: limit,
       orderBy: {
+        startTime: 'desc',
         ...orderBySearchRelevance,
+        
       },
     });
 

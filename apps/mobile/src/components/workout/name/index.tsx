@@ -2,10 +2,10 @@ import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import React, {  useRef } from "react";
 import { TouchableHighlight, FlatList, RefreshControl, TouchableWithoutFeedback } from "react-native";
 import { View, Text, XStack, Avatar, H2, YStack } from "tamagui";
-import { api } from "../../../../utils/api";
-import { buildFileUrlV2 } from "../../../../utils/buildUrl";
+import { api } from "../../../utils/api";
+import { buildFileUrlV2 } from "../../../utils/buildUrl";
 import { Skeleton } from "moti/skeleton";
-import CustomImage from "../../../../components/CustomImage";
+import CustomImage from "../../CustomImage";
 
 const VideoCard = ({ videoSource, title, id }) => {
     const router = useRouter()

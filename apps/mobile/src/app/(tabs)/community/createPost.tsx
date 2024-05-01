@@ -171,7 +171,7 @@ const CreatePost = () => {
                         bg={"black"}
                         color={"white"}
                     >
-                        Inspire
+                        Post
                     </Button>
                 </View>
                 <View style={styles.container}>

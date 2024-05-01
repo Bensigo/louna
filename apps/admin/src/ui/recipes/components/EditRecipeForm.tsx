@@ -31,6 +31,19 @@ import { api } from "~/utils/api"
 import { MemoV2FileUplaod } from "~/shared/V2FileUpload"
 import { RecipeFormSchema, type RecipeFormType } from "../schema/recipe"
 
+
+export const mealPref = [
+    "Gluten-Free",
+    "Dairy-Free",
+    "Low-Carb",
+    "High-Protein",
+    "Low-Calorie",
+    "Keto",
+]
+
+export const allergens = ['Peanuts', 'Tree nuts', 'Shellfish', 'Fish', 'Milk', 'Eggs', 'Wheat', 'Soy', 'Sesame', 'Sulfites'];
+
+
 export const categories = [
     "Breakfast",
     "Brunch",
@@ -61,12 +74,7 @@ export const categories = [
     "Seafood",
     "Vegetarian",
     "Vegan",
-    "Gluten-Free",
-    "Dairy-Free",
-    "Low-Carb",
-    "High-Protein",
-    "Low-Calorie",
-    "Keto",
+ 
     "Paleo",
     "Whole30",
     "Weight Loss",
@@ -105,8 +113,8 @@ export const tags = [
 
 export enum CuisineType {
     ITALIAN = "ITALIAN",
-    MEXICAN = "Mexican",
-    CHINESE = "MEXICAN",
+    MEXICAN = "MEXICAN",
+    CHINESE = "CHINESE",
     INDIAN = "INDIAN",
     FRENCH = "FRENCH",
     JAPANESE = "JAPANESE",
@@ -142,6 +150,8 @@ const EditForm = ({ recipe, id }) => {
 
     const selectedCategories = useWatch({ name: "categories", control }) || []
     const selectedTags = useWatch({ name: "tags", control }) || []
+    const selectedAllergen = useWatch({ name: "allergens", control }) || []
+    const selectedMealPreference = useWatch({ name: "mealPreference", control }) || []
 
     const {
         fields: stepFields,
@@ -183,6 +193,8 @@ const EditForm = ({ recipe, id }) => {
 
     const { mutate: update, isLoading: isUpdating } =
         api.recipe.update.useMutation()
+
+      
 
     const submitRecipe = (data: RecipeFormType) => {
         // Handle form submission logic
@@ -234,6 +246,20 @@ const EditForm = ({ recipe, id }) => {
             : [...selectedCategories, category]
         setValue("categories", currentCategories)
     }
+
+    const toggleAllergen = (allergen: string) => {
+        const currentAllergen = selectedAllergen.includes(allergen)
+          ? selectedAllergen.filter((c) => c !== allergen)
+          : [...selectedAllergen, allergen];
+        setValue("allergens", currentAllergen);
+      };
+
+      const toggleMealPref = (mealPreference: string) => {
+        const currentMealPref = selectedMealPreference.includes(mealPreference)
+          ? selectedMealPreference.filter((c) => c !== mealPreference)
+          : [...selectedMealPreference, mealPreference];
+        setValue("mealPreference", currentMealPref);
+      };
 
     const toggleTags= (tag: string) => {
         const currentTags = selectedTags.includes(tag)
@@ -458,6 +484,52 @@ const EditForm = ({ recipe, id }) => {
                                 {errors.categories?.message}
                             </FormErrorMessage>
                         </FormControl>
+
+                        <FormControl mt={4} isInvalid={!!errors.allergens}>
+                    <FormLabel>Allergens</FormLabel>
+                    <Stack spacing={2} direction="row" flexWrap="wrap">
+                        {allergens.map((allergen) => (
+                        <Tag
+                            key={allergen}
+                            size="lg"
+                            variant="solid"
+                            colorScheme={
+                            selectedAllergen.includes(allergen) ? "green" : "gray"
+                            }
+                            cursor="pointer"
+                            onClick={() => toggleAllergen(allergen)}
+                        >
+                            {allergen}
+                        </Tag>
+                        ))}
+                    </Stack>
+                    <FormErrorMessage>
+                        {errors.allergens?.message}
+                    </FormErrorMessage>
+                </FormControl>
+
+                <FormControl mt={4} isInvalid={!!errors.mealPreference}>
+                    <FormLabel>Meal Preference</FormLabel>
+                    <Stack spacing={2} direction="row" flexWrap="wrap">
+                        {mealPref.map((pref) => (
+                        <Tag
+                            key={pref}
+                            size="lg"
+                            variant="solid"
+                            colorScheme={
+                            selectedMealPreference.includes(pref) ? "green" : "gray"
+                            }
+                            cursor="pointer"
+                            onClick={() => toggleMealPref(pref)}
+                        >
+                            {pref}
+                        </Tag>
+                        ))}
+                    </Stack>
+                    <FormErrorMessage>
+                        {errors.mealPreference?.message}
+                    </FormErrorMessage>
+                </FormControl>
 
                         <FormControl mt={4} isInvalid={!!errors.tags}>
                             <FormLabel>Tags</FormLabel>

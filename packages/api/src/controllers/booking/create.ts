@@ -5,10 +5,23 @@ import { isBefore , addHours} from 'date-fns'
 
 export const createBookingController = protectedProcedure.input(ById).mutation(async ({ input, ctx}) => {
    const { id } = input;
+   console.log({ id }, 'yyyyyyy')
    const { prisma, auth } = ctx;
 
    const { userId } = auth;
 
+   const session  = await prisma.session.findFirst({
+       where: {
+          id
+       }
+   })
+
+   if (!session){
+    throw new TRPCError({
+        message: 'Session does not exists',
+        code: 'NOT_FOUND'
+    })
+   }
 
 
    // check if user alredy have a booking if exiting booking thow an error
@@ -16,20 +29,20 @@ export const createBookingController = protectedProcedure.input(ById).mutation(a
      where: {
         sessionId: id,
         userId
-     },
-     include: {
-        session: true 
      }
    })
 
-   if (!exitingBooking ){
+
+  
+
+   if (exitingBooking ){
     throw new TRPCError({
         message: 'Booking already exists for this session',
         code: 'BAD_REQUEST'
     })
    }
 
-   const { session } = exitingBooking;
+
 
 
    // check if user have valid points
@@ -37,7 +50,7 @@ export const createBookingController = protectedProcedure.input(ById).mutation(a
       where: {
          userId,
          point: {
-            gt: session.point
+            gt: session?.point
          }
       }
    });

@@ -11,6 +11,7 @@ import { useAuth } from '@clerk/clerk-expo';
 
 
 
+
 type SettingListType = { iconName: React.ComponentProps<typeof Ionicons>['name'], title: string, onPress: () => void }
 
 const SettingsListItem = ({ iconName, title, onPress }: SettingListType) => {
@@ -47,6 +48,7 @@ const SettingsScreen = () => {
 
     const handleLogout = () => {
        signOut()
+       router.replace('/')
     };
 
 

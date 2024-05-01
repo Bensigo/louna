@@ -34,10 +34,11 @@ import {
     BiHome,
     BiLink,
     BiLogOut,
-    BiMale,
     BiMoon,
     BiRun,
     BiSun,
+    BiUser,
+    BiUserCircle,
 } from "react-icons/bi"
 
 import MobileNavigation from "./components/MobileNav"
@@ -48,13 +49,14 @@ interface LinkItemProps {
 }
 export const navItems: Array<LinkItemProps> = [
     { name: "Home", icon: BiHome },
+    { name: "Users", icon: BiUser },
     { name: "recipes", icon: BiFoodMenu },
     { name: "SMW", icon: BiRun },
-    { name: "solu expert", icon: BiMale },
+    { name: "solu expert", icon: BiBuildings },
     { name: "resources", icon: BiLink },
     { name: "sessions", icon: BiBook },
     { name: "partners", icon: BiBuildings },
-    { name: "Profile", icon: BiMale },
+    { name: "Profile", icon: BiUserCircle },
 ]
 
 export default function AppLayout({ children }: { children: ReactNode }) {

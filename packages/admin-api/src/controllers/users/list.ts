@@ -1,15 +1,15 @@
 import { UserRole } from ".prisma/client"
-import { ListPartnersSchema } from "../../schema/user"
+import { ListUsersSchema } from "../../schema/user"
 import { protectedProcedure } from "../../trpc"
 
 const listUsersController = protectedProcedure
-    .input(ListPartnersSchema)
+    .input(ListUsersSchema)
     .query(async ({ ctx, input }) => {
         const { prisma } = ctx
 
         const { filters, page, limit } = input
 
-        const { isActivated, search } = filters
+        const { search, isSubscribe } = filters
 
         const startIndex = (page - 1) * limit
 
@@ -18,17 +18,6 @@ const listUsersController = protectedProcedure
 
       
 
-        if (isActivated) {
-            if (isActivated === "true") {
-                query = {
-                    ...query,
-                    metadata: {
-                        path: ["isActivated"],
-                        equals: true,
-                    },
-                }
-            }
-        }
 
         if (search) {
             query = {
@@ -66,15 +55,17 @@ const listUsersController = protectedProcedure
         const users = await prisma.user.findMany({
             where: {
                 ...query,
+                ...(isSubscribe ? { hasActiveSubscription: true }: {}),
                 roles: {
-                    has: UserRole.PARTNER
+                    has: UserRole.USER
                 },
             },
             skip: startIndex,
             take: limit,
             include: {
                 wallet: true,
-                partnerProfile: true,
+                userPref: true
+           
             },
             orderBy: {
                 ...orderBySearchRelevance,

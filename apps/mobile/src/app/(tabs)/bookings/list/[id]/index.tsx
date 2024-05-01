@@ -38,7 +38,7 @@ const PartnerDetail = () => {
         return () => {
             showTabBar()
         }
-    }, [])
+    }, [hideTabBar, showTabBar])
 
 
   

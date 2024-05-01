@@ -1,6 +1,6 @@
 import { Stack } from "expo-router"
-import { CustomSaveAreaView } from "../../../components/CustomSaveAreaView"
-import { LeftBackButton } from "../../_layout"
+import { CustomSaveAreaView } from "../CustomSaveAreaView"
+import { LeftBackButton } from "../../app/_layout"
 
 
 const LayoutView = () => {

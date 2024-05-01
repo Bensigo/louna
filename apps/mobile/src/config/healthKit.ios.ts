@@ -19,10 +19,10 @@ export const PERMISSIONS: HealthKitPermissions = {
             AppleHealthKit.Constants.Permissions.MindfulSession,
             AppleHealthKit.Constants.Permissions.DistanceCycling,
             AppleHealthKit.Constants.Permissions.Height,
+            AppleHealthKit.Constants.Permissions.HeartRateVariability
 
 
         ],
         write: []
     }
 }
-

@@ -27,7 +27,7 @@ import { BiPlus, BiTrash } from "react-icons/bi"
 import { MemoV2FileUplaod } from "~/shared/V2FileUpload"
 import { api } from "~/utils/api"
 import   { RecipeFormSchema, type RecipeFormType } from "../schema/recipe"
-import { CuisineType, categories, tags } from "./EditRecipeForm"
+import { CuisineType, categories, tags, allergens, mealPref } from "./EditRecipeForm"
 
 
 
@@ -90,8 +90,10 @@ const NewRecipeForm = () => {
         control,
     })
 
+    
     const selectedTags = useWatch({ name: "tags", control }) || []
-
+    const selectedAllergen = useWatch({ name: "allergens", control }) || []
+    const selectedMealPreference = useWatch({ name: "mealPreference", control }) || []
 
     const submitRecipe = (data: RecipeFormType) => {
         // Handle form submission logic
@@ -139,6 +141,21 @@ const NewRecipeForm = () => {
         : [...selectedCategories, category];
       setValue("categories", currentCategories);
     };
+
+    const toggleAllergen = (allergen: string) => {
+        const currentAllergen = selectedAllergen.includes(allergen)
+          ? selectedAllergen.filter((c) => c !== allergen)
+          : [...selectedAllergen, allergen];
+        setValue("allergens", currentAllergen);
+      };
+
+      const toggleMealPref = (mealPreference: string) => {
+        const currentMealPref = selectedMealPreference.includes(mealPreference)
+          ? selectedMealPreference.filter((c) => c !== mealPreference)
+          : [...selectedMealPreference, mealPreference];
+        setValue("mealPreference", currentMealPref);
+      };
+
     const handleRemoveIngriedentImg = (file: string, index: number) => {
         console.log({ file }, 'rm')
         setValue(`ingredients.${index}.image`, { });
@@ -334,6 +351,51 @@ const NewRecipeForm = () => {
                     </Stack>
                     <FormErrorMessage>
                         {errors.categories?.message}
+                    </FormErrorMessage>
+                </FormControl>
+                <FormControl mt={4} isInvalid={!!errors.allergens}>
+                    <FormLabel>Allergens</FormLabel>
+                    <Stack spacing={2} direction="row" flexWrap="wrap">
+                        {allergens.map((allergen) => (
+                        <Tag
+                            key={allergen}
+                            size="lg"
+                            variant="solid"
+                            colorScheme={
+                            selectedAllergen.includes(allergen) ? "green" : "gray"
+                            }
+                            cursor="pointer"
+                            onClick={() => toggleAllergen(allergen)}
+                        >
+                            {allergen}
+                        </Tag>
+                        ))}
+                    </Stack>
+                    <FormErrorMessage>
+                        {errors.allergens?.message}
+                    </FormErrorMessage>
+                </FormControl>
+
+                <FormControl mt={4} isInvalid={!!errors.mealPreference}>
+                    <FormLabel>Meal Preference</FormLabel>
+                    <Stack spacing={2} direction="row" flexWrap="wrap">
+                        {mealPref.map((pref) => (
+                        <Tag
+                            key={pref}
+                            size="lg"
+                            variant="solid"
+                            colorScheme={
+                            selectedMealPreference.includes(pref) ? "green" : "gray"
+                            }
+                            cursor="pointer"
+                            onClick={() => toggleMealPref(pref)}
+                        >
+                            {pref}
+                        </Tag>
+                        ))}
+                    </Stack>
+                    <FormErrorMessage>
+                        {errors.mealPreference?.message}
                     </FormErrorMessage>
                 </FormControl>
 

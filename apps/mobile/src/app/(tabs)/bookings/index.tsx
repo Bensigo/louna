@@ -48,8 +48,7 @@ const CategoryPill = ({ category, onPress }) => {
                 <Text
                     style={{
                         fontSize: 11,
-                        fontWeight: "bold",
-                        wordBreak: "break-all",
+                        fontWeight: "bold"
                     }}
                 >
                     {category?.toUpperCase()}

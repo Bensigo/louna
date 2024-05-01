@@ -40,7 +40,7 @@ const BookingDetailScreen = () => {
         return () => {
             showTabBar()
         }
-    }, [])
+    }, [hideTabBar, showTabBar])
 
     const goBack = () => {
         router.back()

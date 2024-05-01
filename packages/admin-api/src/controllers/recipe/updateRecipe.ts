@@ -24,11 +24,23 @@ export const updateRecipeController = protectedProcedure.input(UpdateRecipeSchem
         description,
         tags,
         cusineType,
-        difficultyLevel
+        difficultyLevel,
+        allergens,
+        mealPreference
        } = input;
 
 
-       console.log({ input })
+       
+
+       const isValidAllergens = ingredients.every(item => !allergens.includes(item.name));
+
+       if (!isValidAllergens){
+        throw new TRPCError({
+            message: 'Invalid Recipe',
+            code: "BAD_REQUEST"
+        })
+    }
+
 
 
        const imageKeys = images.map((img) => img.key)
@@ -73,7 +85,9 @@ export const updateRecipeController = protectedProcedure.input(UpdateRecipeSchem
         images,
         tags,
         cuisine: cusineType as CuisineType,
-        difficulty: difficultyLevel
+        difficulty: difficultyLevel,
+        mealPreference,
+        allergens
     }
 
     console.log({ data })

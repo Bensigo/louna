@@ -59,6 +59,8 @@ export const CreateRecipeSchema = z.object({
         }),
     ),
     categories: z.array(z.string()),
+    allergens: z.array(z.string()),
+    mealPreference: z.array(z.string()),
     tags: z.array(z.string()),
     cusineType: z.enum(['ITALIAN', 'MEXICAN', 'CHINESE', 'FRENCH', 'INDIAN', 'JAPANESE', 'THAI', 'AMERICAN', 'MEDITERRANEAN', 'AFRICAN', 'OTHERS']),
     difficultyLevel: z.enum(['EASY', 'MEDIUM', 'HARD']),

@@ -10,7 +10,7 @@ import {
 import { usePathname, useRouter } from "expo-router"
 import { Avatar, H3, View, XStack } from "tamagui"
 
-import { api } from "../../../utils/api"
+import { api } from "../../utils/api"
 import { styles } from "./styles"
 
 // Define types for sections and items
@@ -90,14 +90,17 @@ const data = [
         title: "Mind",
         data: [
             {
+                id: 10,
                 name: "Meditation",
                 image: require("../../../../assets/group-yoga.jpg"),
             },
             {
+                id: 11,
                 name: "Sound Healing",
                 image: require("../../../../assets/yoga-woman.jpg"),
             },
             {
+                id: 12,
                 name: "Sleeping Sound",
                 image: require("../../../../assets/group-pilates.jpg"),
             },
@@ -156,7 +159,7 @@ const FitnessScreen = () => {
             <SectionList
                 sections={data}
                 showsVerticalScrollIndicator={false}
-                keyExtractor={( item ) => item.id}
+                keyExtractor={( item, i ) => `${item.id}-${i}`}
                 renderItem={() => null}
                 renderSectionHeader={({ section }) => {
                     return (
@@ -168,7 +171,7 @@ const FitnessScreen = () => {
                                 data={section.data}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
-                                keyExtractor={(item) => item.id}
+                                keyExtractor={(item, i) => `${item.id}-${i}`}
                                 renderItem={({ item }) => (
                                     <ItemComponent {...item} />
                                 )}

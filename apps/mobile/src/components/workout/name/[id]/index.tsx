@@ -6,11 +6,11 @@ import { View as AnimationView } from "moti"
 import { Skeleton } from "moti/skeleton"
 import { Button, H1, H4, ScrollView, Text, View, XStack, YStack } from "tamagui"
 
-import ReadMoreCollapsible from "../../../../../components/collapable"
-import CustomImage from "../../../../../components/CustomImage"
-import { useCustomTabbar } from "../../../../../context/useCustomTabbar"
-import { api } from "../../../../../utils/api"
-import { buildFileUrlV2 } from "../../../../../utils/buildUrl"
+import ReadMoreCollapsible from "../../../collapable"
+import CustomImage from "../../../CustomImage"
+import { useCustomTabbar } from "../../../../context/useCustomTabbar"
+import { api } from "../../../../utils/api"
+import { buildFileUrlV2 } from "../../../../utils/buildUrl"
 
 type CustomVidProps = {
     src: string

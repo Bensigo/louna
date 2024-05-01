@@ -24,8 +24,20 @@ export const createRecipeController = protectedProcedure
             contentType,
             tags,
             cusineType,
-            difficultyLevel
+            difficultyLevel,
+            allergens,
+            mealPreference
         } = input
+
+
+        const isValidAllergens = ingredients.every(item => !allergens.includes(item.name));
+
+        if (!isValidAllergens){
+            throw new TRPCError({
+                message: 'Invalid Recipe',
+                code: "BAD_REQUEST"
+            })
+        }
 
         const imageKeys = images.map((img) => img.key)
         const ingredientImgs = ingredients.map(
@@ -72,7 +84,8 @@ export const createRecipeController = protectedProcedure
                 images,
                 tags,
                 cuisine: cusineType  as CuisineType,
-                difficulty: difficultyLevel
+                difficulty: difficultyLevel,
+                mealPreference
             
         }
         const recipe = await prisma.recipe.create({

@@ -3,7 +3,7 @@ import { useToast, Button , Box, Text } from "@chakra-ui/react"
 import { useRouter } from "next/router"
 import { BiArrowBack } from "react-icons/bi"
 import { api } from "~/utils/api"
-import  { SessionType, SessionForm } from "./components/form"
+import  { type SessionType, SessionForm } from "./components/form"
 
 
 

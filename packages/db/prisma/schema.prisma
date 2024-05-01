@@ -319,12 +319,14 @@ model Recipe {
     images      Json[]
     nutrients   Json[]
     mealType    MealType
+    mealPreference String[] @default([])
     dietType    DietType
     categories  String[]
     tags        String[]
     difficulty  DifficultyLevel?
     cuisine     CuisineType?
     steps       String[]
+    allergens  String[] @default([])
     likes       RecipeLike[]
     bookmarks   Bookmark[]
     isApproved  Boolean          @default(false)

@@ -12,6 +12,7 @@ import {
     Tabs,
     Tag,
     Text,
+    useToast,
 } from "@chakra-ui/react"
 import { BiArrowBack, BiCalendar, BiEdit, BiPlus } from "react-icons/bi"
 
@@ -23,6 +24,8 @@ import Link from "next/link"
 
 const PartnerInfo = ({ id }: { id: string }) => {
     const { data: partner, isLoading } = api.partner.get.useQuery({ id })
+    const ctx = api.useUtils()
+    const toast = useToast()
 
     const { mutate: publish, isLoading: isUpdating } = api.partner.publish.useMutation()
     const pathname = usePathname()
@@ -30,6 +33,27 @@ const PartnerInfo = ({ id }: { id: string }) => {
     const publishPartner = () => {
         publish({
             id
+        }, {
+            onSuccess: () => {
+                ctx.partner.get.invalidate()
+                toast({
+                    title: "Created",
+                    description: 'updated',
+                    status: "success",
+                    duration: 9000,
+                    isClosable: true,
+                })
+            },
+            onError: (err) => {
+                
+                toast({
+                    title: "Error",
+                    description: err.message,
+                    status: "error",
+                    duration: 9000,
+                    isClosable: true,
+                })
+            }
         })
     }
 

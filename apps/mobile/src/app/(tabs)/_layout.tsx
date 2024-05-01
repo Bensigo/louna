@@ -110,15 +110,7 @@ const TabScreenLayout = () => {
                         tabBarIcon: ({ color }) => ( <TabBarIcon name={"calendar-outline" } color={color} />),
 
                     }}
-                ></Tabs.Screen>
-                  <Tabs.Screen
-                    name="workout"
-                    options={{
-                        tabBarLabel: "Workout",
-                        tabBarIcon: ({ color }) => ( <TabBarIcon name={'fitness-outline'} color={color} />),
-                    }}
-                ></Tabs.Screen>
-               
+                ></Tabs.Screen>           
                <Tabs.Screen
                     name="community"
                     options={{

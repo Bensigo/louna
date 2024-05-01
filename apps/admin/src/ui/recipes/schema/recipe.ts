@@ -1,5 +1,7 @@
 import { z } from "zod"
+import { type RouterInputs } from "~/utils/api"
 
+type RecipeInput = RouterInputs['recipe']['create']
 
 
 export const RecipeFormSchema = z.object({
@@ -42,9 +44,12 @@ export const RecipeFormSchema = z.object({
         repo: z.string()
     })),
     categories: z.array(z.string()),
+    allergens: z.array(z.string()),
+    mealPreference: z.array(z.string()),
     tags: z.array(z.string()),
     cusineType: z.enum(['ITALIAN', 'MEXICAN', 'CHINESE', 'FRENCH', 'INDIAN', 'JAPANESE', 'THAI', 'AMERICAN', 'MEDITERRANEAN', 'AFRICAN', 'OTHERS']),
     difficultyLevel: z.enum(['EASY', 'MEDIUM', 'HARD']),
+
 })
 
 export type RecipeFormType = z.infer<typeof RecipeFormSchema>

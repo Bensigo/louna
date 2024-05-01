@@ -91,7 +91,7 @@ const SearchAddressInput: React.FC<SearchAddressInputProps> = ({
     return (
         <>
            <FormControl>
-           <FormLabel fontSize={"sm"}>Instructor</FormLabel>
+           <FormLabel fontSize={"sm"}>Address</FormLabel>
             <InputGroup>
                 <Input
                     type="text"

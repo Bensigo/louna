@@ -10,12 +10,12 @@ const getPartnerController = protectedProcedure.input(ById).query(async ({ ctx, 
         where: {
             id: input.id,
             roles: {
-                has: 'INSTRUCTOR'
+                has: 'USER'
             }
         },
         include: {
-            partnerProfile: true,
-            wallet: true
+            wallet: true,
+            userPref: true
         }
     })
 
