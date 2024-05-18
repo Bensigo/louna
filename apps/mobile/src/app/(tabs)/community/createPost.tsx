@@ -14,6 +14,7 @@ import { Avatar, Button, Image, Text, View } from "tamagui"
 import { v4 as uuidv4 } from "uuid"
 import {Buffer} from 'buffer'
 import * as FileSystem from "expo-file-system";
+import { Colors } from "../../../constants/colors"
 
 
 import { api } from "../../../utils/api"
@@ -161,15 +162,15 @@ const CreatePost = () => {
                         onPress={goBack}
                         underlayColor="transparent"
                     >
-                        <Text fontSize={"$4"}>Cancel</Text>
+                        <Text fontSize={"$4"} color={Colors.light.primary} >Cancel</Text>
                     </TouchableHighlight>
                     <Button
                         borderRadius={20}
                         height={40}
                         disabled={text.length === 0}
                         onPress={handleCreatePost}
-                        bg={"black"}
-                        color={"white"}
+                        bg={Colors.light.secondray}
+                        color={Colors.light.primary}
                     >
                         Post
                     </Button>

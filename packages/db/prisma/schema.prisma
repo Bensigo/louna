@@ -501,11 +501,20 @@ model Booking {
     @@index([id, sessionId])
 }
 
+enum ResourceType {
+    Link
+    Video
+}
+
+
 model Resource {
     id        String   @id @default(cuid())
     isPublish Boolean  @default(false)
-    url       String
+    url       String?
     title     String
+    description String?
+    contentType ResourceType @default(Link)
+    videoUrl   String?
     image     Json
     tags      String[]
     createdAt DateTime @default(now())

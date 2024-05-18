@@ -18,10 +18,11 @@ import config from "../../tamagui.config"
 import { TRPCProvider } from "../utils/api"
 import { tokenCache } from "../utils/cache"
 import { CustomTabbarProvider } from "../context/useCustomTabbar"
+import { Colors } from "~/constants/colors"
 
 void SplashScreen.preventAutoHideAsync()
 
-export const LeftBackButton = ({ route, bg }: { route?: string, bg?: string  }) => {
+export const LeftBackButton = ({ route }: { route?: string, bg?: string  }) => {
     const router = useRouter()
     return (
         <Button
@@ -36,7 +37,7 @@ export const LeftBackButton = ({ route, bg }: { route?: string, bg?: string  }) 
                     router.back()
                 }
             }}
-            icon={<FontAwesomIcon size={20} name="chevron-left" color={bg ? bg: 'black'} />}
+            icon={<FontAwesomIcon size={20} name="chevron-left" color={Colors.light.primary} />}
         ></Button>
     )
 }

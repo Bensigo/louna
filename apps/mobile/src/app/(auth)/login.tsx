@@ -5,6 +5,7 @@ import { Button, H2, H3, View, YStack } from "tamagui"
 import { SignInWithApple } from "../../components/auth/SignInWithApple"
 import { SignInWithGoogle } from "../../components/auth/SignInWithGoogle"
 import { Link } from "expo-router"
+import { Colors } from "../../constants/colors"
 
 function Login() {
 
@@ -30,12 +31,12 @@ function Login() {
                 >
                   
              
-                        <YStack>
-                            <H2 color={"black"} fontSize={"$10"}>
+                        <YStack mt={'$10'}>
+                            <H2 color={Colors.dark.primary} fontSize={"$10"}>
                                Welcome back.
                             </H2>
                             <H3
-                                color={"black"}
+                                color={Colors.dark.primary}
                                 fontWeight={"$2"}
                                 fontSize={"$8"}
                             >

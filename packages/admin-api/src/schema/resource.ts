@@ -14,13 +14,17 @@ export const ListResourceSchema = z.object({
 
 
 export const ResourceSchema = z.object({
+
+    url: z.string().optional(),
+    contentType: z.enum(["Link", "Video"]),
     title: z.string(),
-    url: z.string(),
     image: z.object({
         key: z.string(),
-        repo: z.string()
+        repo: z.string(),
     }),
-    tags: z.array(z.string())
+    tags: z.array(z.string()),
+    description: z.string().optional(),
+    videoUrl: z.string().optional(),
 })
 
 

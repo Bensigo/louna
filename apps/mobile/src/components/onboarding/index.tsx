@@ -6,6 +6,7 @@ import { FlatList, useWindowDimensions, type ImageSourcePropType, Animated, Imag
 import { View, YStack, H4, Text, Button } from "tamagui";
 import { Paginator } from './paginator'
 import { useRouter } from "expo-router";
+import { Colors } from "../../constants/colors";
 type OnboardingData = {
   id: string;
   title: string;
@@ -49,7 +50,7 @@ const RenderItem: React.FC<OnboardingData> = (props) => {
           }}
         ></ImageBackground>
       <LinearGradient
-          colors={["transparent", "#f5e6cf"]}
+          colors={["transparent", Colors.light.secondray]}
           style={{
             position: "absolute",
             top: 0,
@@ -59,7 +60,7 @@ const RenderItem: React.FC<OnboardingData> = (props) => {
           }}
         />
       
-        <View paddingHorizontal="$4" paddingTop={4}  alignItems="center" >
+        <View paddingHorizontal="$4" paddingTop={4}  alignItems="center"  >
           <H4 color="black" fontWeight={"$7"}>{props.title}</H4>
           <Text color="black" textAlign="center" fontWeight={'$10'} lineHeight={18}>{props.body}</Text>
         </View>
@@ -82,12 +83,11 @@ function Onboarding() {
     const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current
 
     const handlePress = ( ) => {
-      console.log("clicked");
       router.replace("signup")
     }
 
   return (
-    <View flex={1}>
+    <View flex={1} bg={Colors.light.secondray}>
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
@@ -111,14 +111,14 @@ function Onboarding() {
       
       <YStack  paddingVertical="$5" paddingHorizontal={'$4'} >
                 <Button
-                    backgroundColor={"$green10"}
+                    backgroundColor={Colors.light.primary}
                     fontWeight={"$14"}
                     height={"$5"}
                     onPress={handlePress}
                     fontSize={"$6"}
                     color={"white"}
                     pressStyle={{
-                        backgroundColor: "$dda144",
+                        backgroundColor: Colors.light.primary,
                     }}
                 >
                     Get Started

@@ -16,6 +16,7 @@ import { XStack } from "tamagui"
 
 import { buildFileUrl } from "../../utils/buildUrl"
 import CustomImage from "../CustomImage"
+import { Colors } from "../../constants/colors"
 
 export enum CATEGORY {
     BREAKFAST = "BREAKFAST",
@@ -75,7 +76,7 @@ const RecipeItem = ({ recipe }: { recipe: Recipe }) => {
                     <Text style={styles.duration}>{duration} mins</Text>
                     {likes?.length > 0 && (<XStack space={2} style={styles.likesContainer} alignItems="center"> 
    
-                            <Text style={styles.likes}>
+                            <Text style={styles.likes} >
                                 {likes.length.toLocaleString('en-US',{
                                       notation: 'compact',
                                       maximumFractionDigits: 1
@@ -84,7 +85,7 @@ const RecipeItem = ({ recipe }: { recipe: Recipe }) => {
                             <Ionicons
                             name={"heart-outline"}
                             size={20}
-                            color={"black"}
+                            color={Colors.light.primary}
                         />
                     </XStack>
                       )}
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     likes: {
-        color: "#555",
+        color: Colors.light.primary,
     },
 })
 

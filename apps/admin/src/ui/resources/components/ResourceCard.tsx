@@ -2,22 +2,14 @@
 import { Box, Button, Divider, HStack, IconButton,  Stack, Tag, Text, useToast } from "@chakra-ui/react"
 import { buildFileUrlV2 } from "~/utils/getFileurl"
 import CustomImage from "~/shared/CustomImage"
-import { api } from "~/utils/api";
+import { type RouterOutputs, api } from "~/utils/api";
 import { BiTrash } from "react-icons/bi";
 import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
 
 
-type Resource = {
-    id:string
-    title: string
-    url: string
-    image: any
-    isPublish: boolean
-    createdAt: Date
-    updatedAt: Date
-}
 
+type Resource = NonNullable<RouterOutputs['resource']['get'] & { image: { key: string, repo: string}}>
 const ResourceCard: React.FC<{ resource: Resource }> = ({ resource  }) => {
     const { id, title, url, image } = resource
     const { replace } = useRouter()
@@ -90,6 +82,7 @@ const ResourceCard: React.FC<{ resource: Resource }> = ({ resource  }) => {
                     <Text wordBreak={'break-word'} fontSize={'medium'}>{title}</Text>
                     <HStack spacing={2}>
                     <Tag fontSize={'xs'} width={'fit-content'}  colorScheme={resource.isPublish ? 'green': 'red'}>{resource.isPublish ? 'visible': 'hidden'}</Tag>
+                    <Tag fontSize={'xs'} width={'fit-content'}  colorScheme={'blue'}>{resource.contentType === 'Link' ? 'Article': resource.contentType}</Tag>
                     </HStack>
                   
                 </Stack>

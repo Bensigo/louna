@@ -1,12 +1,37 @@
+import { TRPCError } from "@trpc/server";
 import { UpdateResource } from "../../schema/resource";
 import { protectedProcedure } from "../../trpc";
 import { isValidImages } from "../recipe/createRecipe";
 
 
 export const updateResourceController = protectedProcedure.input(UpdateResource).mutation( async ({ input, ctx}) => {
-    const { tags, title, url, image, id } = input;
+    const { tags, title, url, image, id, videoUrl, contentType, description  } = input;
     const {  prisma } = ctx;
 
+
+
+    if (contentType === 'Video'){
+        const [vidRepo, vidKey] = videoUrl.split('/')
+        const isVidValid = await isValidImages([vidKey], prisma)
+
+        if (!isVidValid) {
+            throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "invalid video",
+            })
+        }
+        // update validated images
+        await prisma.file.updateMany({
+            where: {
+                key: {
+                    in: vidKey,
+                },
+            },
+            data: {
+                isValid: true,
+            },
+        })
+    }
 
     const isImagesValid = await isValidImages([image.key], prisma)
 
@@ -34,12 +59,15 @@ export const updateResourceController = protectedProcedure.input(UpdateResource)
         },
         data: {
             title,
-            url,
+            contentType,
             image: {
                 key: image.key,
                 repo: image.repo
             },
-            tags
+            tags,
+            ...(url ? { url }: {}),
+            ...(videoUrl ? { videoUrl }: {}),
+            ...(description ? { description }: {})
         }
     })
     return resource;

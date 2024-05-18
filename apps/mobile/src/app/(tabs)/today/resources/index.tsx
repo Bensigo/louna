@@ -1,13 +1,14 @@
 import { useRef, useState } from "react"
-import { api } from "../../../utils/api"
+
 import { View, Text } from "tamagui"
 import { Skeleton } from "moti/skeleton"
 import { FlatList, RefreshControl } from "react-native"
-import { ResourceItem } from "../../../components/RecommendedArticle"
+import { ResourceItem } from "../../../../components/RecommendedResouces"
+import { api } from "../../../../utils/api"
 
 
 
-const ArticlesScreen = () => {
+const ResourcesScreen = () => {
     const [page, setPage] = useState(1)
     const resourcesRef = useRef()
 
@@ -62,4 +63,4 @@ const ArticlesScreen = () => {
     )
 }
 
-export default ArticlesScreen;
+export default ResourcesScreen;

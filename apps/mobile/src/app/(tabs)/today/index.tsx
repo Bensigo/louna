@@ -5,11 +5,12 @@ import {
 } from "react-native"
 import { H2, H6, ScrollView, Text, View, XStack, Avatar, YStack } from "tamagui"
 
-import { RecommendedArticles } from "../../../components/RecommendedArticle"
+import { RecommendedResources } from "../../../components/RecommendedResouces"
 import { RecipeItem, RecipeSkeleton } from "../../../components/recipeItem"
 import { api } from "../../../utils/api"
 import { useRouter } from "expo-router"
 import { format } from 'date-fns'
+import { Colors } from "../../../constants/colors"
 
 const TodayScreen = () => {
     const router = useRouter()
@@ -30,10 +31,10 @@ const TodayScreen = () => {
             <View mt="$4">
                 <XStack justifyContent="space-between" alignItems="center">
                    <YStack gap="$2">
-                        <H2 fontSize={"$9"} fontWeight={"$15"}>
+                        <H2 fontSize={"$9"} fontWeight={"$15"} color={Colors.light.primary}>
                                 Today
                             </H2>
-                        <Text fontSize={"$6"}>{getDayAndMonth}</Text>
+                        <Text fontSize={"$6"} color={Colors.light.primary}>{getDayAndMonth}</Text>
                    </YStack>
                     <TouchableHighlight onPress={goToProfile}>
                         <Avatar circular size="$3">
@@ -43,9 +44,9 @@ const TodayScreen = () => {
                     </TouchableHighlight>
                 </XStack>
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <RecommendedArticles />
+                    <RecommendedResources />
                     <RecommendedRecipes />
-                    <RecommendedArticles />
+                    <RecommendedResources />
                 </ScrollView>
             </View>
         </View>

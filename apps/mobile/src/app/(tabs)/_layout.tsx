@@ -13,7 +13,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { useAsyncStorage } from "@react-native-async-storage/async-storage"
 
-import { PostLoadingSekeleton } from "../../components/community/post"
 import { api } from "../../utils/api"
 import { ActivityIndicator, useColorScheme } from "react-native"
 import { Colors } from "../../constants/colors"
@@ -71,16 +70,17 @@ const TabScreenLayout = () => {
     return (
         <SignedIn>
             <Tabs
+        
                 initialRouteName="today"
                 screenOptions={{
                     headerShown: false,
-                    tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+                    tabBarActiveTintColor: Colors[colorScheme ?? "light"].primary,
                    tabBarItemStyle: {
                       backgroundColor: 'transparent'
                    }
                 }}
                 sceneContainerStyle={{
-                    backgroundColor: "transparent",
+                    backgroundColor:  'transparent'
                 }}
                 tabBar={(props) =>  <CustomTabBar {...props}/>}
                 

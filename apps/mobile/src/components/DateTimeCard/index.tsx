@@ -5,8 +5,9 @@ import {
     TouchableOpacity,
     useWindowDimensions,
 } from "react-native"
-import { addDays, format, startOfDay, isSameDay,  setHours, setMinutes, addHours, subHours } from "date-fns"
-import {  View, YStack , ScrollView} from "tamagui"
+import { addDays, format, startOfDay,  setHours } from "date-fns"
+import {  YStack , ScrollView} from "tamagui"
+import { Colors } from "~/constants/colors";
 
 
 
@@ -56,13 +57,13 @@ const DateCalendarTabs = ({ onDatePress }: { onDatePress: (date: Date) => void})
                         onPress={() => handleDatePress(index)}
                         style={[
                             styles.tab,
-                            index === selectedDateIndex && { backgroundColor: "black" },
+                            index === selectedDateIndex && { backgroundColor: Colors.light.secondray },
                         ]}
                     >
                         <Text
                             style={[
                                 styles.tabText,
-                                index === selectedDateIndex && { color: "white" },
+                                index === selectedDateIndex && { color: Colors.light.primary  },
                             ]}
                         >
                             {index === 0 ? "Today" : date}

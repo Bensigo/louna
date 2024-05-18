@@ -12,9 +12,22 @@ const LayoutView = () => {
                     options={{ headerShown: false }}
                 ></Stack.Screen>
                   <Stack.Screen
-                    name="articles"
+                    name="resources/index"
                     options={{
-                        title: "Articles",
+                        title: "Resources",
+                        headerShadowVisible: false,
+                       headerStyle: {
+                        backgroundColor: 'transparent',
+                       },
+                        headerLeft: () => (
+                            <LeftBackButton route="/today" bg="black" />
+                        ),
+                    }}
+                ></Stack.Screen>
+                   <Stack.Screen
+                    name="resources/[id]/index"
+                    options={{
+                        title: "Resource",
                         headerShadowVisible: false,
                        headerStyle: {
                         backgroundColor: 'transparent',

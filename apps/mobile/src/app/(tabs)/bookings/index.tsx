@@ -10,6 +10,7 @@ import { Avatar, H2, H3, Image, ScrollView, Text, View, XStack, YStack } from "t
 import { Video, ResizeMode } from 'expo-av';
 import { api } from "../../../utils/api"
 import { Activity, } from "./list"
+import { Colors } from "../../../constants/colors"
 
 const categories = [
     "stress relief",
@@ -95,13 +96,13 @@ const BookingScreen = () => {
         <ScrollView flex={1}  mt="$4" width={DEVICE_WIDTH} px={"$4"} showsVerticalScrollIndicator={false}>
             <XStack justifyContent="space-between" alignItems="center">
                 <YStack gap="$2">
-                    <H2 fontSize={"$9"} fontWeight={"$15"}>
+                    <H2 fontSize={"$9"} fontWeight={"$15"} color={Colors.light.primary}>
                         Bookings
                     </H2>
                 </YStack>
                 <XStack gap={"$3"} alignItems="center">
                     <TouchableOpacity onPress={goToUpcoming}>
-                        <Ionicons name="calendar-outline" size={25} />
+                        <Ionicons name="calendar-outline" size={25}    color={Colors.light.primary} />
                     </TouchableOpacity>
                     <TouchableHighlight onPress={goToProfile}>
                         <Avatar circular size="$3">

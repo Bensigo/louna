@@ -9,6 +9,7 @@ import { Avatar, Card, H6, Text, View, XStack, YStack } from "tamagui"
 import { buildFileUrl } from "../../utils/buildUrl"
 import CustomImage from "../CustomImage"
 import FullScreenImage from "../FullScreenImage"
+import { Colors } from '../../constants/colors'
 
 type PostType = {
     post: {
@@ -144,9 +145,9 @@ const Post: React.FC<PostType> = (props) => {
                                                     : "heart-outline"
                                             }
                                             size={20}
-                                            color={isLiked ? "red" : "black"}
+                                            color={Colors.light.primary}
                                         />
-                                        <Text> {likeCount}</Text>
+                                        <Text  color={Colors.light.primary}> {likeCount}</Text>
                                     </XStack>
                                 </TouchableHighlight>
 
@@ -160,8 +161,9 @@ const Post: React.FC<PostType> = (props) => {
                                         <Ionicons
                                             name="chatbox-outline"
                                             size={20}
+                                            color={Colors.light.primary}
                                         />
-                                        <Text> {post.Comments.length}</Text>
+                                        <Text  color={Colors.light.primary}> {post.Comments.length}</Text>
                                     </XStack>
                                 </TouchableHighlight>
                             </XStack>

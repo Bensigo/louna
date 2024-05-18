@@ -15,6 +15,8 @@ import { Text } from "tamagui"
 import { Comments, PostWithMemo as Post } from "../../../components/community"
 import { PostLoadingSekeleton } from "../../../components/community/post"
 import { api } from "../../../utils/api"
+import { Colors } from "../../../constants/colors"
+
 
 const FETCH_BATCH = 10
 
@@ -161,7 +163,7 @@ export default function CommunityForum() {
                 style={styles.createPostBtn}
                 onPress={handleGtoCreatePost}
             >
-                <Ionicons size={25} name="pencil-outline" color={"white"} />
+                <Ionicons size={25} name="pencil-outline" color={Colors.light.primary} />
             </TouchableHighlight>
             {showCommentSheet && (
                 <Comments
@@ -185,6 +187,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         bottom: 60,
         right: 25,
-        backgroundColor: "black",
+        backgroundColor: Colors.light.secondray,
     },
 })

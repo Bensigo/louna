@@ -15,18 +15,22 @@ import {
     Stack,
     Text,
     VStack,
+    useToast
 } from "@chakra-ui/react"
-import { BiFilter, BiPlus, BiSearch } from "react-icons/bi"
+import { BiDownload, BiFilter, BiPlus, BiSearch } from "react-icons/bi"
 import { useDebouncedCallback } from "use-debounce"
 
 import { api } from "~/utils/api"
 import { Paginator } from "~/shared/Paginator"
 import RecipeCard from "./components/RecipeCard"
 
+import axios from 'axios'
+
 const ListRecipeWrapper = () => {
     const params = useSearchParams()
     const { replace, push } = useRouter()
     const pathname = usePathname()
+    const toast = useToast()
 
     const PAGE_LIMIT = 10
     const page = parseInt(params.get("page") || "1")
@@ -35,6 +39,7 @@ const ListRecipeWrapper = () => {
 
     const [searchTerm, setSearchTerm] = useState<string>("")
     const [isApprove, setIsApprove] = useState<boolean>(isApproved === "true")
+    const [generatingUpload, setGeneratingUpload] = useState<boolean>(false)
     const [mealTypeFilters, setMealTypeFilters] = useState<string[]>([])
     const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
@@ -99,19 +104,57 @@ const ListRecipeWrapper = () => {
         replace(`${pathname}?${currenParams.toString()}`)
     }
 
+    const generateBulkUpload = async () => {
+        try {
+            setGeneratingUpload(true)
+            await axios.get('/api/bulk/recipe/generate',{
+                responseType: 'arraybuffer'
+            }).then((response) => {
+                const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a')
+                link.href = window.URL.createObjectURL(blob)
+                link.download = `recipe-upload-sheet-${new Date().toISOString()}.xlsx`
+                link.click()
+                setGeneratingUpload(false);
+            })
+            
+        }catch(err){
+            setGeneratingUpload(false);
+            console.log(err)
+            toast({
+                title: 'File generation',
+                description: err.message,
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+                
+            })
+        }
+    }
+
     return (
         <>
             <Text my={3} fontWeight={"bold"} fontSize={"x-large"}>
                 Recipes
             </Text>
             <VStack spacing={6} align="start" width={"100%"}>
-                <Button
-                    alignSelf={"end"}
+               <HStack spacing={2} alignSelf={'end'}>
+               <Button
+             
+                    leftIcon={<BiDownload />}
+                    onClick={generateBulkUpload}
+                    isLoading={generatingUpload}
+                >
+                    Generate Bulk Upload
+                </Button>
+               <Button
+                    
                     leftIcon={<BiPlus />}
                     onClick={goToCreatePage}
                 >
                     Create Recipe
                 </Button>
+               </HStack>
                 <Box w="50%" display={"flex"} alignItems={"center"}>
                     <InputGroup mr={4}>
                         <Input

@@ -1,9 +1,13 @@
 import { useToast, Heading, Box } from "@chakra-ui/react"
 
 import { useRouter } from "next/router"
-import { api } from "~/utils/api"
+import { api, type RouterInputs } from "~/utils/api"
 import Form from "./components/Form"
-import { type CreateResourceFormSchemaType } from "./schema"
+
+
+
+
+type CreateResourceFormSchemaType = RouterInputs['resource']['create']
 
 
 export const CreateResourcesWrapper = () => {

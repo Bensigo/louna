@@ -1,11 +1,12 @@
-import { api } from "~/utils/api"
+import { RouterInputs, api } from "~/utils/api"
 import Form from "./components/Form"
 import { useRouter } from "next/router"
 import { Box, Button, Heading, Skeleton, useToast } from "@chakra-ui/react"
-import { type CreateResourceFormSchemaType } from "./schema"
 import { BiArrowBack } from "react-icons/bi"
 
 
+
+type CreateResourceFormSchemaType = RouterInputs['resource']['create']
 
 export const EditResourcesWrapper = () => {
     const { query, replace, back } = useRouter()

@@ -6,8 +6,10 @@ import {
     TouchableOpacity,
 } from "react-native"
 import {  useRouter } from "expo-router"
-import { Ionicons, Octicons } from "@expo/vector-icons"
+import {  Octicons } from "@expo/vector-icons"
 import { type ViewStyle } from "@tamagui/core"
+import FontAwesomIcon from "@expo/vector-icons/FontAwesome"
+
 import { Skeleton } from "moti/skeleton"
 import {
     Avatar,
@@ -23,6 +25,7 @@ import CustomImage from "../../components/CustomImage"
 import { Colors } from "../../constants/colors"
 import { api } from "../../utils/api"
 import { HealthVitalsCard } from "../../components/healthVitalsCard"
+
 
 const Profile = () => {
     const router = useRouter()
@@ -60,13 +63,13 @@ const Profile = () => {
                     <XStack justifyContent="space-between" alignItems="center">
                     <TouchableOpacity   style={[styles.btn, styles.configBtn]}
                             onPress={goBack} >
-                            <Octicons name="arrow-left" size={24} />
+                            <FontAwesomIcon size={20} name="chevron-left" color={Colors.light.primary} />
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.btn, styles.configBtn]}
                             onPress={goToSettings}
                         >
-                            <Octicons name="gear" size={24} color="black" />
+                            <Octicons name="gear" size={24}  color={Colors.light.primary} />
                         </TouchableOpacity>
                         
                     </XStack>

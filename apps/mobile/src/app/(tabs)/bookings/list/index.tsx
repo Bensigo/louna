@@ -12,12 +12,10 @@ import Ionicons from "@expo/vector-icons/Ionicons"
 import _ from "lodash"
 import { Skeleton } from "moti/skeleton"
 import {
-    Button,
     H3,
     H6,
-    Image,
     Input,
-    ScrollView,
+
     Text,
     View,
     XStack,
@@ -29,6 +27,8 @@ import CustomImage from "../../../../components/CustomImage"
 import DateCalendarTabs from "../../../../components/DateTimeCard"
 import { api } from "../../../../utils/api"
 import { buildFileUrl } from "../../../../utils/buildUrl"
+import { Colors } from "../../../../constants/colors"
+
 
 const MAX_LIMIT = 50
 
@@ -89,7 +89,7 @@ const BookingList = () => {
     return (
         <View flex={1} width={DEVICE_WIDTH} px={"$3"}>
             <LeftBackButton route="/bookings" bg="black" />
-            <H3>Search</H3>
+            <H3 color={Colors.light.primary}>Search</H3>
             <XStack justifyContent="space-between" mb={15} alignItems="center">
                 <XStack
                     mt={10}
@@ -107,7 +107,7 @@ const BookingList = () => {
                         borderWidth={0}
                         onChangeText={handleSearchTerm}
                     />
-                    <Ionicons name="search-outline" size={20} />
+                    <Ionicons name="search-outline" size={20} color={Colors.light.primary} />
                 </XStack>
             </XStack>
             <YStack space="$2">

@@ -6,6 +6,7 @@ import { Button, H2, H3, View, YStack } from "tamagui"
 
 import { SignInWithApple } from "../../components/auth/SignInWithApple"
 import { SignInWithGoogle } from "../../components/auth/SignInWithGoogle"
+import { Colors } from "../../constants/colors"
 
 function SignUp() {
     const onSignUp = () => {
@@ -27,11 +28,11 @@ function SignUp() {
                     marginHorizontal={"$3"}
                     justifyContent="space-between"
                 >
-                    <YStack>
-                        <H2 color={"black"} fontSize={"$10"}>
+                    <YStack mt={'$10'}>
+                        <H2 color={Colors.dark.primary}  fontSize={"$10"}>
                             Let's get you started
                         </H2>
-                        <H3 color={"black"} fontWeight={"$2"} fontSize={"$8"}>
+                        <H3 color={Colors.dark.primary}  fontWeight={"$2"} fontSize={"$8"}>
                             you deserve to be healthier, happy and whole.
                         </H3>
                     </YStack>

@@ -6,7 +6,7 @@ import { authMiddleware } from "@clerk/nextjs"
 export default authMiddleware({
     publicRoutes: ["/"],
     // publicRoutes: ["/login", "/register", "/forgot-password"],
-    // ignoredRoutes: [""],
+    ignoredRoutes: ["/api/hello", "/api/bulk/recipe/generate", "/api/bulk/recipe/upload"],
 })
 
 // Stop Middleware running on static files

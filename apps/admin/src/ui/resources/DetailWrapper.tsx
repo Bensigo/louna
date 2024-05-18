@@ -1,13 +1,25 @@
-import { AspectRatio, Box, Button, Container, HStack, Heading, Skeleton, Text, Tag, useToast, Stack } from "@chakra-ui/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useRouter } from "next/router"
-import { BiArrowBack } from "react-icons/bi"
-import CustomImage from "~/shared/CustomImage"
+import {
+    AspectRatio,
+    Box,
+    Button,
+    Container,
+    Heading,
+    HStack,
+    Skeleton,
+    Stack,
+    Tag,
+    Text,
+    useToast,
+} from "@chakra-ui/react"
+import { BiArrowBack, BiLink } from "react-icons/bi"
+
 import { api } from "~/utils/api"
 import { buildFileUrlV2 } from "~/utils/getFileurl"
-
-
+import CustomImage from "~/shared/CustomImage"
+import CustomVideo from "~/shared/CustomVideo"
 
 export const DetailResourcesWrapper = () => {
     const { query, replace } = useRouter()
@@ -28,8 +40,8 @@ export const DetailResourcesWrapper = () => {
         if (id) {
             publish(
                 {
-                   ids:  [id],
-                   type: resource?.isPublish ? 'unPublish': 'Publish'
+                    ids: [id],
+                    type: resource?.isPublish ? "unPublish" : "Publish",
                 },
                 {
                     onSuccess: () => {
@@ -53,7 +65,7 @@ export const DetailResourcesWrapper = () => {
 
     return (
         <>
-          <Skeleton isLoaded={!isLoading}>
+            <Skeleton isLoaded={!isLoading}>
                 {resource && (
                     <>
                         <Container maxW="container.lg" py={8}>
@@ -68,33 +80,56 @@ export const DetailResourcesWrapper = () => {
                                 >
                                     Back
                                 </Button>
-                                <Stack display={'flex'} direction={'row'} alignItems={'center'}>
-                                <Button onClick={handlePublish} isLoading={isSubmiting} variant={"outline"}>
+                                <Stack
+                                    display={"flex"}
+                                    direction={"row"}
+                                    alignItems={"center"}
+                                >
+                                    <Button
+                                        onClick={handlePublish}
+                                        isLoading={isSubmiting}
+                                        variant={"outline"}
+                                    >
                                         {resource.isPublish
                                             ? "Unpublish"
                                             : "Publish"}
                                     </Button>
                                     <Button
-                                    size="sm"
-                                    colorScheme="aplhaBalck"
-                                    variant={"outline"}
-                                    onClick={handleEdit}
-                                >
-                                    Edit
-                                </Button>
+                                        size="sm"
+                                        colorScheme="aplhaBalck"
+                                        variant={"outline"}
+                                        onClick={handleEdit}
+                                    >
+                                        Edit
+                                    </Button>
                                 </Stack>
-                               
                             </Box>
-                            <AspectRatio width={'100%'} ratio={16 / 9}>
+                            <AspectRatio width={"100%"} ratio={16 / 9}>
                                 <CustomImage
-                                    src={buildFileUrlV2(`${resource.image.repo}/${resource.image.key}`)}
+                                    src={buildFileUrlV2(
+                                        `${resource.image.repo}/${resource.image.key}`,
+                                    )}
                                     alt={resource.title}
                                     width={"100%"}
-                                    height={'100%'}
+                                    height={"100%"}
                                 />
                             </AspectRatio>
-                            <Heading fontSize="2xl" mt={3}>{resource.title}</Heading>
-                    
+                            <Heading fontSize="2xl" mt={3}>
+                                {resource.title}
+                            </Heading>
+                           {resource.contentType === 'Video' && (
+                            <>
+                                 <Text my={2}>{resource.description}</Text>
+                                 <AspectRatio width={'100%'} ratio={16 / 9}>
+                                <CustomVideo
+                                    src={buildFileUrlV2(resource.videoUrl)}
+                                    alt={resource.title}
+                                    width={"400px"}
+                                    height={'200px'}
+                                />
+                            </AspectRatio>
+                            </>
+                           )}
                             <HStack spacing={1} my={3}>
                                 {resource.tags.map((tag, index) => (
                                     <Tag key={index} colorScheme="blue">
@@ -102,9 +137,14 @@ export const DetailResourcesWrapper = () => {
                                     </Tag>
                                 ))}
                             </HStack>
-                            <Link href={resource.url}  target="_blank" >
-                                {resource.url}
-                            </Link>
+                            {resource.contentType === "Link" && (
+                                <Tag colorScheme="green">
+                                    <BiLink />
+                                    <Link href={resource.url} target="_blank">
+                                        {resource.url}
+                                    </Link>
+                                </Tag>
+                            )}
                         </Container>
                     </>
                 )}

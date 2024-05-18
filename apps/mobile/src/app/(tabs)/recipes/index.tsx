@@ -2,13 +2,12 @@ import { useRef, useState } from "react"
 import {
     FlatList,
     RefreshControl,
-    SectionList,
     TouchableHighlight,
     TouchableOpacity,
 } from "react-native"
 import { usePathname, useRouter } from "expo-router"
 import Ionicons from "@expo/vector-icons/Ionicons"
-import { DefaultTheme } from "@react-navigation/native"
+
 import _ from "lodash"
 import {
     Avatar,
@@ -17,14 +16,15 @@ import {
     SizableText,
     Tabs,
     Text,
-    useDebounce,
+
     View,
     XStack,
-    YStack,
 } from "tamagui"
 
 import { RecipeItem, RecipeSkeleton } from "../../../components/recipeItem"
 import { api } from "../../../utils/api"
+import { Colors } from "../../../constants/colors"
+
 
 const meals = ["Breakfast", "Lunch", "Dinner", "Snack" ]
 type MealType = "Breakfast" | "Lunch" | "Snack" | "Dinner"
@@ -32,7 +32,6 @@ const RecipeScreen = () => {
     const [activeTab, setActiveTab] = useState<MealType>("Breakfast")
     const [searchTerm, setSearchTerm] = useState<string>()
     const router = useRouter()
-    const pathname = usePathname()
 
     const { isLoading: isLoadingProfile, data } = api.auth.getProfile.useQuery()
 
@@ -73,12 +72,12 @@ const RecipeScreen = () => {
         <View flex={1}>
             <View flex={1} mb={"$3"} mt={"$5"} paddingHorizontal={"$4"}>
                 <XStack justifyContent="space-between" alignItems="center">
-                    <H3 fontSize={"$9"} fontWeight={"$15"}>
+                    <H3 fontSize={"$9"} fontWeight={"$15"} color={Colors.light.primary}>
                         Recipes
                     </H3>
                     <XStack gap={"$4"} alignItems="center">
                         <TouchableOpacity onPress={handleGoToRecipeBookmark}>
-                            <Ionicons name="bookmark-outline" size={25} />
+                            <Ionicons name="bookmark-outline" size={25} color={Colors.light.primary} />
                         </TouchableOpacity>
                         <TouchableHighlight onPress={goToProfile}>
                             <Avatar circular size="$3">
@@ -106,7 +105,7 @@ const RecipeScreen = () => {
                         borderWidth={0}
                         onChangeText={handleSearchTerm}
                     />
-                    <Ionicons name="search-outline" size={20} />
+                    <Ionicons name="search-outline" size={20} color={Colors.light.primary}  />
                 </XStack>
 
                 <View mt="$4" mb={"$15"}>
@@ -115,11 +114,12 @@ const RecipeScreen = () => {
                         flexDirection="column"
                         mt="$2"
                         onValueChange={(val) => setActiveTab(val as MealType)}
+                    
                     >
-                        <Tabs.List space="$1">
+                        <Tabs.List space="$1" >
                             {meals.map((meal) => (
-                                <Tabs.Tab value={meal} key={meal} my="$4">
-                                    <SizableText fontSize={"$3"}>
+                                <Tabs.Tab value={meal} key={meal} my="$4"  >
+                                    <SizableText fontSize={"$3"} color={activeTab === meal ? Colors.light.primary : 'black'}>
                                         {meal}
                                     </SizableText>
                                 </Tabs.Tab>
