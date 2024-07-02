@@ -6,8 +6,8 @@ import { Workbook } from 'exceljs';
 const generateRecipeExcel = async () => {
     try {
         // Create workbook and worksheet
-        let workbook = new Workbook();
-        let worksheet = workbook.addWorksheet('Recipe Entry', { properties: { defaultColWidth: 35 }});
+        const workbook = new Workbook();
+        const worksheet = workbook.addWorksheet('Recipe Entry', { properties: { defaultColWidth: 35 }});
 
         // Define headers
         const headers = [
@@ -19,11 +19,11 @@ const generateRecipeExcel = async () => {
         
 
         // Add Header Row
-        let headerRow = worksheet.addRow(headers);
+        const headerRow = worksheet.addRow(headers);
       
 
         // Cell Style: Fill and Border
-        headerRow.eachCell((cell, number) => {
+        headerRow.eachCell((cell, _) => {
             cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
@@ -138,7 +138,7 @@ const generateRecipeExcel = async () => {
         const excelBuffer = await workbook.xlsx.writeBuffer();
         return excelBuffer;
     } catch (error) {
-        throw new Error('Error generating Excel file: ' + error);
+        throw new Error(`Error generating Excel file: ${error}`);
     }
 }
 

@@ -86,3 +86,23 @@ export const ListRecipeSchema = ListSchemaBase.extend({
 export const UpdateRecipeSchema = CreateRecipeSchema.extend({
     id: z.string()
 })
+
+
+
+const BulkCreateRecipeSchema = z.object({
+    name: z.string().trim().min(3),
+    duration: z.number(),
+    contentType: z.enum(['Freemium', 'Premium']),
+    calories: z.number(),
+    description: z.string().trim().min(50),
+    mealType: z.enum(["BREAKFAST", "LUNCH", "DINNER", "SNACK"]),
+    dietType: z.enum(["Standard", "Vegan", "Paleo", "Vegetarian"]),
+    categories: z.array(z.string()),
+    allergens: z.array(z.string()),
+    mealPreference: z.array(z.string()),
+    tags: z.array(z.string()),
+    cusineType: z.enum(['ITALIAN', 'MEXICAN', 'CHINESE', 'FRENCH', 'INDIAN', 'JAPANESE', 'THAI', 'AMERICAN', 'MEDITERRANEAN', 'AFRICAN', 'OTHERS']),
+    difficultyLevel: z.enum(['EASY', 'MEDIUM', 'HARD']),
+})
+
+export const BulkUploadRecipeSchema = z.array(BulkCreateRecipeSchema)

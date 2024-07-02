@@ -1,8 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import { Workbook, type Cell, type Row, type Worksheet } from "exceljs"
 import multer from "multer"
+import { prisma } from '@solu/admin-api'
+import { unLinkAsync } from "../partner/upload"
 
-function runMiddleware(
+
+
+
+
+export function runMiddleware(
     req: NextApiRequest & { [key: string]: any },
     res: NextApiResponse,
     fn: (...args: any[]) => void,
@@ -81,7 +87,7 @@ const parseCellData = (cell: Cell): string | number | MealType | DietType | Cuis
     return value;
 };
 
-const parseRowData = (row: Row, rowNumber: number): { rowData: ProcessData, errors: string[]} => {
+const parseRowData = (row: Row, rowNumber: number): { rowData: Partial<ProcessData> | null, errors: string[] | null} => {
     const rowData: Partial<ProcessData> = {};
     const cellMappings = [
         { index: 1, key: 'name' },
@@ -89,7 +95,7 @@ const parseRowData = (row: Row, rowNumber: number): { rowData: ProcessData, erro
         { index: 3, key: 'calories' },
         { index: 4, key: 'mealType' },
         { index: 5, key: 'dietType' },
-        { index: 6, key: 'Categories', isSplit: true },
+        { index: 6, key: 'categories', isSplit: true },
         { index: 7, key: 'tags', isSplit: true },
         { index: 8, key: 'difficulty' },
         { index: 9, key: 'cuisine' },
@@ -102,14 +108,13 @@ const parseRowData = (row: Row, rowNumber: number): { rowData: ProcessData, erro
         const cell = row.getCell(mapping.index);
         const isRequired = !optionalColNums.includes(mapping.index);
         if (isRequired && (cell.value === undefined || cell.value === null)) {
-            errors.push(`Column ${key} in row ${rowNumber}`);
+            errors.push(`Missing value in column ${cell.col} in row ${rowNumber}`);
         } else {
-            rowData[mapping.key] = mapping.isSplit
+            rowData[mapping?.key] = mapping.isSplit
                 ? (parseCellData(cell) as string)?.split(",").map(val => val.trim()) || []
                 : parseCellData(cell);
         }
     });
-
     if (errors.length > 0){
         return { rowData: null, errors }
     }
@@ -117,28 +122,33 @@ const parseRowData = (row: Row, rowNumber: number): { rowData: ProcessData, erro
     return {rowData, errors: null };
 };
 
-const processExcelData = (worksheet: Worksheet): ProcessData[] => {
+export const processExcelData = (worksheet: Worksheet, parseRowData: (row: Row, rowNum: number) => any): ProcessData[] => {
     const data: ProcessData[] = [];
     const errors: string[] = [];
 
     worksheet.eachRow((row: Row, rowNumber: number) => {
         if (rowNumber === 1) return; // Skip header row
 
-        const  { rowData, errors: rowErr } = parseRowData(row);
-        if (errors.length > 0) {
+        const  { rowData, errors: rowErr } = parseRowData(row, rowNumber);
+      
+        if (!!rowErr && rowErr.length > 0) {
             errors.push(...rowErr)
+        }
+        if (rowData && rowData !== null){
+            data.push(rowData as ProcessData);
         } 
-        data.push(rowData);
+       
 
     });
-
-    if (data.length === 0) {
-        throw new Error("No valid data found in the Excel file");
-    }
-
     if (errors.length > 0) {
         throw new Error(errors.join("\n"));
     }
+
+    if (data.length === 0 && errors.length === 0) {
+        throw new Error("No valid data found in the Excel file");
+    }
+
+   
 
     return data;
 };
@@ -151,7 +161,7 @@ export const config = {
     },
 }
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest  & { file: any }, res: NextApiResponse) => {
     try {
         const multerUpload = multer({ dest: "uploads/" }).single('file')
         await runMiddleware(req, res, multerUpload)
@@ -169,15 +179,35 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // Get the first worksheet
         const worksheet = workbook.getWorksheet(1)
 
+         // delete file
+         unLinkAsync(filePath)
+
+         if (!worksheet){
+            throw new Error('worksheet not found')
+         }
+
         // Validate the Excel data
-         const data = processExcelData(worksheet)
+         const data = processExcelData(worksheet, parseRowData)
 
-        console.log({ data })
+        
 
-        // If validation and process data passes, update database with data
+        const batchSize = 20
+        const batches = []
 
-        res.status(200).json({ data })
-    } catch (error) {
+        for (let i = 0; i <= data.length; i +=  batchSize){
+            const batch = data.slice(i, i + batchSize);
+            batches.push(batch)
+        }
+
+       for (const batch of batches){
+            // handle prisma create here
+            await prisma.recipe.createMany({
+                data: batch
+            })
+       }
+
+        res.status(200).json({ message: "Recipes uploaded successfully" })
+    } catch (error: any) {
         console.error("Error uploading Excel file:", error)
         res.status(500).json({ message: error.message })
     }

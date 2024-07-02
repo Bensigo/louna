@@ -1,11 +1,17 @@
 // ** Next Import
-import Document, { Html, Head, Main, NextScript } from 'next/document'
+import Document, { Html,Head,  Main, NextScript } from 'next/document'
+
 
 class CustomDocument extends Document {
   render() {
     return (
       <Html lang='en'>
         <Head>
+        <title>Solu - Live well, Feel Great</title>
+        <meta
+          name="description"
+          content="Solu - Live well, Feel Great"
+        />
           <link rel='preconnect' href='https://fonts.googleapis.com' />
           <link rel='preconnect' href='https://fonts.gstatic.com' />
           <link
@@ -15,7 +21,7 @@ class CustomDocument extends Document {
           <link rel='apple-touch-icon' sizes='180x180' href='/images/apple-touch-icon.png' />
           <link rel='shortcut icon' href='/images/favicon.png' />
         </Head>
-        <body>
+        <body >
           <Main />
           <NextScript />
         </body>

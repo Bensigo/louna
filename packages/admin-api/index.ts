@@ -1,9 +1,11 @@
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server"
 
-import { type AppRouter } from "./src/root"
+import { appRouter, type AppRouter } from "./src/root"
 
 export { appRouter, type AppRouter } from "./src/root"
 export { createTRPCContext } from "./src/trpc"
+
+export { prisma } from '@solu/db'
 
 /**
  * Inference helpers for input types
@@ -16,3 +18,4 @@ export type RouterInputs = inferRouterInputs<AppRouter>
  * @example type HelloOutput = RouterOutputs['example']['hello']
  **/
 export type RouterOutputs = inferRouterOutputs<AppRouter>
+

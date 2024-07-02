@@ -1,4 +1,5 @@
 import { toggleApprovalRecipeController } from "../controllers/recipe/approveRecipe";
+import { bulkCreateRecipeController } from "../controllers/recipe/bulkCreate";
 import { createRecipeController } from "../controllers/recipe/createRecipe";
 import { deleteRecipeController } from "../controllers/recipe/delete";
 import { getRecipeController } from "../controllers/recipe/getRecipe";
@@ -13,5 +14,6 @@ export const recipeRouter = createTRPCRouter({
     list: listRecipeController,
     toggleApproval: toggleApprovalRecipeController,
     update: updateRecipeController,
-    delete: deleteRecipeController
+    delete: deleteRecipeController,
+    bulk: bulkCreateRecipeController
 })

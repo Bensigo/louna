@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useRouter } from "next/router"
 import {
@@ -17,7 +17,7 @@ import {
     VStack,
     useToast
 } from "@chakra-ui/react"
-import { BiDownload, BiFilter, BiPlus, BiSearch } from "react-icons/bi"
+import { BiDownload, BiFilter, BiPlus, BiSearch, BiUpload } from "react-icons/bi"
 import { useDebouncedCallback } from "use-debounce"
 
 import { api } from "~/utils/api"
@@ -37,11 +37,29 @@ const ListRecipeWrapper = () => {
     const search = params.get("search")
     const isApproved = params.get("isApproved")
 
+
+    const ctx = api.useUtils();
+
     const [searchTerm, setSearchTerm] = useState<string>("")
+    const [file, setFile] = useState<File>(null)
     const [isApprove, setIsApprove] = useState<boolean>(isApproved === "true")
     const [generatingUpload, setGeneratingUpload] = useState<boolean>(false)
     const [mealTypeFilters, setMealTypeFilters] = useState<string[]>([])
     const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+    const [isUploading, setIsUploading] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+
+    useEffect(() => 
+    {
+        if (file){
+            uploadRecipes(file)
+        }
+        return () => {
+            setIsUploading(false); 
+        };
+    }, [file])
+
 
     const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const term = e.target.value
@@ -104,6 +122,8 @@ const ListRecipeWrapper = () => {
         replace(`${pathname}?${currenParams.toString()}`)
     }
 
+
+
     const generateBulkUpload = async () => {
         try {
             setGeneratingUpload(true)
@@ -132,6 +152,55 @@ const ListRecipeWrapper = () => {
         }
     }
 
+   
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0]) {
+            setFile(event.target.files[0])
+        }
+    }
+    const uploadClickHandler = async () => {
+
+        fileInputRef.current?.click()
+       
+    }
+
+    const uploadRecipes = async  (file: File) => {
+        try {
+            
+            setIsUploading(true)
+            // Prepare the form data
+            const formData = new FormData()
+            formData.append('file', file)
+    
+            // Make the POST request to upload the file
+            await axios.post('/api/bulk/recipe/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            ctx.recipe.list.invalidate()
+            setIsUploading(false)
+            toast({
+                title: 'Upload successful',
+                description: 'The recipes have been uploaded successfully.',
+                status: 'success',
+                duration: 9000,
+                isClosable: true,
+            })
+        }
+         catch (err){
+            setIsUploading(false)
+            toast({
+                title: 'Failed to upload',
+                description: err.message,
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+                
+            })
+         }
+    }
+
     return (
         <>
             <Text my={3} fontWeight={"bold"} fontSize={"x-large"}>
@@ -139,6 +208,16 @@ const ListRecipeWrapper = () => {
             </Text>
             <VStack spacing={6} align="start" width={"100%"}>
                <HStack spacing={2} alignSelf={'end'}>
+               <input ref={fileInputRef} style={{ display: 'none' }} type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
+
+               <Button
+             
+             leftIcon={<BiUpload />}
+             onClick={uploadClickHandler}
+             isLoading={isUploading}
+         >
+            Upload
+         </Button>
                <Button
              
                     leftIcon={<BiDownload />}
