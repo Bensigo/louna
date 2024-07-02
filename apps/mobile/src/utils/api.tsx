@@ -26,7 +26,8 @@ export const TRPCProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
     // const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://solu-web.vercel.app/'
-    const API_URL = "https://solu-web.vercel.app/"
+    const API_URL = "https://solu-web.vercel.app"
+    // const API_URL = "http://localhost:7001"
 
     console.log({ API_URL })
 

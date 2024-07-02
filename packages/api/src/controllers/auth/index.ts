@@ -17,6 +17,7 @@ export const getProfile = protectedProcedure.query(async ({ ctx }) => {
             userPref: true
         }
     })
+    console.log({ user : user }, '---------testing-----------')
     return  user
 })
 
