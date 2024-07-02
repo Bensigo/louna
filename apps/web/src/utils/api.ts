@@ -6,9 +6,11 @@ import type { AppRouter } from "@solu/api";
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""; // browser should use relative url
+  console.log({ vercel_url: process.env.VERCEL_URL})
   if (process.env.VERCEL_URL) return `${process.env.VERCEL_URL}`; // SSR should use vercel url
-
+  
   return `http://localhost:7001`; // dev SSR should use localhost
+
 };
 
 export const api = createTRPCNext<AppRouter>({

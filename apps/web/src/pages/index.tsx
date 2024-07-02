@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { Box, Container } from "@chakra-ui/react"
 
 import Benefits from "~/components/Benfit"
@@ -44,6 +44,8 @@ const data = [
 ]
 
 const Home = () => {
+  
+
     return (
         <>
             <Navbar />

@@ -1,23 +1,32 @@
 import { createNextApiHandler } from "@trpc/server/adapters/next";
 
 import { appRouter, createTRPCContext } from "@solu/api"
+import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
+import Cors from 'cors';
 
-// export API handler
-export default createNextApiHandler({
+const cors = Cors();
+
+function runMiddleware(req: NextApiRequest, res: NextApiResponse, fn: any) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result: any) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+
+      return resolve(result);
+    });
+  });
+}
+
+export function withCors(handler: NextApiHandler) {
+  return async (req: NextApiRequest, res: NextApiResponse) => {
+    await runMiddleware(req, res, cors);
+
+    return await handler(req, res);
+  };
+}
+
+export default withCors(createNextApiHandler({
   router: appRouter,
   createContext: createTRPCContext,
-});
-
-// If you need to enable cors, you can do so like this:
-// const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-//   // Enable cors
-//   await cors(req, res);
-
-//   // Let the tRPC handler do its magic
-//   return createNextApiHandler({
-//     router: appRouter,
-//     createContext,
-//   })(req, res);
-// };
-
-// export default handler;
+}));

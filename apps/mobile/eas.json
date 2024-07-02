@@ -24,6 +24,10 @@
       "extends": "base",
       "ios": {
         "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://solu-web.vercel.app",
+        "EXPO_PUBLIC_IMAGE_SERVER_URL": "https://solu-file-bucket.vercel.app"
       }
     },
     "production": {
