@@ -3,6 +3,7 @@ import { UpdateRecipeSchema } from "../../schema/recipe";
 import { protectedProcedure } from "../../trpc";
 import { isValidImages } from "./createRecipe";
 import {type  CuisineType } from "@solu/db";
+import { slugify } from "../../utils/slug";
 
 
 export const updateRecipeController = protectedProcedure.input(UpdateRecipeSchema).mutation(async ({ ctx, input }) => {
@@ -69,6 +70,9 @@ export const updateRecipeController = protectedProcedure.input(UpdateRecipeSchem
     
        const newCalorie = parseInt(calories)
        const newDuration = parseInt(duration)
+       const slug = slugify(name)
+
+
 
        const data = {
         name,
@@ -87,10 +91,10 @@ export const updateRecipeController = protectedProcedure.input(UpdateRecipeSchem
         cuisine: cusineType as CuisineType,
         difficulty: difficultyLevel,
         mealPreference,
-        allergens
+        allergens,
+        slug
     }
 
-    console.log({ data })
 
        const update = await prisma.recipe.update({
         where: { id },

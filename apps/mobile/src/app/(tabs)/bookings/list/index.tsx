@@ -49,7 +49,7 @@ const BookingList = () => {
     } = api.partner.list.useQuery(
         {
             filter: {
-                category: params.category as string,
+                subCategories: [params.category as string],
                 date: slectedDate,
             },
             ...(searchTerm ? { searchName: searchTerm } : {}),
@@ -170,7 +170,7 @@ export const Activity = ({ partner, date }) => {
     console.log({ date, d: 2222 })
     const goToSessionDetail = () => {
         router.push({
-            pathname: `/bookings/list/${partner.id}`,
+            pathname: `/activities/list/${partner.id}`,
             params: {
                 date,
             },

@@ -113,43 +113,48 @@ export default function Upcoming() {
     }
 
     return (
-        <View flex={1} px={10}>
-            <FlatList
-                ref={bookingRef}
-                data={data}
-                ListEmptyComponent={() =>
-                    isLoading ? (
-                        <LoadingCard />
-                    ) : (
-                        <Text>No Booking available</Text>
-                    )
-                }
-                style={{
-                    flex: 1,
-                    height: height,
-                }}
-                onEndReached={handleUpdateList}
-                keyExtractor={(item) => item.id}
-                showsVerticalScrollIndicator={false}
-                renderItem={renderItem}
-                maxToRenderPerBatch={10}
-                onEndReachedThreshold={0.7}
-                onMomentumScrollBegin={() => {
-                    onEndReachedCalledDuringMomentum.current = false
-                }}
-                onScrollToIndexFailed={({ index, averageItemLength }) => {
-                    bookingRef.current?.scrollToOffset({
-                        offset: index * averageItemLength,
-                        animated: true,
-                    })
-                }}
-                refreshControl={
-                    <RefreshControl
-                        onRefresh={refetch}
-                        refreshing={isRefetching}
-                    />
-                }
-            />
+        <View flex={1} mt={4} px={10}>
+            {isLoading ? (
+                <FlatList
+                    data={[{}, {}, {}, {}, {}]}
+                    keyExtractor={(_, index) => index.toString()}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={() => <LoadingCard />}
+                />
+            ) : (
+                <FlatList
+                    ref={bookingRef}
+                    data={data}
+                    ListEmptyComponent={() => <View  p={15} flex={1} alignContent="center">
+                        <Text textAlign="center">No Booking available</Text>
+                    </View>}
+                    style={{
+                        flex: 1,
+                        height: height,
+                    }}
+                    onEndReached={handleUpdateList}
+                    keyExtractor={(item) => item.id}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={renderItem}
+                    maxToRenderPerBatch={10}
+                    onEndReachedThreshold={0.7}
+                    onMomentumScrollBegin={() => {
+                        onEndReachedCalledDuringMomentum.current = false
+                    }}
+                    onScrollToIndexFailed={({ index, averageItemLength }) => {
+                        bookingRef.current?.scrollToOffset({
+                            offset: index * averageItemLength,
+                            animated: true,
+                        })
+                    }}
+                    refreshControl={
+                        <RefreshControl
+                            onRefresh={refetch}
+                            refreshing={isRefetching}
+                        />
+                    }
+                />
+            )}
         </View>
     )
 }

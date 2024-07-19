@@ -10,7 +10,7 @@ const fadeIn = keyframes`
 export default function Hero() {
     return (
       <>
-        <Container maxW="container.xl" py={8} >
+        <Container maxW="container.xl" py={8} alignSelf={'center'}>
           <Flex direction={{ base: "column", lg: "row" }}  justify={{ base: 'flex-start', lg: "space-between"}} >
             <Box
               display={{ base: "block", lg: 'none' }}

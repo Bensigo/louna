@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import {
+    ActivityIndicator,
+    Alert,
     FlatList,
     KeyboardAvoidingView,
     RefreshControl,
-    Alert,
     StyleSheet,
     TouchableHighlight,
 } from "react-native"
@@ -14,9 +15,12 @@ import { Text } from "tamagui"
 
 import { Comments, PostWithMemo as Post } from "../../../components/community"
 import { PostLoadingSekeleton } from "../../../components/community/post"
-import { api } from "../../../utils/api"
 import { Colors } from "../../../constants/colors"
+import { api, type RouterOutputs } from "../../../utils/api"
 
+type Post = NonNullable<RouterOutputs["post"]["getPost"]> & {
+    trendScore: number
+}
 
 const FETCH_BATCH = 10
 
@@ -28,88 +32,78 @@ export default function CommunityForum() {
     const postRef = useRef()
     const [postId, setPostId] = useState<string>()
     const [limit, setLimit] = useState(FETCH_BATCH)
+    const [loadingMore, setLoadingMore] = useState(false)
 
-    const [transformedPosts, setTransformedPosts] = useState([])
+    // const [transformedPosts, setTransformedPosts] = useState<Post[]>([])
 
-    // const { data: user } = api.auth.getProfile.useQuery()
     const user = {}
 
     const {
         data: posts,
         isLoading: isLoadingPost,
         refetch,
-        isRefetching: postIsRefeching,
-    } = api.post.listPost.useQuery({ limit })
+        isRefetching,
+    } = api.post.listPost.useQuery({ limit }, { keepPreviousData: true })
+
 
     useEffect(() => {
-        if (!!posts?.length) {
-            setTransformedPosts(posts)
-        }
-        return () => {
-            setTransformedPosts([])
+        if (posts?.length){
+            setLoadingMore(false)
         }
     }, [posts])
 
+
+
     const { mutate: likePost } = api.post.likePost.useMutation()
 
-    const handleRefeshData = useCallback(() => {
+    const handleLoadMore = useCallback(() => {
         if (!onEndReachedCalledDuringMomentum.current) {
-            setLimit((prev) => prev + 10)
-
+            setLoadingMore(true)
+            setLimit((prev) => prev + FETCH_BATCH)
             onEndReachedCalledDuringMomentum.current = true
         }
     }, [])
 
+    const handleRefreshData = useCallback(() => {
+        refetch()
+    }, [refetch])
+
     const handleLike = (postId: string) => {
-        // Optimistically update the post data
         const updatedPosts = transformedPosts.map((post) => {
             if (post.id === postId && !!user) {
                 return {
                     ...post,
-                    // Assuming the post data structure includes a likes array
                     likes: [...post.likes, { userId: user?.id }],
                 }
             }
             return post
         })
-        // Update the state with the optimistic changes
         setTransformedPosts(updatedPosts)
-
-        // Make the actual API call to like the post
         likePost(
+            { postId },
             {
-                postId,
-            },
-            {
-                onSuccess: () => {
-                    // If the API call is successful, no action needed
-                },
+                onSuccess: () => {},
                 onError: (err) => {
-                    // If the API call fails, revert the optimistic update
                     setTransformedPosts(transformedPosts)
                     Alert.alert("Error", err.message, [
                         {
                             text: "Cancel",
                             style: "cancel",
                             onPress: () => console.log("Cancel Pressed"),
-                            
-                        }
+                        },
                     ])
                 },
             },
         )
     }
 
-    const handleGtoCreatePost = () => {
+    const handleGoToCreatePost = () => {
         router.replace("community/createPost")
     }
 
-
-    const renderItem = ({ item }) => (
+    const renderItem = ({ item }: { item: Post }) => (
         <Post
             post={item}
-            isLoading={isLoadingPost}
-            isRefetching={postIsRefeching}
             onLike={handleLike}
             onShowCommentSheet={(postId) => {
                 setPostId(postId)
@@ -118,52 +112,62 @@ export default function CommunityForum() {
         />
     )
 
+    const renderFooter = () => {
+        return loadingMore ? (
+            <ActivityIndicator size="small" color={Colors.light.primary} />
+        ) : null
+    }
+
     return (
         <KeyboardAvoidingView
             keyboardVerticalOffset={47 + insets.top}
             style={{ flex: 1, bottom: 0, marginTop: 10 }}
             behavior="padding"
         >
-            <FlatList
-                data={transformedPosts}
-                ref={postRef}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id}
-                refreshControl={
-                    <RefreshControl
-                        onRefresh={refetch}
-                        refreshing={postIsRefeching}
-                    />
-                }
-                onEndReached={handleRefeshData}
-                ListEmptyComponent={() =>
-                    isLoadingPost ? (
-                        <>
-                            <PostLoadingSekeleton />
-                            <PostLoadingSekeleton />
-                        </>
-                    ) : (
-                        <Text>No post found</Text>
-                    )
-                }
-                maxToRenderPerBatch={FETCH_BATCH}
-                onMomentumScrollBegin={() => {
-                    onEndReachedCalledDuringMomentum.current = false
-                }}
-                initialScrollIndex={0}
-                onEndReachedThreshold={0.7}
-                onScrollToIndexFailed={({ index, averageItemLength }) => {
-                    postRef.current?.scrollToOffset({
-                        offset: index * averageItemLength,
-                        animated: true,
-                    })
-                }}
-            />
+            {isLoadingPost && !loadingMore ? (
+                <FlatList
+                    data={[{}, {}, {}, {}, {}]}
+                    renderItem={() => <PostLoadingSekeleton />}
+                />
+            ) : (
+                <FlatList
+                    data={(posts as Post[])}
+                    ref={postRef}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.id}
+                    refreshControl={
+                        <RefreshControl
+                            tintColor={Colors.light.primary}
+                            onRefresh={handleRefreshData}
+                            refreshing={isRefetching}
+                        />
+                    }
+                    onEndReached={handleLoadMore}
+                    ListFooterComponent={renderFooter}
+                    ListEmptyComponent={() => <Text>No post found</Text>}
+                    maxToRenderPerBatch={FETCH_BATCH}
+                    onMomentumScrollBegin={() => {
+                        onEndReachedCalledDuringMomentum.current = false
+                    }}
+                    initialScrollIndex={0}
+                    onEndReachedThreshold={0.7}
+                    onScrollToIndexFailed={({ index, averageItemLength }) => {
+                        postRef.current?.scrollToOffset({
+                            offset: index * averageItemLength,
+                            animated: true,
+                        })
+                    }}
+                />
+            )}
             <TouchableHighlight
                 style={styles.createPostBtn}
-                onPress={handleGtoCreatePost}
+                onPress={handleGoToCreatePost}
             >
-                <Ionicons size={25} name="pencil-outline" color={Colors.light.primary} />
+                <Ionicons
+                    size={25}
+                    name="pencil-outline"
+                    color={Colors.light.primary}
+                />
             </TouchableHighlight>
             {showCommentSheet && (
                 <Comments

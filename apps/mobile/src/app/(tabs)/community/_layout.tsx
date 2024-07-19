@@ -1,8 +1,10 @@
 import { Stack } from "expo-router"
+import { CustomSaveAreaView } from "../../../components/CustomSaveAreaView"
 
 
 const LayoutView = () => { 
     return (
+    <CustomSaveAreaView>
         <Stack 
         
         >
@@ -23,6 +25,7 @@ const LayoutView = () => {
                 
             </Stack.Screen>
         </Stack>
+        </CustomSaveAreaView>
     )
 }
 

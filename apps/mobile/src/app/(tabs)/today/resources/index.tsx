@@ -4,22 +4,25 @@ import { View, Text } from "tamagui"
 import { Skeleton } from "moti/skeleton"
 import { FlatList, RefreshControl } from "react-native"
 import { ResourceItem } from "../../../../components/RecommendedResouces"
-import { api } from "../../../../utils/api"
+import { getResources, type Resource } from "../../../../api/resources"
+import { useQuery } from "@tanstack/react-query"
+import { useLocalSearchParams } from "expo-router"
 
 
 
 const ResourcesScreen = () => {
     const [page, setPage] = useState(1)
+    const { tags } = useLocalSearchParams();
     const resourcesRef = useRef()
 
-    const { data, isRefetching: isResourceRefetching , isLoading} =
-    api.resource.list.useQuery({ filter: { page, limit: 15 } })
+    const {
+        isLoading,
+        data,
+        refetch,
+        isRefetching: isResourceRefetching,
+    } = useQuery(["getActivities", tags], () => getResources(tags))
 
-    const handleRefreshResourceData = () => {
-        if (data && page < data?.data.totalPages){
-             setPage((prev) => prev + 1)
-        }
-    }
+
 
     if (isLoading) {
         return (
@@ -32,13 +35,12 @@ const ResourcesScreen = () => {
     return (
        <View px={'$4'} py={'$2'}>
               <FlatList
-                            data={data?.data.resources}
+                            data={data}
                             keyExtractor={(data) => data.id}
                             ListEmptyComponent={() => (
                                 <Text>No Articles found</Text>
                             )}
                             renderItem={({ item }) => <ResourceItem resource={item} width={'100%'} height={250} />}
-                            onEndReached={handleRefreshResourceData}
                             showsVerticalScrollIndicator={false}
                      
                             
@@ -54,7 +56,7 @@ const ResourcesScreen = () => {
                             }}
                             refreshControl={
                                 <RefreshControl
-                                    onRefresh={handleRefreshResourceData}
+                                    onRefresh={refetch}
                                     refreshing={isResourceRefetching}
                                 />
                             }

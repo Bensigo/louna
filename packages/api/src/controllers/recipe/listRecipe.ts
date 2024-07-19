@@ -2,13 +2,12 @@ import type { MealType, PrismaClient, UserPref } from "@solu/db"
 
 import { recommendRecipes } from "../../ml/recipe/contentBase"
 import { ListRecipeSchema } from "../../schemas/recipe"
-import { protectedProcedure } from "../../trpc"
+import {  protectedProcedure } from "../../trpc"
 
 const listRecipeController = protectedProcedure
     .input(ListRecipeSchema)
     .query(async ({ ctx, input }) => {
-        const { prisma, auth } = ctx
-        const userId = auth.userId
+        const { prisma } = ctx
 
         const { filter, searchName } = input
 
@@ -43,7 +42,9 @@ const listRecipeController = protectedProcedure
         const recipes = await prisma.recipe.findMany({
             where: {
                 ...listFilter,
-                mealType: filter.mealType,
+                ...(filter.mealType?.length ? { mealType: { in: filter.mealType } }: {}),
+                ...(filter.dietType?.length ? { dietType: { in: filter.dietType } }: {}),
+                ...(filter.difficulty?.length ? { difficulty: { in: filter.difficulty } }: {}),
                 deleted: false,
            
             },
@@ -57,14 +58,16 @@ const listRecipeController = protectedProcedure
             take: filter.limit || 50,
         })
 
+        const totalCount = await prisma.recipe.count({})
+
         // const recommend = await getRecommendRecipes(
         //     prisma,
         //     userId,
         //     filter.mealType,
         //     searchName
         // )
-        const recommend = []
-        return { recipes, recommend }
+     
+        return { recipes, totalCount  }
     })
 
 export { listRecipeController }

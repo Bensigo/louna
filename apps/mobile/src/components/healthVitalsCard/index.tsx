@@ -1,34 +1,73 @@
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import AppleHealthKit from "react-native-health";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { H5, XStack, YStack, Text } from "tamagui";
+import { ProgressCircle } from "react-native-svg-charts";
+import { XStack, YStack } from "tamagui";
 
 import { PERMISSIONS } from "../../config/healthKit.ios";
+import { type RouterOutputs } from "../../utils/api";
+import ReadMoreCollapsible from "../collapable";
 
-// Assume there's a `VitalDisplay` component that standardizes the display of each vital type.
-const VitalDisplay = ({ icon, iconColor, label, value }) => {
-    return (
-        <XStack alignItems="center" gap="$3" width={150}>
-            <FontAwesome5 name={icon} size={23} color={iconColor} />
-            <YStack gap="$1">
-                <H5>{value || "N/A"}</H5>
-                <Text fontWeight="bold">{label}</Text>
-            </YStack>
-        </XStack>
-    );
+const convertToKg = (weightInPounds: number) => {
+    const kg = weightInPounds * 0.45359237;
+    return Number(kg.toFixed(2)); // Returning the weight in kilograms, rounded to 2 decimal places
 };
 
-const HealthVitalsCard = ({ onVitalsData }) => {
+// Calculate BMR using Harris-Benedict equation
+const calculateBMR = (
+    weight: number,
+    height: number,
+    age: number,
+    gender: string
+) => {
+    if (gender === "male") {
+        return 88.362 + 13.397 * weight + 4.799 * height - 5.677 * age;
+    } else {
+        return 447.593 + 9.247 * weight + 3.098 * height - 4.33 * age;
+    }
+};
+
+// Calculate TDEE based on activity level
+const calculateTDEE = (bmr: number, activityLevel: string) => {
+    const activityFactors = {
+        sedentary: 1.2,
+        lightlyActive: 1.375,
+        moderatelyActive: 1.55,
+        veryActive: 1.725,
+        superActive: 1.9,
+    };
+    return bmr * activityFactors[activityLevel];
+};
+
+// Determine the color of the progress circle based on steps
+const getProgressColor = (steps: number) => {
+    const percentage = (steps / 10000) * 100;
+    if (percentage >= 75) {
+        return "#00e676"; // Green for good
+    } else if (percentage >= 50) {
+        return "#FFD700"; // Yellow for fair
+    } else {
+        return "#FF6347"; // Red for poor
+    }
+};
+
+const HealthVitalsCard = ({
+    lodingUserPref,
+    user,
+}: {
+    lodingUserPref: boolean;
+    user: RouterOutputs["auth"]["getProfile"];
+}) => {
     const [hasPermissions, setHasPermissions] = useState(false);
-    const [steps, setSteps] = useState<number>();
-    const [heartRate, setHeartRate] = useState<number>();
-    const [sleepHours, setSleepHours] = useState<number>();
-    const [stressLevel, setStressLevel] = useState<number>();
-    const [vo2Max, setVo2Max] = useState<number>();
-    const [bloodPressure, setBloodPressure] = useState<number>();
-    const [height, setHeight] = useState<number>();
-    const [weight, setWeight] = useState<number>();
+    const [steps, setSteps] = useState<number>(0);
+    const [previousDaySteps, setPreviousDaySteps] = useState<number>(0);
+    const [caloriesBurnt, setCaloriesBurnt] = useState<number>(0);
+    const [stressLevel, setStressLevel] = useState<string>();
+    const [weight, setWeight] = useState<number>(0);
+    const [height, setHeight] = useState<number>(0);
+    const [age, setAge] = useState<number>(0);
+    const [bmi, setBmi] = useState<number>(0);
+    const [tdee, setTDEE] = useState<number>(1500); // Default daily calorie goal
 
     useEffect(() => {
         AppleHealthKit.initHealthKit(PERMISSIONS, (err, permission) => {
@@ -51,178 +90,285 @@ const HealthVitalsCard = ({ onVitalsData }) => {
             if (err) {
                 console.log({ err });
             }
-            setSteps(result.value);
+            setSteps(Math.round(result.value) ?? 0);
         });
 
-        // Fetch heart rate data
-        AppleHealthKit.getHeartRateSamples({}, (err, result) => {
-            console.log("heart rate", result);
-            if (err) {
-                console.log({ err });
-            }
-            if (result?.length > 0) {
-                setHeartRate(result[0].value);
-                // Calculate stress level
-                const stressLevel = calculateStressLevel(result);
-                setStressLevel(stressLevel);
-            }
-        });
-
-        // Fetch VO2 max data
-        AppleHealthKit.getVo2MaxSamples({}, (err, result) => {
-            if (err) {
-                console.log({ err });
-            }
-            if (result?.length > 0) {
-                setVo2Max(result[0].value);
-            }
-        });
-
-        // Fetch sleep hours data
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(today.getDate() - 1); // Fetch sleep data for the past day
-        AppleHealthKit.getSleepSamples(
+        // Fetch previous day's steps data
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        AppleHealthKit.getStepCount(
             {
-                startDate: new Date(2024, 0, 0).toISOString(), // required
-                endDate: new Date().toISOString(), // optional; default now
-                limit: 10, // optional; default no limit
-                ascending: true, // optional; default false
+                startDate: yesterday.toISOString(),
+                endDate: new Date().toISOString(),
             },
             (err, result) => {
                 if (err) {
                     console.log({ err });
                 }
-                console.log({ result });
-                if (result?.length > 0) {
-                    // Calculate total sleep hours
-                    const totalSleepHours = result.reduce((acc, curr) => {
-                        return (
-                            acc +
-                            (curr.endDate - curr.startDate) / (1000 * 60 * 60)
-                        ); // Convert milliseconds to hours
-                    }, 0);
-                    setSleepHours(totalSleepHours);
-                }
+                setPreviousDaySteps(result.value ?? 0);
             }
         );
 
-        // Fetch blood pressure data
-        AppleHealthKit.getBloodPressureSamples({}, (err, result) => {
-            if (err) {
-                console.log({ err });
+        // Fetch calories burnt data
+        AppleHealthKit.getActiveEnergyBurned(
+            {
+                startDate: new Date().toISOString(),
+            },
+            (err, result) => {
+                if (err) {
+                    console.log({ err });
+                }
+                console.log(
+                    { result },
+                    "=========== active energy========"
+                );
+                setCaloriesBurnt(result[0]?.value ?? 0);
             }
-            if (result?.length > 0) {
-                setBloodPressure(result[0].value);
-            }
-        });
+        );
 
-        AppleHealthKit.getLatestHeight({}, (err, result) => {
-            if (err) {
-                console.log({ err });
+        // Fetch stress level data (this should be derived from heart rate variability or another relevant metric)
+        AppleHealthKit.getHeartRateSamples(
+            {
+                startDate: new Date().toISOString(),
+            },
+            (err, result) => {
+                if (err) {
+                    console.log({ err });
+                }
+                console.log({ result }, "======== heart rate samples");
+                const stressLevel = calculateStressLevel(result);
+                setStressLevel(stressLevel);
             }
-            if (result?.length > 0) {
-                setHeight(result.value);
-            }
-        });
+        );
 
+        // Fetch weight data
         AppleHealthKit.getLatestWeight({}, (err, result) => {
             if (err) {
                 console.log({ err });
             }
-            if (result?.length > 0) {
-                setHeight(result.value);
+            if (result) {
+                const weightInKg = convertToKg(result.value);
+                setWeight(weightInKg ?? 0);
+            }
+        });
+
+        // Fetch height data
+        AppleHealthKit.getLatestHeight({}, (err, result) => {
+            if (err) {
+                console.log({ err });
+            }
+            if (result) {
+                setHeight(result.value ?? 0);
+            }
+        });
+
+        // Fetch BMI data
+        AppleHealthKit.getLatestBmi({}, (err, result) => {
+            if (err) {
+                console.log({ err });
+            }
+            if (result) {
+                setBmi(result.value ?? 0);
             }
         });
     }, [hasPermissions]);
 
+    useEffect(() => {
+        if (weight && height && !lodingUserPref) {
+            const bmr = calculateBMR(
+                weight,
+                height,
+                user?.userPref?.age as number,
+                "female"
+            );
+            const activityLevel = determineActivityLevel(previousDaySteps);
+            const tdee = calculateTDEE(bmr, activityLevel); // Adjusted TDEE based on activity level
+            console.log({ bmr, tdee });
+            setTDEE(tdee);
+        }
+    }, [weight, height, age, previousDaySteps, lodingUserPref]);
+
     // Calculate Stress Level
     const calculateStressLevel = (heartRateSamples: any[]) => {
         if (heartRateSamples.length < 2) {
-            return null; // Not enough data to calculate stress level
+            return "Low"; // Default stress level
         }
-        const sumOfDifferences = heartRateSamples
-            .slice(1)
-            .reduce((acc, curr, index) => {
-                return (
-                    acc + Math.abs(curr.value - heartRateSamples[index].value)
-                );
-            }, 0);
-        const averageDifference =
-            sumOfDifferences / (heartRateSamples.length - 1);
-        return Math.round(averageDifference * 100); // Multiply by a scaling factor for better readability
+        const sumOfDifferences = heartRateSamples.slice(1).reduce(
+            (acc, curr, index) => {
+                return acc + Math.abs(curr.value - heartRateSamples[index].value);
+            },
+            0
+        );
+        const averageDifference = sumOfDifferences / (heartRateSamples.length - 1);
+        if (averageDifference > 10) return "High";
+        if (averageDifference > 5) return "Medium";
+        return "Low";
+    };
+
+    // Determine activity level based on previous day's steps
+    const determineActivityLevel = (steps: number) => {
+        if (steps < 5000) return "sedentary";
+        if (steps < 7500) return "lightlyActive";
+        if (steps < 10000) return "moderatelyActive";
+        if (steps < 12500) return "veryActive";
+        return "superActive";
+    };
+
+    const weightLossRecommendation = () => {
+        if (bmi == 0) return "";
+        const weightToLoss = ((bmi - 24.9) * 0.5).toFixed(2);
+        console.log({ weightToLoss, bmi });
+        if (bmi < 18.5) return "You are underweight. Consider gaining weight.";
+        if (bmi >= 18.5 && bmi <= 24.9) return "You are at a healthy weight.";
+        if (bmi >= 25)
+            return `You should lose ${weightToLoss} kg to reach a healthy weight.`;
     };
 
     return (
-        <View
-            style={{
-                padding: 20,
-                backgroundColor: "#fff",
-                borderRadius: 10,
-                shadowColor: "#000",
-            }}
-        >
-            <YStack space="$4">
-                <XStack justifyContent="space-between">
-                    <VitalDisplay
-                        icon="heartbeat"
-                        iconColor="#f05454" // Cool and matching minimalist color
-                        label="Heart Rate"
-                        value={heartRate}
-                    />
-                    <VitalDisplay
-                        icon="bed"
-                        iconColor="#5c5cff" // Cool and matching minimalist color
-                        label="Sleep Hours"
-                        value={sleepHours}
-                    />
+        <YStack>
+            <Text style={styles.title}>Health Monitor Overview</Text>
+            <ReadMoreCollapsible
+                text={`This card provides an overview of your key health metrics including steps, calorie intake, stress level, and weight. Stay on top of your health by monitoring these vital signs regularly.`}
+                len={100}
+            />
+            <YStack gap={"$1"}>
+                <XStack gap={"$1"}>
+                    <YStack style={styles.card}>
+                        <YStack style={styles.progressContainer}>
+                            <ProgressCircle
+                                style={styles.progressCircle}
+                                progress={(steps / 10000) * 1}
+                                startAngle={0}
+                                endAngle={100}
+                                cornerRadius={50}
+                                strokeWidth={8}
+                                progressColor={getProgressColor(steps)}
+                                backgroundColor="#fff"
+                                animate
+                                animateDuration={0.2}
+                            />
+                            <YStack style={styles.textContainer}>
+                                <Text style={styles.progressText}>
+                                    {steps} / 10000
+                                </Text>
+                            </YStack>
+                        </YStack>
+                        <Text style={styles.label}>Steps</Text>
+                    </YStack>
+
+                    <YStack style={styles.card}>
+                        <Text style={styles.label}>Calories Intake</Text>
+                        <Text style={styles.valueBig}>
+                            {" "}
+                            {Math.round(tdee)} Cal
+                        </Text>
+                        <Text style={styles.note}>
+                            Max Calories intake for the day
+                        </Text>
+                    </YStack>
                 </XStack>
-                <XStack justifyContent="space-between">
-                    <VitalDisplay
-                        icon="tired"
-                        iconColor="#41b883" // Cool and matching minimalist color
-                        label="Stress Level"
-                        value={stressLevel}
-                    />
-                    <VitalDisplay
-                        icon="running"
-                        iconColor="#ff9f1a" // Cool and matching minimalist color
-                        label="Steps Count"
-                        value={steps}
-                        fontFamily="FontAwesome5"
-                    />
-                </XStack>
-                <XStack justifyContent="space-between">
-                    <VitalDisplay
-                        icon="wind"
-                        iconColor="#a55eea" // Cool and matching minimalist color
-                        label="VO2 Max"
-                        value={vo2Max}
-                    />
-                    <VitalDisplay
-                        icon="tint"
-                        iconColor="#ff6b6b" // Cool and matching minimalist color
-                        label="Blood Pressure"
-                        value={`${bloodPressure ? bloodPressure : "N/A"}`}
-                    />
-                </XStack>
-                <XStack justifyContent="space-between">
-                    <VitalDisplay
-                        icon="female"
-                        iconColor="#a55eea" // Cool and matching minimalist color
-                        label="Height"
-                        value={height}
-                    />
-                    <VitalDisplay
-                        icon="weight"
-                        iconColor="#ff6b6b" // Cool and matching minimalist color
-                        label="Weight"
-                        value={weight}
-                    />
+                <XStack gap={"$1"}>
+                    <YStack style={styles.card}>
+                        <Text style={styles.label}>Stress Level</Text>
+                        <Text style={styles.valueBig}>{stressLevel}</Text>
+                        <Text style={styles.note}>
+                            {stressLevel === "High" &&
+                                "Your stress level is high. Consider taking breaks, practicing mindfulness, and ensuring you get enough sleep."}
+                            {stressLevel === "Medium" &&
+                                "Your stress level is moderate. It's a good idea to engage in relaxing activities and monitor your stress."}
+                            {stressLevel === "Low" &&
+                                "Your stress level is low. Keep up the good work maintaining a balanced lifestyle."}
+                        </Text>
+                    </YStack>
+
+                    <YStack style={styles.card}>
+                        <Text style={styles.label}>Weight</Text>
+                        <Text style={styles.valueBig}>{weight} kg</Text>
+                        <Text style={styles.note}>
+                            {weightLossRecommendation()}
+                        </Text>
+                    </YStack>
                 </XStack>
             </YStack>
-        </View>
+        </YStack>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        padding: 10,
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        shadowColor: "#000",
+        flexDirection: "column",
+        flexWrap: "wrap",
+        justifyContent: "space-around",
+    },
+    title: {
+        fontSize: 15,
+        fontWeight: "bold",
+    },
+    description: {
+        fontSize: 14,
+        color: "#757575",
+        marginBottom: 20,
+        flexWrap: "wrap", // Ensure the text wraps properly
+    },
+    card: {
+        overflow: "hidden",
+        elevation: 3,
+        backgroundColor: "#f5f5f5",
+        borderRadius: 10,
+        padding: 15,
+        margin: 10,
+        alignItems: "center",
+        width: 150,
+        height: 150,
+    },
+    label: {
+        fontSize: 12,
+        fontWeight: "bold",
+        marginTop: 10,
+    },
+    value: {
+        fontSize: 15,
+        fontWeight: "bold",
+    },
+    valueBig: {
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    progressCircle: {
+        height: 120,
+        width: 120,
+    },
+    note: {
+        fontSize: 9,
+        color: "#757575",
+        marginTop: 10,
+        textAlign: "center",
+    },
+    progressContainer: {
+        position: "relative",
+        justifyContent: "center",
+        alignItems: "center",
+        width: 100,
+        height: 100,
+    },
+    textContainer: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    progressText: {
+        fontSize: 13,
+        fontWeight: "bold",
+        color: "#333",
+    },
+});
 
 export { HealthVitalsCard };

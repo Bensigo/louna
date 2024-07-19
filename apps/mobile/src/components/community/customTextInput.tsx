@@ -27,7 +27,6 @@ export const CustomTextInput = ({ onPostText }: { onPostText: (text: string) => 
     }
 
     const submitPost = (data: FormInputType) => {
-        console.log("called")
         onPostText(data.text)
         setValue("text", "")
     }

@@ -70,10 +70,11 @@ const createUser = (userData: User) =>
 
 const now = new Date().toISOString().split(".")[0]; // YYYY-MM-DDTHH:mm:ss
 function appendLog(payload: any) {
-  fs.appendFileSync(
-    `./migration-log-${now}.json`,
-    `\n${JSON.stringify(payload, null, 2)}`
-  );
+
+  // fs.appendFileSync(
+  //   `./migration-log-${now}.json`,
+  //   `\n${JSON.stringify(payload, null, 2)}`
+  // );
 }
 
 let migrated = 0;

@@ -22,8 +22,6 @@ type PostType = {
         Comments: any[]
         createdAt: Date
     }
-    isLoading: boolean,
-    isRefetching: boolean,
     onLike: (postId: string) => void
     onShowCommentSheet: (postId: string) => void
 }
@@ -31,7 +29,7 @@ type PostType = {
 const { width: screenWidth } = Dimensions.get("window")
 
 const Post: React.FC<PostType> = (props) => {
-    const { post, onLike, isRefetching } = props
+    const { post, onLike } = props
     const { userId } = useAuth()
     const [isLiked, setIsLike] = React.useState(false)
 

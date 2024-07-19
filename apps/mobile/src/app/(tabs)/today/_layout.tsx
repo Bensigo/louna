@@ -37,6 +37,60 @@ const LayoutView = () => {
                         ),
                     }}
                 ></Stack.Screen>
+                <Stack.Screen
+                      name="activities/[category]"
+                      options={{
+                          title: "Activities",
+                          headerShadowVisible: false,
+                         headerStyle: {
+                          backgroundColor: 'transparent',
+                         },
+                          headerLeft: () => (
+                              <LeftBackButton route="/today" bg="black" />
+                          ),
+                      }}
+                ></Stack.Screen>
+                
+                <Stack.Screen
+                      name="goals/steps"
+                      options={{
+                          title: "Steps",
+                          headerShadowVisible: false,
+                         headerStyle: {
+                          backgroundColor: 'transparent',
+                         },
+                          headerLeft: () => (
+                              <LeftBackButton route="/today" bg="black" />
+                          ),
+                      }}
+                ></Stack.Screen>  
+                <Stack.Screen
+                      name="goals/flexibility"
+                      options={{
+                          title: "Flexibility",
+                          headerShadowVisible: false,
+                         headerStyle: {
+                          backgroundColor: 'transparent',
+                         },
+                          headerLeft: () => (
+                              <LeftBackButton route="/today" bg="black" />
+                          ),
+                      }}
+                ></Stack.Screen>  
+                 <Stack.Screen
+                      name="goals/breathing"
+                      options={{
+                          title: "Breathing Exercise",
+                          headerShadowVisible: false,
+                         headerStyle: {
+                          backgroundColor: 'transparent',
+                         },
+                          headerLeft: () => (
+                              <LeftBackButton route="/today" bg="black" />
+                          ),
+                      }}
+                ></Stack.Screen> 
+
             </Stack>
         </CustomSaveAreaView>
     )

@@ -4,6 +4,7 @@ import type { CuisineType, MealType, PrismaClient } from "@solu/db"
 
 import { CreateRecipeSchema } from "../../schema/recipe"
 import { protectedProcedure } from "../../trpc"
+import { slugify } from "../../utils/slug"
 
 export const createRecipeController = protectedProcedure
     .input(CreateRecipeSchema)
@@ -68,6 +69,7 @@ export const createRecipeController = protectedProcedure
 
         const newCalorie = parseInt(calories)
         const newDuration = parseInt(duration)
+        const slug = slugify(name)
         const data = {
             
                 name,
@@ -85,7 +87,8 @@ export const createRecipeController = protectedProcedure
                 tags,
                 cuisine: cusineType  as CuisineType,
                 difficulty: difficultyLevel,
-                mealPreference
+                mealPreference,
+                slug
             
         }
         const recipe = await prisma.recipe.create({

@@ -7,6 +7,7 @@ import Hero from "~/components/Hero"
 import Navbar from "~/components/Navbar"
 import SectionTitle from "~/components/SectionTitle"
 import CardBox from "~/components/Card"
+import FeaturesSection from "~/components/Feauture"
 
 const data = [
     {
@@ -54,7 +55,8 @@ const Home = () => {
                 Nextly is a free landing page & marketing website template for
                 startups and indie projects.
             </SectionTitle>
-            <Benefits data={data} />
+            {/* <Benefits data={data} /> */}
+            <FeaturesSection data={data} />
             <Container maxW="container.xl" py={8}>
                 <CardBox />
             </Container>

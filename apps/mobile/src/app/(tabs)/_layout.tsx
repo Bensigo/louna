@@ -90,24 +90,14 @@ const TabScreenLayout = () => {
                     name="today"
                     options={{
                         tabBarLabel: "Today",
-                        tabBarIcon: ({ color }) => ( <TabBarIcon name={'today-outline'} color={color} />),
-                    }}
-                ></Tabs.Screen>
-                <Tabs.Screen
-                    name="recipes"
-                    options={{
-                        tabBarLabel: "Recipes",
-                        tabBarIcon: ({ color }) => (
-                            
-                            <MaterialCommunityIcons name="food-takeout-box-outline" size={28} color={color} />
-                        ),
+                        tabBarIcon: ({ color }) => ( <TabBarIcon name={'home-outline'} color={color} />),
                     }}
                 ></Tabs.Screen>
                 <Tabs.Screen
                     name="bookings"
                     options={{
-                        tabBarLabel: "Bookings",
-                        tabBarIcon: ({ color }) => ( <TabBarIcon name={"calendar-outline" } color={color} />),
+                        tabBarLabel: "bookings",
+                        tabBarIcon: ({ color }) => ( <TabBarIcon name={"today-outline" } color={color} />),
 
                     }}
                 ></Tabs.Screen>           
@@ -119,6 +109,14 @@ const TabScreenLayout = () => {
                         tabBarIcon: ({ color }) => ( <TabBarIcon name={"people-outline"} color={color} />),
                     }}
                 ></Tabs.Screen>
+                 <Tabs.Screen
+                    name="profile"
+                    options={{
+                        tabBarLabel: "profile",
+                        tabBarIcon: ({ color }) => ( <TabBarIcon name={"person-outline" } color={color} />),
+
+                    }}
+                ></Tabs.Screen> 
             </Tabs>
         </SignedIn>
     )

@@ -54,7 +54,9 @@
         "SOLU_AWS_SECRET_KEY",
         "SOLU_AWS_REGION",
         "IMG_SERVER_URL",
-        "NEXT_PUBLIC_IMG_SERVER_URL"
-
+        "NEXT_PUBLIC_IMG_SERVER_URL",
+        "EXPO_PUBLIC_AI_API_URL",
+        "EXPO_PUBLIC_AI_API_X_SECRET",
+        "X_SECRET"
     ]
 }

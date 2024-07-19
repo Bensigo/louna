@@ -57,7 +57,7 @@ const RecipeItem = ({ recipe }: { recipe: Recipe }) => {
     const router = useRouter()
     const { id, name, duration, category, likes, images } = recipe
 
-    console.log({ recipe })
+  
 
     const handleGoToDetail = () => {
         router.push(`recipes/${id}`)

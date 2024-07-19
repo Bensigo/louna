@@ -7,7 +7,7 @@ const Auth = () => {
     const { isSignedIn } = useAuth()
 
     if (isSignedIn) {
-        return <Redirect href="/community" />
+        return <Redirect href="/today" />
     }
 
     return (
@@ -37,7 +37,7 @@ const Auth = () => {
                         options={{
                             headerTitle: "",
                             headerTransparent: true,
-                            headerLeft: () => <LeftBackButton route='' />,
+                            headerLeft: () => <LeftBackButton route='/' />,
                         }}
                     />
 

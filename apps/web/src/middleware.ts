@@ -4,7 +4,7 @@ import { authMiddleware } from "@clerk/nextjs"
 //     return NextResponse.next(req)
 // }
 export default authMiddleware({
-    publicRoutes: ["/", "/auth/register","/auth/login" ,'/auth/verify_new', '/auth/forgot-password'],
+    publicRoutes: ["/", "/auth/register","/auth/login" ,'/auth/verify_new', '/auth/forgot-password', "/recipes", "/recipes/:slug", "/studios", "/studios/:slug", "/api/trpc/recipe.list", "/api/trpc/recipe.getBySlug"],
     // publicRoutes: ["/login", "/register", "/forgot-password"],
     ignoredRoutes: ["/api/webhooks/user"],
 })

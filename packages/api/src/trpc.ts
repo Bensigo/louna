@@ -28,7 +28,8 @@ import { prisma } from "@solu/db"
  *
  */
 type CreateContextOptions = {
-    auth: SignedInAuthObject | SignedOutAuthObject
+    auth: SignedInAuthObject | SignedOutAuthObject,
+    headers: any
 }
 
 /**
@@ -41,9 +42,11 @@ type CreateContextOptions = {
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
+  
     return {
         auth: opts.auth,
         prisma,
+        headers: opts.headers
     }
 }
 
@@ -55,6 +58,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
 export const createTRPCContext = (opts: CreateNextContextOptions) => {
     return createInnerTRPCContext({
         auth: getAuth(opts.req),
+        headers: opts.req
     })
 }
 
@@ -82,11 +86,6 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
     },
 })
 
-t.middleware(({ ctx, next }) => {
-    console.log("new request")
-    return next()
-})
-
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
  *
@@ -108,12 +107,15 @@ export const createTRPCRouter = t.router
  * can still access user session data if they are logged in
  */
 export const publicProcedure = t.procedure
-
 /**
  * Reusable middleware that enforces users are logged in before running the
  * procedure
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+    if (ctx.headers['x-secret'] && ctx.headers['x-secret'] === process.env.X_SECRET) {
+        return next({})
+    }
+
     if (!ctx.auth.userId) {
         throw new TRPCError({
             code: "UNAUTHORIZED",
@@ -137,3 +139,7 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed)
+
+
+// export const InternalProcedure = t.procedure.use(enforceInternalAPICall)
+export type Context = Awaited<ReturnType<typeof createTRPCContext>>;

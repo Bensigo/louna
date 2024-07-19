@@ -1,5 +1,6 @@
 import { bookmarkRecipeController } from "../controllers/recipe/bookmarkRecipe";
 import { getRecipeController } from "../controllers/recipe/getRecipe";
+import { getRecipeBySlugController } from "../controllers/recipe/getRecipeBySlug";
 import { isBookmarkController } from "../controllers/recipe/isBookmark";
 import { isLikeController } from "../controllers/recipe/isLike";
 import { likeRecipeController } from "../controllers/recipe/likeRecipe";
@@ -14,6 +15,7 @@ import { createTRPCRouter } from "../trpc";
 export const recipeRouters = createTRPCRouter({
     likeRecipe: likeRecipeController,
     getRecipe: getRecipeController,
+    getBySlug: getRecipeBySlugController,
     list: listRecipeController,
     bookmarkRecipe: bookmarkRecipeController,
     isLike: isLikeController,

@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from "react"
-import { AVPlaybackStatus, ResizeMode, Video } from "expo-av"
-import {  usePathname, useRouter } from "expo-router"
-import { FontAwesome5, Ionicons } from "@expo/vector-icons"
+import {  ResizeMode, Video } from "expo-av"
+import { FontAwesome5 } from "@expo/vector-icons"
 import { View as AnimationView } from "moti"
 import { Skeleton } from "moti/skeleton"
 import { useLocalSearchParams } from "expo-router";
-import { View, Text, YStack, Button, H1, H4, ScrollView } from "tamagui";
+import { View, Text, YStack, H4, ScrollView } from "tamagui";
 
 import { api } from "../../../../../utils/api";
 import { buildFileUrlV2 } from "../../../../../utils/buildUrl"

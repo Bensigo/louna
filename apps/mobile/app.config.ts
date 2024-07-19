@@ -35,7 +35,7 @@ const defineConfig = (): ExpoConfig => ({
         },
         CLERK_PUBLISHABLE_KEY,
     },
-    plugins: ["./expo-plugins/with-modify-gradle.js", "expo-font",
+    plugins: ["./expo-plugins/with-modify-gradle.js", "expo-font",  "expo-router",
     "expo-secure-store", ["react-native-health", {
         "isClinicalDataEnabled": true,
     }]],

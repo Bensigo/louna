@@ -1,26 +1,40 @@
 import React, { useRef, useState } from "react"
-import {
-    TouchableHighlight,
-    TouchableOpacity,
-    useWindowDimensions,
-} from "react-native"
+import { TouchableOpacity, useWindowDimensions } from "react-native"
+import { ResizeMode, Video } from "expo-av"
 import { useRouter } from "expo-router"
-import Ionicons from "@expo/vector-icons/Ionicons"
-import { Avatar, H2, H3, Image, ScrollView, Text, View, XStack, YStack } from "tamagui"
-import { Video, ResizeMode } from 'expo-av';
-import { api } from "../../../utils/api"
-import { Activity, } from "./list"
-import { Colors } from "../../../constants/colors"
+import {
+    H3,
+    Image,
+    ScrollView,
+    SizableText,
+    Tabs,
+    Text,
+    View,
+    YStack,
+    AnimatePresence,
+    styled,
+} from "tamagui"
 
-const categories = [
-    "stress relief",
-    "fat loss",
-    "muscle gain",
-    "Cardiovasular",
-    "therapy",
-    "mobility",
-    "endurance",
-]
+import { Colors } from "../../../constants/colors"
+import { api } from "../../../utils/api"
+import { Activity } from "./list"
+import Upcoming from "./upcoming"
+
+const categories: string[] = [
+    "Strength",
+    "Endurance",
+    "Running",
+    "HIIT",
+    "Cycling",
+    "Boxing",
+    "Therapy",
+    "Prenatal",
+    "Post natal",
+    "Mindfulness",
+    "Pilates",
+    "Yoga",
+    "Dance"
+  ];
 
 const CategoryPill = ({ category, onPress }) => {
     const { width: DEVICE_WIDTH } = useWindowDimensions()
@@ -33,8 +47,8 @@ const CategoryPill = ({ category, onPress }) => {
                 alignItems="center"
                 gap={"$2"}
                 backgroundColor="white"
-                borderRadius={5}
-                height={70}
+                borderRadius={10}
+                height={50}
                 width={pillWidth}
                 marginRight={10}
                 marginBottom={10}
@@ -44,12 +58,12 @@ const CategoryPill = ({ category, onPress }) => {
                 <Image
                     source={require("../../../../assets/yoga-woman.jpg")}
                     alt="image"
-                    style={{ height: 40, width: 40, borderRadius: 20 }}
+                    style={{ height: 30, width: 30, borderRadius: 15 }}
                 />
                 <Text
                     style={{
-                        fontSize: 11,
-                        fontWeight: "bold"
+                        fontSize: 13,
+                        fontWeight: "bolder",
                     }}
                 >
                     {category?.toUpperCase()}
@@ -59,20 +73,171 @@ const CategoryPill = ({ category, onPress }) => {
     )
 }
 
+
+
 const BookingScreen = () => {
+    const [tabState, setTabState] = useState({
+        currentTab: 'upcoming',
+        intentAt: null,
+        activeAt: null,
+        prevActiveAt: null,
+      });
+    
+      const setCurrentTab = (currentTab) => setTabState({ ...tabState, currentTab });
+      const setIntentIndicator = (intentAt) => setTabState({ ...tabState, intentAt });
+      const setActiveIndicator = (activeAt) =>
+        setTabState({ ...tabState, prevActiveAt: tabState.activeAt, activeAt });
+    
+      const { activeAt, intentAt, prevActiveAt, currentTab } = tabState;
+      const direction = (() => {
+        if (!activeAt || !prevActiveAt || activeAt.x === prevActiveAt.x) {
+          return 0;
+        }
+        return activeAt.x > prevActiveAt.x ? -1 : 1;
+      })();
+    
+      const handleOnInteraction = (type, layout) => {
+        if (type === 'select') {
+          setActiveIndicator(layout);
+        } else {
+          setIntentIndicator(layout);
+        }
+      };
+    return (
+        <View flex={1} mt="$4">
+             <Tabs
+      value={currentTab}
+      onValueChange={setCurrentTab}
+      orientation="horizontal"
+      size="$4"
+      flexDirection="column"
+      activationMode="manual"
+      flex={1}
+    
+    >
+      <YStack>
+        <AnimatePresence>
+          {intentAt && (
+            <TabsRovingIndicator
+              width={intentAt.width}
+              height="$0.5"
+              x={intentAt.x}
+              bottom={0}
+            />
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {activeAt && (
+            <TabsRovingIndicator
+              theme="active"
+              active
+              width={activeAt.width}
+              height="$0.5"
+              x={activeAt.x}
+              bottom={0}
+            />
+          )}
+        </AnimatePresence>
+        <Tabs.List
+          disablePassBorderRadius
+          loop={false}
+          borderBottomLeftRadius={0}
+          borderBottomRightRadius={0}
+          paddingBottom="$1.5"
+          borderColor="$color3"
+          borderBottomWidth="$0.5"
+          backgroundColor="transparent"
+        >
+          <Tabs.Tab
+            unstyled
+            paddingHorizontal="$3"
+            paddingVertical="$2"
+            value="upcoming"
+            onInteraction={handleOnInteraction}
+          >
+            <SizableText fontSize={'$5'} color={Colors.light.primary}>Upcoming</SizableText>
+          </Tabs.Tab>
+          <Tabs.Tab
+            unstyled
+            paddingHorizontal="$3"
+            paddingVertical="$2"
+            value="bookings"
+            onInteraction={handleOnInteraction}
+          >
+            <SizableText fontSize={'$5'} color={Colors.light.primary}>Bookings</SizableText>
+          </Tabs.Tab>
+       
+        </Tabs.List>
+      </YStack>
+      <AnimatePresence exitBeforeEnter custom={{ direction }} initial={false}>
+        <AnimatedYStack key={currentTab} flex={1}>
+          <Tabs.Content  value={currentTab} forceMount flex={1} pb={'$3'} justifyContent="center">
+            {currentTab === 'upcoming' && <Upcoming />}
+            {currentTab === 'bookings' && <BookingTab />}
+          </Tabs.Content>
+        </AnimatedYStack>
+      </AnimatePresence>
+    </Tabs>
+        </View>
+    )
+}
+
+const TabsRovingIndicator = ({ active, ...props }) => {
+    return (
+      <YStack
+        position="absolute"
+        backgroundColor={Colors.light.primary}
+        opacity={0.7}
+        animation="quick"
+        enterStyle={{
+          opacity: 0,
+        }}
+        exitStyle={{
+          opacity: 0,
+        }}
+        {...(active && {
+          backgroundColor: Colors.light.primary,
+          opacity: 0.6,
+        })}
+        {...props}
+      />
+    );
+};
+  
+const AnimatedYStack = styled(YStack, {
+    f: 1,
+    x: 0,
+    o: 1,
+    animation: 'quick',
+    variants: {
+      direction: {
+        ':number': (direction) => ({
+          enterStyle: {
+            x: direction > 0 ? -25 : 25,
+            opacity: 0,
+          },
+          exitStyle: {
+            zIndex: 0,
+            x: direction < 0 ? -25 : 25,
+            opacity: 0,
+          },
+        }),
+      },
+    },
+  });
+
+const BookingTab = () => {
     const videoRef = useRef(null)
     const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = useWindowDimensions()
-    const videoSource = require('../../../../assets/pilates-vid.mp4') // todo: change to proper video
+    const videoSource = require("../../../../assets/pilates-vid.mp4") // todo: change to proper video
 
     const { data: userData, isLoading: isLoadingUserData } =
         api.auth.getProfile.useQuery()
 
     const router = useRouter()
-
-    const goToUpcoming = () => {
-        router.push("/bookings/upcoming")
+    const renderItem = () => {
+        return <Activity />
     }
-
     const handleCategoryPress = (category: string) => {
         router.push({
             pathname: "/bookings/list",
@@ -81,41 +246,15 @@ const BookingScreen = () => {
             },
         })
     }
-
-    const handleRefreshData = () => {}
-
-    const renderItem = () => {
-        return <Activity />
-    }
-
-    const goToProfile = () => {
-        router.push("/profile")
-    }
-
     return (
-        <ScrollView flex={1}  mt="$4" width={DEVICE_WIDTH} px={"$4"} showsVerticalScrollIndicator={false}>
-            <XStack justifyContent="space-between" alignItems="center">
-                <YStack gap="$2">
-                    <H2 fontSize={"$9"} fontWeight={"$15"} color={Colors.light.primary}>
-                        Bookings
-                    </H2>
-                </YStack>
-                <XStack gap={"$3"} alignItems="center">
-                    <TouchableOpacity onPress={goToUpcoming}>
-                        <Ionicons name="calendar-outline" size={25}    color={Colors.light.primary} />
-                    </TouchableOpacity>
-                    <TouchableHighlight onPress={goToProfile}>
-                        <Avatar circular size="$3">
-                            {!isLoadingUserData && userData && (
-                                <Avatar.Image src={userData?.imageUrl} />
-                            )}
-                            <Avatar.Fallback bc="$blue3" />
-                        </Avatar>
-                    </TouchableHighlight>
-                </XStack>
-            </XStack>
-
-            <View mt={'$3'} height={DEVICE_HEIGHT / 2.8} borderRadius={10}>
+        <ScrollView
+            flex={1}
+            mt="$4"
+            width={DEVICE_WIDTH}
+            px={"$4"}
+            showsVerticalScrollIndicator={false}
+        >
+            <View mt={"$3"} height={DEVICE_HEIGHT / 3.4} borderRadius={10}>
                 <Video
                     ref={videoRef}
                     source={videoSource}
@@ -124,22 +263,21 @@ const BookingScreen = () => {
                     isLooping
                     isMuted
                     shouldPlay
-                   
                 />
             </View>
             <View my={"$3"}>
-                <H3 fontSize={'$7'} my="$1">Categories</H3>
-                <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
-              
-                {categories.map((item, index) => (
-                      <CategoryPill
-                      key={index}
-                      category={item}
-                      onPress={() => handleCategoryPress(item)}
-                  />
-                ))}
+                <H3 fontSize={"$7"} my="$1">
+                    Categories
+                </H3>
+                <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                    {categories.map((item, index) => (
+                        <CategoryPill
+                            key={index}
+                            category={item}
+                            onPress={() => handleCategoryPress(item)}
+                        />
+                    ))}
                 </View>
-           
             </View>
         </ScrollView>
     )

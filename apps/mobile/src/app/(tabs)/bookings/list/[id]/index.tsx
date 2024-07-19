@@ -75,7 +75,7 @@ const PartnerDetail = () => {
 
     const goToSession = () => {
         router.push({
-            pathname: `/bookings/list/${id}/sessions`,
+            pathname: `/activities/list/${id}/sessions`,
             params: {
                 date
             }

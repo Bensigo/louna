@@ -1,5 +1,6 @@
 import { authRouter } from "./router/auth"
 import { bookingRouter } from "./router/booking"
+import { goalRouter } from "./router/goal"
 import { partnerRouter } from "./router/partner"
 import { paymentRouter } from "./router/payment"
 import { postRouter } from "./router/post"
@@ -23,6 +24,7 @@ export const appRouter = createTRPCRouter({
     partner: partnerRouter,
     smw: smwRouter,
     booking: bookingRouter,
+    goal: goalRouter
 
 })
 

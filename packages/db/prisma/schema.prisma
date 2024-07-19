@@ -28,6 +28,7 @@ model User {
     post                  Post[]
     sMWLikes              SMWLike[]
     bookings     Booking[]
+    goals Goal[]
     hasPref               Boolean         @default(false)
     userPref              UserPref?
     partnerProfile        PartnerProfile?
@@ -58,6 +59,16 @@ model UserPref {
     user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([id, userId])
+}
+
+
+model Goal {
+   id               Int      @id @default(autoincrement())  
+   name String
+   value String
+   userId           String
+   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+   
 }
 
 enum UserRole {
@@ -313,6 +324,7 @@ model Recipe {
     name        String
     contentType ContentType      @default(Freemium)
     duration    Int
+    slug String @unique()
     calories    Int
     description String
     ingredients Json[]

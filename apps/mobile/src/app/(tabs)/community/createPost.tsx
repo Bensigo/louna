@@ -1,3 +1,4 @@
+import { Buffer } from "buffer"
 import { useState } from "react"
 import {
     KeyboardAvoidingView,
@@ -7,17 +8,41 @@ import {
     TouchableOpacity,
 } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import * as FileSystem from "expo-file-system"
 import * as ImagePicker from "expo-image-picker"
 import { useRouter } from "expo-router"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { Avatar, Button, Image, Text, View } from "tamagui"
-import { v4 as uuidv4 } from "uuid"
-import {Buffer} from 'buffer'
-import * as FileSystem from "expo-file-system";
+
+
 import { Colors } from "../../../constants/colors"
-
-
 import { api } from "../../../utils/api"
+
+
+function generateUUIDv6(): string {
+    // Get the current timestamp in milliseconds
+    const now = Date.now();
+  
+    // Convert timestamp to hexadecimal
+    const hexTimestamp = now.toString(16).padStart(12, '0');
+  
+    // Generate random values
+    function getRandomHex(size: number): string {
+      let hex = '';
+      for (let i = 0; i < size; i++) {
+        const randomValue = Math.floor(Math.random() * 256);
+        hex += randomValue.toString(16).padStart(2, '0');
+      }
+      return hex;
+    }
+  
+    const hexRandom = getRandomHex(10);
+  
+    // Format the UUIDv6
+    const uuidv6 = `${hexTimestamp.slice(0, 8)}-${hexTimestamp.slice(8, 12)}-6${hexRandom.slice(0, 3)}-${(parseInt(hexRandom.slice(3, 5), 16) & 0x3f | 0x80).toString(16).padStart(2, '0')}-${hexRandom.slice(5, 15)}`;
+  
+    return uuidv6;
+}
 
 const getBlob = async (fileUri: string) => {
     const resp = await fetch(fileUri)
@@ -63,92 +88,95 @@ const CreatePost = () => {
                 {
                     onSuccess: () => {
                         // Navigation logic after creating post
-                        router.replace('/community')
+                        router.replace("/community")
                     },
                 },
             )
         }
     }
 
-
     const handleImageSelect = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
+        console.log("-------- got here 3--------------")
+        const result: ImagePicker.ImagePickerResult = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             aspect: [4, 3],
             quality: 0.5,
             allowsMultipleSelection: true,
             base64: true,
             selectionLimit: 2,
-            
-        });
-    
-        if (!result.canceled && result.assets) {
-            const baseKey = uuidv4();
-            const assets = result.assets;
+        }) 
+        console.log({ result }, "======= result from image picker ======")
+        const { canceled, assets } = result
 
+        if (!canceled && !!assets.length) {
+            console.log("pass =========== 111")
+            const baseKey =  generateUUIDv6()
             if (assets && assets.length > 0) {
-                setSelectedImages(assets);
-    
+                setSelectedImages(assets)
+
                 try {
                     const presignedUrls = await getPreSignedUrls({
                         fileNames: assets.map((file) => file.fileName),
                         repo: "post",
-                        expiration: "5000",
-                        contentType: 'image/jpg',
+                        expiration: "50000",
+                        contentType: "image/jpg",
                         baseKey,
-                    });
-                    const images = [];
+                    })
+                    console.log({ presignedUrls }, "---------got here ------")
+                    const images = []
                     await Promise.all(
-                        presignedUrls.map(async (presignedUrl: { url: string, fields: any }, index) => {
-                            const file = assets [index];
-                          
-                            if (file) {
-                                const formData = new FormData();
-                                const { fields, url } = presignedUrl;
-                               
-                                // Append required fields
-                                const { uri } = file;
-                                const imageExt = uri.split('.').pop();  
-             
-                                const fileData = {
-                                    ...fields,
-                                    "Content-Type":   `image/${imageExt}`,
-                             
-                                }
-    
-                                // Append file data
-                                for (const name in fileData) {
-                                    // add images to image arr
-                                    if (name === 'key'){
-                                        images.push(fileData[name])
-                                    }
-                                    formData.append(name, fileData[name]);
-                                }
-                                // @ts-ignore
-                                formData.append('file', file)
-                                const {  ok } =  await fetch(url, {
-                                    method: "POST",
-                                    body: formData,
-                                 
-                                })
-                              if (!ok){
-                                throw new Error(`Failed to upload image ${file.fileName}`);
-                              }
+                        presignedUrls.map(
+                            async (
+                                presignedUrl: { url: string; fields: any },
+                                index,
+                            ) => {
+                                const file = assets[index]
 
-                            }
-                        })
-                    );
-                     setImgs(images);
-                     setBaseKey(baseKey)
+                                if (file) {
+                                    const formData = new FormData()
+                                    const { fields, url } = presignedUrl
+
+                                    // Append required fields
+                                    const { uri } = file
+                                    const imageExt = uri.split(".").pop()
+
+                                    const fileData = {
+                                        ...fields,
+                                        "Content-Type": `image/${imageExt}`,
+                                    }
+
+                                    // Append file data
+                                    for (const name in fileData) {
+                                        // add images to image arr
+                                        if (name === "key") {
+                                            images.push(fileData[name])
+                                        }
+                                        formData.append(name, fileData[name])
+                                    }
+                                    // @ts-ignore
+                                    formData.append("file", file)
+                                    const { ok } = await fetch(url, {
+                                        method: "POST",
+                                        body: formData,
+                                    })
+                                    if (!ok) {
+                                        throw new Error(
+                                            `Failed to upload image ${file.fileName}`,
+                                        )
+                                    }
+                                }
+                            },
+                        ),
+                    )
+                    setImgs(images)
+                    setBaseKey(baseKey)
                     // console.log("All images uploaded successfully!");
                 } catch (error) {
-                    console.error("Error uploading images:", error);
+                    console.error("Error uploading images:", error)
                 }
             }
         }
-    };
-    
-    
+    }
 
     return (
         <KeyboardAvoidingView
@@ -162,7 +190,9 @@ const CreatePost = () => {
                         onPress={goBack}
                         underlayColor="transparent"
                     >
-                        <Text fontSize={"$4"} color={Colors.light.primary} >Cancel</Text>
+                        <Text fontSize={"$4"} color={Colors.light.primary}>
+                            Cancel
+                        </Text>
                     </TouchableHighlight>
                     <Button
                         borderRadius={20}
