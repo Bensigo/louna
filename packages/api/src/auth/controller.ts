@@ -3,7 +3,7 @@ import * as Schema from "./schema";
 import * as Service from "./service";
 
 export const getUserController = publicProcedure.query(({ ctx }) => {
-  console.log({ user: ctx.user })
+
   return Service.getProfile(ctx.user?.id as string, ctx);
 });
 

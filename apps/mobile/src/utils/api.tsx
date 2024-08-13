@@ -28,18 +28,20 @@ export const api = createTRPCReact<AppRouter>();
 export { type RouterInputs, type RouterOutputs } from "@lumi/api";
 
 const getBaseUrl = () => {
-  // const debuggerHost = Constants.expoConfig?.hostUri;
-  // const localhost = debuggerHost?.split(":")[0];
-  // console.log("Localhost:", localhost); // Add logging
+  const debuggerHost = Constants.expoConfig?.hostUri;
+  const localhost = debuggerHost?.split(":")[0];
+  console.log("Localhost:", localhost); // Add logging
 
-  // if (!localhost) {
-  //   // return "https://turbo.t3.gg";
-  //   throw new Error(
-  //     "Failed to get localhost. Please point to your production server.",
-  //   );
-  // }
+  if (!localhost) {
+    // return "https://turbo.t3.gg";
+    // throw new Error(
+    //   "Failed to get localhost. Please point to your production server.",
+    // );
+    console.log({ url: process.env.EXPO_API_URL })
+    return 'https://louna.vercel.app'
+  }
   // return `http://${localhost}:3000`;
-  return `http://localhost:3000`;
+  return `http://${localhost}:3000`;
 };
 
 /**
