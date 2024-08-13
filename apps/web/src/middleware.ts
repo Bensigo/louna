@@ -1,13 +1,7 @@
-import { authMiddleware } from "@clerk/nextjs"
 
-// export default (req, _res: any) => {
-//     return NextResponse.next(req)
-// }
-export default authMiddleware({
-    publicRoutes: ["/", "/auth/register","/auth/login" ,'/auth/verify_new', '/auth/forgot-password', "/recipes", "/recipes/:slug", "/studios", "/studios/:slug", "/api/trpc/recipe.list", "/api/trpc/recipe.getBySlug"],
-    // publicRoutes: ["/login", "/register", "/forgot-password"],
-    ignoredRoutes: ["/api/webhooks/user"],
-})
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 
 // Stop Middleware running on static files
 export const config = {
@@ -23,3 +17,11 @@ export const config = {
         "/(.*?trpc.*?|(?!static|.*\\..*|_next|favicon.ico|api/webhooks/user).*)",
     ],
 }
+
+export async function middleware(req: NextRequest) {
+    const res = NextResponse.next();
+    const supabase = createMiddlewareClient({ req, res });
+    await supabase.auth.getSession();
+    return res;
+  }
+  

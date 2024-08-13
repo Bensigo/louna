@@ -1,49 +1,47 @@
-import { Redirect, Stack } from "expo-router"
-import { SignedOut, useAuth } from "@clerk/clerk-expo"
+import { Redirect, Stack } from "expo-router";
+import { View } from "tamagui";
 
-import { LeftBackButton } from "../_layout"
+// import { useSession } from "@supabase/auth-helpers-react";
+
+import { HeaderBackButton } from "~/components/header";
 
 const Auth = () => {
-    const { isSignedIn } = useAuth()
+  return (
+    <View flex={1} paddingHorizontal={15}>
+      <Stack
+        initialRouteName="verify"
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen
+          name="login"
+          options={{
+            headerTitle: "",
+            headerShown: false,
+            headerTransparent: true,
+            headerLeft: () => <HeaderBackButton />,
+          }}
+        />
+        <Stack.Screen
+          name="register"
+          options={{
+            headerTitle: "",
+            headerTransparent: true,
+            headerLeft: () => <HeaderBackButton />,
+          }}
+        />
+        <Stack.Screen
+          name="verify"
+          options={{
+            headerTitle: "",
+            headerTransparent: true,
+            headerLeft: () => <HeaderBackButton />,
+          }}
+        />
+      </Stack>
+    </View>
+  );
+};
 
-    if (isSignedIn) {
-        return <Redirect href="/today" />
-    }
-
-    return (
-        <SignedOut>
-                <Stack
-                    screenOptions={
-                        {
-                            // headerShown: false,
-                        }
-                    }
-                >
-                    <Stack.Screen
-                        name="index"
-                        options={{ headerShown: false }}
-                    ></Stack.Screen>
-
-                    <Stack.Screen
-                        name="login"
-                        options={{
-                            headerTitle: "",
-                            headerTransparent: true,
-                            headerLeft: () => <LeftBackButton  route='/signup' />,
-                        }}
-                    />
-                    <Stack.Screen
-                        name="signup"
-                        options={{
-                            headerTitle: "",
-                            headerTransparent: true,
-                            headerLeft: () => <LeftBackButton route='/' />,
-                        }}
-                    />
-
-                </Stack>
-        </SignedOut>
-    )
-}
-
-export default Auth
+export default Auth;

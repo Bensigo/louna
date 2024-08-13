@@ -1,11 +1,4 @@
 packages:
-    - apps/mobile
-    - apps/admin-seed-script
-    - apps/admin
-    - apps/web
-    - apps/file-bucket
-    - packages/api
-    - packages/auth
-    - packages/admin-api
-    - packages/db
-    - packages/config/*
+    - apps/*
+    - packages/*
+    - tooling/*

@@ -6,14 +6,16 @@
  * tl;dr - this is where all the tRPC server stuff is created and plugged in.
  * The pieces you will need to use are documented accordingly near the end
  */
-import type { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/api"
-import { getAuth } from "@clerk/nextjs/server"
+
+import { SupabaseClient } from "@supabase/supabase-js";
 import { initTRPC, TRPCError } from "@trpc/server"
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next"
 import superjson from "superjson"
 import { ZodError } from "zod"
 
-import { prisma } from "@solu/db"
+import { prisma } from "@lumi/db"
+import type { NextApiRequest, NextApiResponse } from "next/types";
+
 
 
 
@@ -21,46 +23,36 @@ import { prisma } from "@solu/db"
 /**
  * 1. CONTEXT
  *
- * This section defines the "contexts" that are available in the backend API
+ * This section defines the "contexts" that are available in the backend API.
  *
- * These allow you to access things like the database, the session, etc, when
- * processing a request
+ * These allow you to access things when processing a request, like the database, the session, etc.
  *
+ * This helper generates the "internals" for a tRPC context. The API handler and RSC clients each
+ * wrap this and provides the required context.
+ *
+ * @see https://trpc.io/docs/server/context
  */
-type CreateContextOptions = {
-    auth: SignedInAuthObject | SignedOutAuthObject,
-    headers: any
-}
+export const createTRPCContext = async (opts: {
+    req: NextApiRequest;
+    res: NextApiResponse;
+    supabase: SupabaseClient
+  }) => {
+    const { req, res, supabase } = opts;
 
-/**
- * This helper generates the "internals" for a tRPC context. If you need to use
- * it, you can export it from here
- *
- * Examples of things you may need it for:
- * - testing, so we dont have to mock Next.js' req/res
- * - trpc's `createSSGHelpers` where we don't have req/res
- * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
- */
-const createInnerTRPCContext = (opts: CreateContextOptions) => {
+
+    // React Native will pass their token through headers,
+    // browsers will have the session cookie set
+    const token = req.headers.authorization;
   
+    const user = token
+      ? await supabase.auth.getUser(token)
+      : await supabase.auth.getUser();
+    const source = req.headers["x-trpc-source"] ?? "unknown";  
     return {
-        auth: opts.auth,
-        prisma,
-        headers: opts.headers
-    }
-}
-
-/**
- * This is the actual context you'll use in your router. It will be used to
- * process every request that goes through your tRPC endpoint
- * @link https://trpc.io/docs/context
- */
-export const createTRPCContext = (opts: CreateNextContextOptions) => {
-    return createInnerTRPCContext({
-        auth: getAuth(opts.req),
-        headers: opts.req
-    })
-}
+      user: user.data.user,
+      prisma,
+    };
+  };
 
 
 
@@ -70,7 +62,9 @@ export const createTRPCContext = (opts: CreateNextContextOptions) => {
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
-const t = initTRPC.context<typeof createTRPCContext>().create({
+export type Context = Awaited<ReturnType<typeof createTRPCContext>>
+
+const t = initTRPC.context<Context>().create({
     transformer: superjson,
     errorFormatter({ shape, error }) {
         return {
@@ -112,19 +106,16 @@ export const publicProcedure = t.procedure
  * procedure
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-    if (ctx.headers['x-secret'] && ctx.headers['x-secret'] === process.env.X_SECRET) {
-        return next({})
-    }
-
-    if (!ctx.auth.userId) {
+    
+    if (!ctx.user || ctx.user === null) {
         throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Not authenticated",
         })
-    }
+    } 
     return next({
         ctx: {
-            auth: ctx.auth,
+            user: ctx.user,
         },
     })
 })
@@ -140,6 +131,3 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed)
 
-
-// export const InternalProcedure = t.procedure.use(enforceInternalAPICall)
-export type Context = Awaited<ReturnType<typeof createTRPCContext>>;

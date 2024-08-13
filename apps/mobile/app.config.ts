@@ -1,44 +1,67 @@
-import type { ExpoConfig } from "@expo/config"
+import type { ExpoConfig } from "@expo/config";
 
-const CLERK_PUBLISHABLE_KEY =
-    "pk_test_cmFyZS1tb2NjYXNpbi04Mi5jbGVyay5hY2NvdW50cy5kZXYk"
 const defineConfig = (): ExpoConfig => ({
-    name: "Solu",
-    slug: "Solu",
-    scheme: "Solu",
-    version: "1.0.0",
-    orientation: "portrait",
-    icon: "./assets/solu.png",
-    userInterfaceStyle: "light",
-    splash: {
-        image: "./assets/solu.png",
-        resizeMode: "contain",
-        backgroundColor: "#FAF9F6",
+  name: "lumi",
+  slug: "lumi",
+  scheme: "ae.lumiapp.app",
+  version: "0.1.0",
+  orientation: "portrait",
+  icon: "./assets/icon.png",
+  userInterfaceStyle: "light",
+  splash: {
+    image: "./assets/icon.png",
+    resizeMode: "contain",
+    backgroundColor: "#18181A",
+  },
+  updates: {
+    fallbackToCacheTimeout: 0,
+  },
+  assetBundlePatterns: ["**/*"],
+  ios: {
+    bundleIdentifier: "ae.lumi.app",
+    supportsTablet: true,
+    usesAppleSignIn: true,
+    backgroundColor: '#ffffff'
+  },
+  android: {
+    package: "your.bundle.identifier",
+    adaptiveIcon: {
+      foregroundImage: "./assets/icon.png",
+      backgroundColor: "#18181A",
     },
-    updates: {
-        fallbackToCacheTimeout: 0,
-    },
-    assetBundlePatterns: ["**/*"],
-    ios: {
-        supportsTablet: true,
-        bundleIdentifier: "ae.soluapp.app",
-    },
-    android: {
-        adaptiveIcon: {
-            foregroundImage: "./assets/solu.png",
-            backgroundColor: "#FAF9F6",
+  },
+  experiments: {
+    tsconfigPaths: true,
+    typedRoutes: true,
+  },
+  // extra: {
+  //   eas: {
+  //     projectId: "your-project-id",
+  //   },
+  // },
+  plugins: [
+    "./expo-plugins/with-modify-gradle.js",
+    "expo-apple-authentication",
+    "expo-secure-store",
+    "expo-router",
+    ["react-native-health"],
+    [
+      "expo-build-properties",
+      {
+        ios: {
+          deploymentTarget: "14.0",
+          useFrameworks: "static",
         },
-    },
-    extra: {
-        eas: {
-            projectId: "80a3324e-3bd7-466b-81e9-767e1e324a23",
-        },
-        CLERK_PUBLISHABLE_KEY,
-    },
-    plugins: ["./expo-plugins/with-modify-gradle.js", "expo-font",  "expo-router",
-    "expo-secure-store", ["react-native-health", {
-        "isClinicalDataEnabled": true,
-    }]],
-})
+      },
+    ],
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "The app accesses your photos to let you share them with your friends.",
+      },
+    ],
+  ],
+});
 
-export default defineConfig
+export default defineConfig;

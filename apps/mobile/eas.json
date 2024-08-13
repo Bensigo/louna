@@ -1,48 +1,28 @@
 {
   "cli": {
-    "version": ">= 3.3.0"
+    "version": ">= 4.1.2"
   },
   "build": {
     "base": {
-      "node": "18.15.0",
+      "node": "18.16.1",
       "ios": {
         "resourceClass": "m-medium"
       }
     },
     "development": {
       "extends": "base",
-      "autoIncrement": true,
       "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://solu-web.vercel.app",
-        "EXPO_PUBLIC_IMAGE_SERVER_URL": "https://solu-file-bucket.vercel.app",
-        "EXPO_PUBLIC_AI_API_URL": "http://127.0.0.1:8000",
-        "EXPO_PUBLIC_AI_API_X_SECRET":"tJC6XJ0Clpufo1VAPawbSYZXFfpeDw62"
-      }
-
+      "distribution": "internal"
     },
     "preview": {
       "extends": "base",
+      "distribution": "internal",
       "ios": {
         "simulator": true
-      },
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://solu-web.vercel.app",
-        "EXPO_PUBLIC_IMAGE_SERVER_URL": "https://solu-file-bucket.vercel.app",
-        "EXPO_PUBLIC_AI_API_URL": "http://127.0.0.1:8000",
-        "EXPO_PUBLIC_AI_API_X_SECRET":"tJC6XJ0Clpufo1VAPawbSYZXFfpeDw62"
       }
     },
     "production": {
-      "extends": "base",
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PUBLIC_API_URL": "api.soluapp.ae",
-        "EXPO_PUBLIC_IMAGE_SERVER_URL": "image.soluappe.ae",
-        "EXPO_PUBLIC_AI_API_URL": "http://127.0.0.1:8000",
-        "EXPO_PUBLIC_AI_API_X_SECRET":"tJC6XJ0Clpufo1VAPawbSYZXFfpeDw62"
-      }
+      "extends": "base"
     }
   },
   "submit": {

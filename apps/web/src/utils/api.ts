@@ -2,14 +2,14 @@ import { httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import superjson from "superjson";
 
-import type { AppRouter  } from "@solu/api";
+import type { AppRouter  } from "@lumi/api";
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""; // browser should use relative url
   console.log({ vercel_url: process.env.VERCEL_URL})
   if (process.env.VERCEL_URL) return `${process.env.VERCEL_URL}`; // SSR should use vercel url
   
-  return `http://localhost:7001`; // dev SSR should use localhost
+  return `http://localhost:3000`; 
 
 };
 
@@ -17,6 +17,19 @@ export const api = createTRPCNext<AppRouter>({
   config() {
     return {
       transformer: superjson,
+      abortOnUnmount: true,
+      queryClientConfig: {
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            refetchOnMount: false,
+            refetchOnReconnect: false,
+            retry(failureCount, error) {
+              console.log("retrying due to", error, failureCount)
+            },
+          }
+        }
+      },
       links: [
         loggerLink({
           enabled: (opts) =>
@@ -29,7 +42,8 @@ export const api = createTRPCNext<AppRouter>({
       ],
     };
   },
-  ssr: true,
+  
+  ssr: false,
 });
 
-export { type RouterInputs, type RouterOutputs } from "@solu/api";
+export { type RouterInputs, type RouterOutputs } from "@lumi/api";

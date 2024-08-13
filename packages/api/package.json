@@ -1,5 +1,5 @@
 {
-  "name": "@solu/api",
+  "name": "@lumi/api",
   "version": "0.1.0",
   "main": "./index.ts",
   "types": "./index.ts",
@@ -11,11 +11,12 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@google-cloud/storage": "^6.11.0",
-    "@solu/db": "^0.1.0",
-    "@tensorflow/tfjs": "^4.17.0",
-    "@trpc/client": "^10.27.1",
-    "@trpc/server": "^10.27.1",
+    "@ai-sdk/openai": "^0.0.45",
+    "@lumi/db": "^0.1.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "@trpc/client": "^10.45.2",
+    "@trpc/server": "^10.45.2",
+    "ai": "^3.3.6",
     "blurhash": "^2.0.5",
     "devalue": "^4.3.2",
     "image-size": "^1.0.2",
@@ -26,7 +27,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@solu/eslint-config": "^0.1.0",
+    "@lumi/eslint-config": "workspace:^0.2.0",
     "eslint": "^8.42.0",
     "typescript": "^5.1.3"
   }

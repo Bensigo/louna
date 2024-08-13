@@ -1,37 +1,42 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import React, { useState, useRef } from "react";
-import {LinearGradient} from "expo-linear-gradient";
-import { FlatList, useWindowDimensions, type ImageSourcePropType, Animated, ImageBackground  } from "react-native";
-import { View, YStack, H4, Text, Button } from "tamagui";
-import { Paginator } from './paginator'
+import React, { useRef, useState } from "react";
+import {
+  Animated,
+  FlatList,
+  ImageBackground,
+  useWindowDimensions,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { Button, H4, Text, View, YStack } from "tamagui";
+
 import { Colors } from "../../constants/colors";
-type OnboardingData = {
+import { Paginator } from "./paginator";
+
+interface OnboardingData {
   id: string;
   title: string;
   body: string;
-  image: ImageSourcePropType;
-};
+  image: any; // Adjust type as needed
+}
 
 const data: OnboardingData[] = [
   {
-    id: '1',
-    title: 'Group Activites',
-    body: 'Get ready for fun activities, shared laughs, and unforgettable moments.',
-    image: require('../../../assets/group-yoga.jpg'),
+    id: "1",
+    title: "Understand Your Body",
+    body: "Gain insights into your body's functions to improve your overall well-being.",
+    image: require("../../../assets/onboarding/track.png"),
   },
   {
-    id: '2',
-    title: 'Community',
-    body: 'A community where connections are real, openness is embraced, and mutual support is the foundation of our wellness journey together.',
-    image: require('../../../assets/community.jpg'),
+    id: "2",
+    title: "Create a Health Party",
+    body: "Invite friends or family to join your health party, making it fun to track everyone's progress.",
+    image: require("../../../assets/onboarding/party.png"),
   },
   {
-    id: '3',
-    title: 'Tasty Recipes',
-    body: 'Explore a variety of flavorful and healthy recipes from around the world. Enjoy delicious meals that align with your goal of eating well.',
-    image: require('../../../assets/cooking.jpg'),
+    id: "3",
+    title: "Join Challenges",
+    body: "Participate in fun challenges with your party and earn medals together.",
+    image: require("../../../assets/onboarding/track.png"),
   },
 ];
 
@@ -39,30 +44,57 @@ const RenderItem: React.FC<OnboardingData> = (props) => {
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
 
   return (
-    <View  flex={1} style={{ width: SCREEN_WIDTH}} >
-      <YStack >
-      <ImageBackground
-          source={props.image}
+    <View
+      flex={1}
+      style={{
+        width: SCREEN_WIDTH,
+      }}
+    >
+      <YStack flex={1}>
+        <View
           style={{
-            height: SCREEN_HEIGHT * 0.65,
-            width: SCREEN_WIDTH,
-            position: "relative",
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
           }}
-        ></ImageBackground>
-      <LinearGradient
-          colors={["transparent", Colors.light.secondray]}
+        >
+          <ImageBackground
+            source={props.image}
+            style={{
+              height: SCREEN_HEIGHT,
+              width: SCREEN_WIDTH,
+              justifyContent: "center",
+              alignItems: "center",
+
+              overflow: "hidden",
+            }}
+            resizeMode="cover"
+          />
+        </View>
+        <LinearGradient
+          colors={[Colors.light.primary, "transparent"]}
           style={{
             position: "absolute",
             top: 0,
             left: 0,
             right: 0,
-            height: SCREEN_HEIGHT * 0.65,
+            height: SCREEN_HEIGHT * 0.35,
           }}
         />
-      
-        <View paddingHorizontal="$4" paddingTop={4}  alignItems="center"  >
-          <H4 color="black" fontWeight={"$7"}>{props.title}</H4>
-          <Text color="black" textAlign="center" fontWeight={'$10'} lineHeight={18}>{props.body}</Text>
+
+        <View paddingHorizontal="$4" paddingTop={4} alignItems="center">
+          <H4 color="black" fontWeight={"$7"} fontSize={24}>
+            {props.title}
+          </H4>
+          <Text
+            color="black"
+            textAlign="center"
+            fontWeight={"$4"}
+            fontSize={16}
+            paddingHorizontal="$4"
+          >
+            {props.body}
+          </Text>
         </View>
       </YStack>
     </View>
@@ -70,24 +102,25 @@ const RenderItem: React.FC<OnboardingData> = (props) => {
 };
 
 function Onboarding() {
-    const scrollX = useRef(new Animated.Value(0)).current;
-    const [_, setCurrentIndex ] = useState<number | null| undefined>(0)
-    const router = useRouter()
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const [_, setCurrentIndex] = useState<number | null | undefined>(0);
+  const router = useRouter();
 
-    const slideRef = useRef(null)
+  const slideRef = useRef(null);
 
-    const viewableItemChanged = useRef(({viewableItems }: any) => {
-        setCurrentIndex(viewableItems[0]?.index)
-    }).current;
+  const viewableItemChanged = useRef(({ viewableItems }: any) => {
+    setCurrentIndex(viewableItems[0]?.index);
+  }).current;
 
-    const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current
+  const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
-    const handlePress = ( ) => {
-      router.replace("signup")
-    }
+  const handlePress = () => {
+    router.replace("/register");
+  };
 
   return (
-    <View flex={1} bg={Colors.light.secondray}>
+    <View flex={1} backgroundColor={Colors.light.secondary}>
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
@@ -95,36 +128,53 @@ function Onboarding() {
         showsHorizontalScrollIndicator={false}
         pagingEnabled
         bounces={false}
-        renderItem={({ item }) => <RenderItem {...item}  />}
-        onScroll={Animated.event([{
-            nativeEvent: {
+        renderItem={({ item }) => <RenderItem {...item} />}
+        onScroll={Animated.event(
+          [
+            {
+              nativeEvent: {
                 contentOffset: {
-                    x: scrollX
-                }
-            }
-        }], { useNativeDriver: false })}
+                  x: scrollX,
+                },
+              },
+            },
+          ],
+          { useNativeDriver: false },
+        )}
         onViewableItemsChanged={viewableItemChanged}
         viewabilityConfig={viewConfig}
         scrollEventThrottle={32}
         ref={slideRef}
       />
-      
-      <YStack  paddingVertical="$5" paddingHorizontal={'$4'} >
-                <Button
-                    backgroundColor={Colors.light.primary}
-                    fontWeight={"$14"}
-                    height={"$5"}
-                    onPress={handlePress}
-                    fontSize={"$6"}
-                    color={"white"}
-                    pressStyle={{
-                        backgroundColor: Colors.light.primary,
-                    }}
-                >
-                    Get Started
-                </Button>
-        </YStack>
-        <Paginator data={data} scrollX={scrollX} />
+      <Text>hey</Text>
+      <LinearGradient
+        colors={["transparent", Colors.light.primary]}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: SCREEN_HEIGHT * 0.55,
+        }}
+      />
+      <YStack paddingVertical="$5" paddingHorizontal={"$4"}>
+        <Button
+          backgroundColor={Colors.light.primary}
+          fontWeight={"$14"}
+          height={"$5"}
+          onPress={handlePress}
+          fontSize={"$6"}
+          color={"black"}
+          borderRadius={25} // Added rounded corners
+          pressStyle={{
+            backgroundColor: Colors.light.primary,
+          }}
+        >
+          Get Started
+        </Button>
+      </YStack>
+
+      <Paginator data={data} scrollX={scrollX} />
     </View>
   );
 }

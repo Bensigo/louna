@@ -1,15 +1,20 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@lumi/tsconfig/base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"],
-      // "react": ["node_modules/@types/react"]
+      "~/*": ["./src/*"]
     },
     "jsx": "react-native",
-    "types": ["webpack-env"]
-
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
-  "include": ["expo-plugins", "src", "*.ts", "**/*.js", "index.tsx", "src/components/community/.tsx"],
-  "exclude": ["node_modules", "*.config.js"]
+  "include": [
+    "src",
+    "*.ts",
+    "index.tsx",
+    "*.js",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ],
+  "exclude": ["node_modules"]
 }

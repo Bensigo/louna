@@ -1,31 +1,14 @@
-import { authRouter } from "./router/auth"
-import { bookingRouter } from "./router/booking"
-import { goalRouter } from "./router/goal"
-import { partnerRouter } from "./router/partner"
-import { paymentRouter } from "./router/payment"
-import { postRouter } from "./router/post"
-import { preferenceRouter } from "./router/preference"
-import { recipeRouters } from "./router/recipe"
-import { resourceRouter } from "./router/resource"
-import { s3Router } from "./router/s3"
-import { sessionController } from "./router/session"
-import { smwRouter } from "./router/smw"
-import { createTRPCRouter } from "./trpc"
+import { authRouter } from "./auth/router";
+import { challengeRouter } from "./challenges/router";
+import { coachRouter } from "./coach/router";
+import { preferenceRouter } from "./preference/router";
+import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
-    auth: authRouter,
-    post: postRouter,
-    preference: preferenceRouter,
-    recipe: recipeRouters,
-    s3: s3Router,
-    session: sessionController,
-    resource: resourceRouter,
-    payment: paymentRouter,
-    partner: partnerRouter,
-    smw: smwRouter,
-    booking: bookingRouter,
-    goal: goalRouter
-
+  auth: authRouter,
+  challenges: challengeRouter,
+  preference: preferenceRouter,
+  coach: coachRouter
 })
 
 // export type definition of API

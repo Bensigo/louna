@@ -1,12 +1,16 @@
-import { BottomTabBar, type BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { useCustomTabbar } from "../../context/useCustomTabbar";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { BottomTabBar } from "@react-navigation/bottom-tabs";
 
-export const CustomTabBar: React.FC<BottomTabBarProps> = (props:BottomTabBarProps ) => {
-  const { isTabBarVisible } = useCustomTabbar()
+import { useCustomTabbar } from "./hooks";
 
-  if (!isTabBarVisible){
+export const CustomTabBar: React.FC<BottomTabBarProps> = (
+  props: BottomTabBarProps,
+) => {
+  const { isTabBarVisible } = useCustomTabbar();
+
+  if (!isTabBarVisible) {
     return null;
   }
 
-    return  <BottomTabBar {...props} />
-}
+  return <BottomTabBar {...props} />;
+};

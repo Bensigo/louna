@@ -7,10 +7,9 @@ class CustomDocument extends Document {
     return (
       <Html lang='en'>
         <Head>
-        <title>Solu - Live well, Feel Great</title>
         <meta
           name="description"
-          content="Solu - Live well, Feel Great"
+          content="LUMI"
         />
           <link rel='preconnect' href='https://fonts.googleapis.com' />
           <link rel='preconnect' href='https://fonts.gstatic.com' />
