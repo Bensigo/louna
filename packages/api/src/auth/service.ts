@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getProfile = async (id: string, ctx) => {
-  if (!id) return;
+  if (!id) return null;
   const profile = await prisma.profile.findUnique({
     where: { id },
     include: {
