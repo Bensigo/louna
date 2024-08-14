@@ -8,10 +8,11 @@ const defineConfig = (): ExpoConfig => ({
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
+  backgroundColor: "#ffffff",
   splash: {
     image: "./assets/icon.png",
     resizeMode: "contain",
-    backgroundColor: "#18181A",
+    backgroundColor: "#ffffff",
   },
   updates: {
     fallbackToCacheTimeout: 0,
@@ -44,7 +45,9 @@ const defineConfig = (): ExpoConfig => ({
     "expo-apple-authentication",
     "expo-secure-store",
     "expo-router",
-    ["react-native-health"],
+    ["react-native-health", {
+      // "isClinicalDataEnabled": true,
+  }],
     [
       "expo-build-properties",
       {

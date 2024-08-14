@@ -28,7 +28,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }
   });
 
-  console.log({ data }, '===================')
 
   useEffect(() => {
     if (data?.id) {
@@ -39,22 +38,23 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   useEffect(() => {
     if (!navigationState?.key) return;
    
-    const inAuthGroup = segments[0] === "(auth)";
+    const isRootRoute = segments.length === 0 && navigationState?.routes?.length === 1;
 
-    console.log({ session, isLoading, inAuthGroup })
 
-    if (!session && !inAuthGroup) {
+    if (!session) {
       router.replace("/login");
-    } else if (session?.user.id && !isLoading  && inAuthGroup) {
-      // check if user has done the onboarding questionnaire
-      // if not redirect user to questionnaire
-      router.replace("/home");
+    } else if (session?.user.id && !isLoading) {
+      if (data && isRootRoute) {
+        // User is authenticated, has completed onboarding, and is on the root route
+        router.replace("/home");
+      } 
     }
   }, [session, isLoading, data, segments, navigationState?.key]);
 
   if (isLoading) {
-    return <ActivityIndicator size={"small"} />;
+    return <ActivityIndicator size={"large"}  />;
   }
+
 
   return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 };

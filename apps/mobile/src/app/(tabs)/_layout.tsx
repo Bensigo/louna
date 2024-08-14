@@ -4,13 +4,20 @@ import { router, Tabs } from "expo-router";
 import { Activity, Home, Smile, User } from "@tamagui/lucide-icons";
 
 import { CustomTabBar } from "~/components/customTabBar";
-import { Colors, colorScheme } from "~/constants/colors";
+import {  colorScheme } from "~/constants/colors";
 import { useAppUser } from "~/provider/user";
-import { useEffect } from "react";
+
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+import { useEffect, useState } from "react";
 
 export default function TabLayout() {
   const user = useAppUser()
 
+
+ 
 
   useEffect(() => {
     if (user){

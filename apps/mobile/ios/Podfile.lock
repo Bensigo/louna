@@ -1309,6 +1309,8 @@ PODS:
     - React-utils (= 0.74.5)
   - RNAppleHealthKit (1.7.0):
     - React
+  - RNCAsyncStorage (1.23.1):
+    - React-Core
   - RNCPicker (2.7.5):
     - React-Core
   - RNDateTimePicker (8.0.1):
@@ -1477,6 +1479,7 @@ DEPENDENCIES:
   - React-utils (from `../../../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
   - RNAppleHealthKit (from `../../../node_modules/react-native-health`)
+  - "RNCAsyncStorage (from `../../../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCPicker (from `../../../node_modules/@react-native-picker/picker`)"
   - "RNDateTimePicker (from `../../../node_modules/@react-native-community/datetimepicker`)"
   - "RNFlashList (from `../../../node_modules/@shopify/flash-list`)"
@@ -1656,6 +1659,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon"
   RNAppleHealthKit:
     :path: "../../../node_modules/react-native-health"
+  RNCAsyncStorage:
+    :path: "../../../node_modules/@react-native-async-storage/async-storage"
   RNCPicker:
     :path: "../../../node_modules/@react-native-picker/picker"
   RNDateTimePicker:
@@ -1759,6 +1764,7 @@ SPEC CHECKSUMS:
   React-utils: 3f1fcffc14893afb9a7e5b7c736353873cc5fc95
   ReactCommon: f79ae672224dc1e6c2d932062176883c98eebd57
   RNAppleHealthKit: 60a6beefdd89a75811e9a8873a5e24f351dee681
+  RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
   RNCPicker: 3e2c37a8328f368ce14da050cdc8231deb5fc9f9
   RNDateTimePicker: b6a9b35a785ecbe12b4e7d6de5439d0aa4614146
   RNFlashList: b521ebdd7f9352673817f1d98e8bdc0c8cf8545b

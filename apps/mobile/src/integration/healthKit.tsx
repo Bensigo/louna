@@ -3,10 +3,9 @@ import type { ReactNode } from 'react';
 import AppleHealthKit, { HealthPermission } from 'react-native-health';
 import type { HealthInputOptions, HealthKitPermissions } from 'react-native-health';
 
-const healthKitPermission: HealthKitPermissions = {
+export const healthKitPermission: HealthKitPermissions = {
    permissions: {
     read: [
-      
         AppleHealthKit.Constants.Permissions.HeartRate,
        AppleHealthKit.Constants.Permissions.HeartRateVariability,
        AppleHealthKit.Constants.Permissions.ActiveEnergyBurned,
@@ -22,7 +21,7 @@ const healthKitPermission: HealthKitPermissions = {
 
 interface HealthKitContextType {
   hasPermissions: boolean;
-  requestPermissions: () => Promise<void>;
+  requestPermissions: () => void;
   readData: (dataType: HealthPermission, options: HealthInputOptions) => Promise<any>;
   writeData: (dataType: HealthPermission, value: number, options: HealthInputOptions) => Promise<void>;
 }
@@ -141,9 +140,5 @@ export const HealthKitProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useHealthKit = () => {
-  const context = useContext(HealthKitContext);
-  if (context === undefined) {
-    throw new Error('useHealthKit must be used within a HealthKitProvider');
-  }
-  return context;
+  return useContext(HealthKitContext);
 };

@@ -34,7 +34,7 @@ const RootLayout = () => {
       }} >
         <TopTab.Screen name="joined" options={{ title: 'Joined'}}></TopTab.Screen>
         <TopTab.Screen name="upcoming" options={{ title: 'Upcoming'}}></TopTab.Screen>
-        <TopTab.Screen name="owned" options={{ title: 'Owned'}}></TopTab.Screen>
+        <TopTab.Screen name="created" options={{ title: 'Owned'}}></TopTab.Screen>
       </TopTab>
       </View>
     );

@@ -12,6 +12,10 @@
     <string>lumi</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
+    <key>NSHealthShareUsageDescription</key>
+   <string>We need access to your health data to provide personalized health insights.</string>
+    <key>NSHealthUpdateUsageDescription</key>
+     <string>We need access to update your health data.</string>
     <key>CFBundleIdentifier</key>
     <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
     <key>CFBundleInfoDictionaryVersion</key>

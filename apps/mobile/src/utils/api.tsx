@@ -30,14 +30,7 @@ export { type RouterInputs, type RouterOutputs } from "@lumi/api";
 const getBaseUrl = () => {
   const debuggerHost = Constants.expoConfig?.hostUri;
   const localhost = debuggerHost?.split(":")[0];
-  console.log("Localhost:", localhost); // Add logging
-  console.log({ debuggerHost })
   if (!localhost) {
-    // return "https://turbo.t3.gg";
-    // throw new Error(
-    //   "Failed to get localhost. Please point to your production server.",
-    // );
-    console.log({ url: process.env.EXPO_PUBLIC_API_URL })
     return process.env.EXPO_PUBLIC_API_URL
   }
   // return `http://${localhost}:3000`;
@@ -50,7 +43,6 @@ const getBaseUrl = () => {
  */
 export const TRPCProvider = (props: { children: React.ReactNode }) => {
   const supabase = useSupabaseClient();
-  console.log("=++++++===++++++++ called +++++========+++++")
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() => 
     api.createClient({
@@ -61,7 +53,6 @@ export const TRPCProvider = (props: { children: React.ReactNode }) => {
           async headers(header) {
             const { data } = await supabase.auth.getSession();
             const token = data.session?.access_token;
-            console.log({ token })
             return {
                Authorization: `Bearer ${token}`,
               'x-trpc-source': 'expo-react',
