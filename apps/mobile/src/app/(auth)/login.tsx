@@ -13,7 +13,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Button, H1, Input, Text, View, XStack, YStack } from "tamagui";
 
 import type { AuthData } from "~/components/googleAuth";
-import { Colors } from "../../constants/colors";
+import { colorScheme } from "../../constants/colors";
 import { initiateAppleSignIn } from "../../utils/auth";
 
 function LoginScreen() {
@@ -111,25 +111,26 @@ function LoginScreen() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View
           flex={1}
-          backgroundColor={Colors.light.secondary}
+        
           alignItems="center"
           justifyContent="center"
         >
           <YStack alignItems="center" mb={70}>
-            <H1 color={Colors.light.primary} fontWeight="bold">
-              Lumi
+            <H1 color={colorScheme.primary.lightGreen} fontWeight="bold">
+              Louna
             </H1>
-            <Text color={Colors.light.tint} fontSize={13}>
-              Make healthy living fun and engaging
+            <Text color={colorScheme.secondary.darkGray} fontSize={13}>
+            Living healthly can be fun
+
             </Text>
           </YStack>
-          <YStack gap="$2" width={"100%"}>
+          <YStack gap="$3" width={"100%"}>
             <Input
               placeholder="you@mail.com"
               value={email}
               onChangeText={setEmail}
               borderWidth={0}
-              backgroundColor={Colors.light.secondray}
+              backgroundColor={'white'}
               borderRadius={5}
               paddingHorizontal="$4"
               paddingVertical="$3"
@@ -137,8 +138,8 @@ function LoginScreen() {
               color={"black"}
             />
             <Button
-              backgroundColor={Colors.light.primary}
-              color="black"
+              backgroundColor={colorScheme.primary.green}
+              color="white"
               borderRadius={10}
               paddingHorizontal="$4"
               paddingVertical="$2"
@@ -154,7 +155,7 @@ function LoginScreen() {
             {message ? <Text color="green">{message}</Text> : null}
             <TouchableWithoutFeedback onPress={goToRegister}>
               <Text
-                color={Colors.light.tint}
+                color={colorScheme.secondary.gray}
                 textAlign="center"
                 lineHeight={14}
               >

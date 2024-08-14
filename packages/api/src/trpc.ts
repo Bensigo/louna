@@ -48,6 +48,7 @@ export const createTRPCContext = async (opts: {
       ? await supabase.auth.getUser(token)
       : await supabase.auth.getUser();
     const source = req.headers["x-trpc-source"] ?? "unknown";  
+    console.log({ user }, '============ from backend ==========')
     return {
       user: user.data.user,
       prisma,

@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 
 export const getProfile = async (id: string, ctx) => {
   if (!id) return null;
+
   const profile = await prisma.profile.findUnique({
     where: { id },
     include: {
@@ -21,6 +22,7 @@ export const getProfile = async (id: string, ctx) => {
       },
     });
   }
+  console.log({ profile })
   return profile;
 };
 

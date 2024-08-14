@@ -15,6 +15,7 @@ export default function RootLayout() {
     <TamaguiProvider config={tamaguiConfig}>
       <SessionContextProvider supabaseClient={supabase}>
         <TRPCProvider>
+        <StatusBar />
           <UserProvider>
             <Stack>
               <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -22,7 +23,7 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
             </Stack>
-            <StatusBar />
+           
           </UserProvider>
         </TRPCProvider>
       </SessionContextProvider>

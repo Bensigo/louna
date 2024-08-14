@@ -1,6 +1,6 @@
 import { Platform, StyleSheet } from "react-native";
 
-import { Colors } from "~/constants/colors";
+import { Colors, colorScheme } from "~/constants/colors";
 
 export const CELL_SIZE = 50;
 export const CELL_BORDER_RADIUS = 8;
@@ -70,14 +70,15 @@ const styles = StyleSheet.create({
     marginTop: 30,
     borderRadius: 10,
     height: 40,
-    backgroundColor: Colors.light.primary,
+    backgroundColor: colorScheme.primary.green,
+     
     justifyContent: "center",
     marginBottom: 100,
   },
   nextButtonText: {
     textAlign: "center",
     fontSize: 20,
-    color: "black",
+    color: "white",
     fontWeight: "700",
   },
 });

@@ -14,7 +14,6 @@ import {
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
 import {
-  useGlobalSearchParams,
   useLocalSearchParams,
   useRouter,
 } from "expo-router";

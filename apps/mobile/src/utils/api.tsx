@@ -31,14 +31,14 @@ const getBaseUrl = () => {
   const debuggerHost = Constants.expoConfig?.hostUri;
   const localhost = debuggerHost?.split(":")[0];
   console.log("Localhost:", localhost); // Add logging
-
+  console.log({ debuggerHost })
   if (!localhost) {
     // return "https://turbo.t3.gg";
     // throw new Error(
     //   "Failed to get localhost. Please point to your production server.",
     // );
-    console.log({ url: process.env.EXPO_API_URL })
-    return 'https://louna.vercel.app'
+    console.log({ url: process.env.EXPO_PUBLIC_API_URL })
+    return process.env.EXPO_PUBLIC_API_URL
   }
   // return `http://${localhost}:3000`;
   return `http://${localhost}:3000`;

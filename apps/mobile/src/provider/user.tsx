@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments, useRootNavigationState } from "expo-router";
 import { useSession } from "@supabase/auth-helpers-react";
 
 import type { RouterOutputs } from "~/utils/api";
@@ -19,8 +19,16 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const session = useSession();
+  const segments = useSegments();
+  const navigationState = useRootNavigationState();
 
-  const { data, isLoading } = api.auth.me.useQuery();
+  const { data, isLoading } = api.auth.me.useQuery({}, {
+    onError(err){
+      console.log({ err })
+    }
+  });
+
+  console.log({ data }, '===================')
 
   useEffect(() => {
     if (data?.id) {
@@ -29,23 +37,24 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   }, [data]);
 
   useEffect(() => {
-    if (session?.user.id && !isLoading && data) {
+    if (!navigationState?.key) return;
+   
+    const inAuthGroup = segments[0] === "(auth)";
+
+    console.log({ session, isLoading, inAuthGroup })
+
+    if (!session && !inAuthGroup) {
+      router.replace("/login");
+    } else if (session?.user.id && !isLoading  && inAuthGroup) {
       // check if user has done the onboarding questionnaire
       // if not redirect user to questionnaire
-
-      router.push("/home");
-      // if (data?.has_Onboarding) {
-      //    router.push("/home");
-      // } else {
-      //   router.push("/username");
-      // }
+      router.replace("/home");
     }
-  }, [session, isLoading, router]);
+  }, [session, isLoading, data, segments, navigationState?.key]);
 
-  if (!session || isLoading) {
+  if (isLoading) {
     return <ActivityIndicator size={"small"} />;
   }
-
 
   return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 };

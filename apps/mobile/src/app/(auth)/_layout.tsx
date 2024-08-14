@@ -1,4 +1,4 @@
-import { Redirect, Stack } from "expo-router";
+import {  Stack } from "expo-router";
 import { View } from "tamagui";
 
 // import { useSession } from "@supabase/auth-helpers-react";

@@ -9,7 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Button, H4, Text, View, YStack } from "tamagui";
 
-import { Colors } from "../../constants/colors";
+import { Colors, colorScheme } from "../../constants/colors";
 import { Paginator } from "./paginator";
 
 interface OnboardingData {
@@ -72,7 +72,7 @@ const RenderItem: React.FC<OnboardingData> = (props) => {
           />
         </View>
         <LinearGradient
-          colors={[Colors.light.primary, "transparent"]}
+          colors={[colorScheme.primary.lightGreen, "transparent"]}
           style={{
             position: "absolute",
             top: 0,
@@ -83,11 +83,11 @@ const RenderItem: React.FC<OnboardingData> = (props) => {
         />
 
         <View paddingHorizontal="$4" paddingTop={4} alignItems="center">
-          <H4 color="black" fontWeight={"$7"} fontSize={24}>
+          <H4 color="white" fontWeight={"$7"} fontSize={24}>
             {props.title}
           </H4>
           <Text
-            color="black"
+            color="white"
             textAlign="center"
             fontWeight={"$4"}
             fontSize={16}
@@ -120,7 +120,7 @@ function Onboarding() {
   };
 
   return (
-    <View flex={1} backgroundColor={Colors.light.secondary}>
+    <View flex={1} backgroundColor={colorScheme.primary.lightGreen}>
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
@@ -146,9 +146,9 @@ function Onboarding() {
         scrollEventThrottle={32}
         ref={slideRef}
       />
-      <Text>hey</Text>
+  
       <LinearGradient
-        colors={["transparent", Colors.light.primary]}
+        colors={["transparent", colorScheme.primary.lightGreen]}
         style={{
           position: "absolute",
           bottom: 0,
@@ -159,15 +159,15 @@ function Onboarding() {
       />
       <YStack paddingVertical="$5" paddingHorizontal={"$4"}>
         <Button
-          backgroundColor={Colors.light.primary}
+          backgroundColor={colorScheme.primary.green}
           fontWeight={"$14"}
           height={"$5"}
           onPress={handlePress}
           fontSize={"$6"}
-          color={"black"}
+          color={"white"}
           borderRadius={25} // Added rounded corners
           pressStyle={{
-            backgroundColor: Colors.light.primary,
+            backgroundColor: colorScheme.primary.lightGreen,
           }}
         >
           Get Started
