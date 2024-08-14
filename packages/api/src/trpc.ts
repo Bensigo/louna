@@ -109,19 +109,18 @@ export const publicProcedure = t.procedure
  * procedure
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-    console.log({ ctx })
-    if (!ctx.user || ctx.user === null) {
+    if (!ctx.user) {
         throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Not authenticated",
-        })
-    } 
+        });
+    }
     return next({
         ctx: {
             user: ctx.user,
         },
-    })
-})
+    });
+});
 
 /**
  * Protected (authed) procedure

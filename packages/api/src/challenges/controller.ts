@@ -81,7 +81,7 @@ export const listChallengesController = protectedProcedure
   .input(listChallengeSchema)
   .query(async ({ ctx, input }) => {
     try {
-      console.log("backend called ==============");
+      console.log("=========== backend api called ==============");
 
       const { id, startDate, isUpcoming, hasJoined, activities, skip, limit } =
         input;
@@ -125,14 +125,7 @@ export const listChallengesController = protectedProcedure
         ? [{ startDateTime: "asc" }, { members: { _count: "desc" } }]
         : { startDateTime: "asc" };
 
-      // // Define include
-      // const include = { members: true };
-
-      // // Define select if filtering upcoming challenges
-      // const select = isUpcoming ? {
-      //   members: {
-      //     where: { profileId: id },
-      //   },
+    
       // } : undefined;
       console.log("reached");
       // Execute the query

@@ -64,6 +64,8 @@ model Challenge {
   
   @@index([ownerId], name: "idx_challenge_owner")
   @@index([activities], name: "idx_challenge_activity")
+  @@index([startDateTime], name: "idx_challenge_start_date")
+  @@index([endDateTime], name: "idx_challenge_end_date")
 }
 
 model ChallengeMembers {
