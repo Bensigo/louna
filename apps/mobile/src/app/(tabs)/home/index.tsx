@@ -19,7 +19,8 @@ const HomeScreen = () => {
   const [hasPermissions, setHasPermissions] = useState(false);
   const user = useAppUser()
   const { mutate: addHealthData  } = api.healthDataLog.createMany.useMutation()
-
+  const { data: stats, isLoading } = api.healthDataLog.stats.useQuery()
+  console.log({ isLoading , stats })
   useEffect(() => {
 
     AppleHealthKit.initHealthKit(healthKitPermission, (error, result) => {

@@ -35,6 +35,12 @@ export class HealthDataService {
     return results;
   }
 
+  calculateStressLevel(hrv: number): 'low' | 'medium' | 'high' {
+    if (hrv >= 70) return 'low';
+    if (hrv >= 50) return 'medium';
+    return 'high';
+  }
+
   async getStats(userId: string) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -87,6 +93,7 @@ export class HealthDataService {
       enegryBurned: 0,
       hrv: 0,
       heartRate: 0,
+      stressLevel: null,
     };
 
     healthData.forEach(item => {
@@ -102,10 +109,10 @@ export class HealthDataService {
         result.heartRate = Math.round(item.value);
       } else if (item.type === 'HRV') {
         result.hrv = Math.round(item.value);
+        result.stressLevel = this.calculateStressLevel(result.hrv);
       }
     });
 
-   
     return result;
   }
 }
