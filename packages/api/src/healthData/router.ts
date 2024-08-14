@@ -1,6 +1,7 @@
 import { createTRPCRouter } from "../trpc";
-import { createHealthDataController } from "./controller";
+import { createHealthDataController, getStatsController } from "./controller";
 
 export const healthDataRouter = createTRPCRouter({
-    createMany: createHealthDataController
+    createMany: createHealthDataController,
+    stats: getStatsController
 });

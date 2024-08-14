@@ -6,8 +6,8 @@ import { useAppUser } from "~/provider/user";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AppleHealthKit from 'react-native-health';
 import { healthKitPermission } from "~/integration/healthKit";
-import { api, RouterInputs } from "~/utils/api";
-
+import { api } from "~/utils/api";
+import type {   RouterInputs } from "~/utils/api"; 
 
 type HealthDataApiInput = RouterInputs['healthDataLog']['createMany']
 
@@ -145,7 +145,7 @@ const HomeScreen = () => {
         console.log('Less than 15 minutes since last sync. Skipping...');
       }
     } else {
-      const startDate = new Date(now.getTime() - 7 * 60 * 60 * 1000).toISOString();
+      const startDate = new Date(now.getTime() - 1 * 60 * 60 * 1000).toISOString();
       console.log('Initial sync...');
       await syncData(startDate);
     }

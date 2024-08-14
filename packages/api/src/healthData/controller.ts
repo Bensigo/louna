@@ -10,3 +10,9 @@ export const createHealthDataController = protectedProcedure
   const healthDataService = new HealthDataService(ctx.prisma);
   return await healthDataService.createMany(input, ctx.user.id);
 })
+
+
+export const getStatsController = protectedProcedure.query(async ({ ctx }) => {
+  const healthDataService = new HealthDataService(ctx.prisma);
+  return healthDataService.getStats(ctx.user.id) 
+})
