@@ -20,7 +20,7 @@ export class HealthDataService {
         value: item.value,
         startDateTime: item.startTime,
         endDateTime: item.endTime,
-        uinit: item.unit || "",
+        ...(item.unit ? { unit: item.unit }: {}),
         profileId: userId
       })),
     });

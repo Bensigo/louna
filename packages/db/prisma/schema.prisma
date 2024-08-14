@@ -94,7 +94,7 @@ model HealthData {
     profile   Profile        @relation(fields: [profileId], references: [id])
     startDateTime DateTime    @db.Timestamp(6)
     endDateTime   DateTime?    @db.Timestamp(6)
-    uinit String
+    unit String?
     value Int
     
   createdAt     DateTime    @default(now()) @db.Timestamp(6)
@@ -110,7 +110,7 @@ model ChallengeHealthLog {
   profile       Profile        @relation(fields: [profileId], references: [id])
   type          HealthDataType
   value         String
-  unit          String
+  unit          String?
   timestamp     DateTime       @default(now())
 
   @@index([challengeId, profileId])
