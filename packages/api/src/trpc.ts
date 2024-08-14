@@ -44,7 +44,7 @@ export const createTRPCContext = async (opts: {
     const token = req.headers.authorization ?? req.headers['app-token'];
    
     const user = token
-      ? await supabase.auth.getUser(token)
+      ? await supabase.auth.getUser(token as string)
       : await supabase.auth.getUser();
     const source = req.headers["x-trpc-source"] ?? "unknown";  
     return {
