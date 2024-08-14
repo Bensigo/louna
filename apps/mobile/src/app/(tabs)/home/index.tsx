@@ -14,6 +14,8 @@ type HealthDataApiInput = RouterInputs['healthDataLog']['createMany']
 const HomeScreen = () => {
   const [appState, setAppState] = useState(AppState.currentState);
 
+  AsyncStorage.clear()
+
   const [hasPermissions, setHasPermissions] = useState(false);
   const user = useAppUser()
   const { mutate: addHealthData  } = api.healthDataLog.createMany.useMutation()
@@ -95,8 +97,12 @@ const HomeScreen = () => {
 
     console.log(`Prepared ${batchData.length} health data samples for API submission`);
 
-    await addHealthData(batchData); // Send batch data to API
-    await AsyncStorage.setItem('lastSyncTime', new Date().toISOString()); // Save last sync time
+    await addHealthData(batchData, {
+      async onSuccess(){
+        await AsyncStorage.setItem('lastSyncTime', new Date().toISOString()); 
+      }
+    }); // Send batch data to API
+ 
   };
 
   const syncHealthData = async () => {

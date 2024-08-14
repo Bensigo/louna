@@ -5,6 +5,11 @@ import Cors from "cors";
 
 import { appRouter, createTRPCContext } from "@lumi/api";
 
+
+export const config = {
+  maxDuration: 30,
+};
+
 // Initialize CORS middleware
 const cors = Cors({
   methods: ["GET", "POST", "OPTIONS"],
