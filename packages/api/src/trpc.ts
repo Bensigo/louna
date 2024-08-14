@@ -39,7 +39,7 @@ export const createTRPCContext = async (opts: {
   }) => {
     const { req, res, supabase } = opts;
 
-
+    console.log({ headers: req.headers })
     // React Native will pass their token through headers,
     // browsers will have the session cookie set
     const token = req.headers.authorization;

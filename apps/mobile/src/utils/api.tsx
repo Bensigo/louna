@@ -50,7 +50,7 @@ const getBaseUrl = () => {
  */
 export const TRPCProvider = (props: { children: React.ReactNode }) => {
   const supabase = useSupabaseClient();
-
+  console.log("=++++++===++++++++ called +++++========+++++")
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() => 
     api.createClient({
@@ -61,6 +61,7 @@ export const TRPCProvider = (props: { children: React.ReactNode }) => {
           async headers() {
             const { data } = await supabase.auth.getSession();
             const token = data.session?.access_token;
+            console.log({ token })
             return {
               authorization: token,
               'x-trpc-source': 'expo-react'
