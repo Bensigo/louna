@@ -8,7 +8,6 @@ const defineConfig = (): ExpoConfig => ({
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
-  backgroundColor: "#ffffff",
   splash: {
     image: "./assets/icon.png",
     resizeMode: "contain",
@@ -22,7 +21,7 @@ const defineConfig = (): ExpoConfig => ({
     bundleIdentifier: "ae.lumi.app",
     supportsTablet: true,
     usesAppleSignIn: true,
-    backgroundColor: '#ffffff'
+    backgroundColor: '#fff'
   },
   android: {
     package: "your.bundle.identifier",

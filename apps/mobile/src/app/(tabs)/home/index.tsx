@@ -14,7 +14,7 @@ type HealthDataApiInput = RouterInputs['healthDataLog']['createMany']
 const HomeScreen = () => {
   const [appState, setAppState] = useState(AppState.currentState);
 
-  AsyncStorage.clear()
+  // AsyncStorage.clear()
 
   const [hasPermissions, setHasPermissions] = useState(false);
   const user = useAppUser()
@@ -73,37 +73,57 @@ const HomeScreen = () => {
   };
 
   // Function to send health data to the API
-  const sendHealthDataToAPI = async (healthData: any) => {
-    const batchData: HealthDataApiInput[] = [];
+  const sendHealthDataToAPI = async (healthData: Record<string, any[]>) => {
+    const reqData: HealthDataApiInput[] = [];
+    
+    // Iterate over each entry in the healthData object
     for (const [key, samples] of Object.entries(healthData)) {
       if (Array.isArray(samples)) {
+        // Process each sample in the array
         for (const sample of samples) {
-          let value = (sample?.value)as number
-          let  unit = ''
-          if (key === 'HRV'){
-             value = parseInt((value * 1000).toFixed(0))
-             unit = 'ms'
+          let value = 0;
+          let unit = '';
+  
+          // Process value and unit based on the key
+          if (typeof sample?.value === 'number') {
+            value = Math.round(sample.value);
+            if (key === 'HRV') {
+              value = Math.round(value * 1000); // Convert HRV to milliseconds
+              unit = 'ms';
+            } else if (key === 'STEPS') {
+              unit = 'count';
+            } else if (key === 'HEART_RATE') {
+              unit = 'bpm';
+            } else if (key === 'CALORIES') {
+              unit = 'kcal';
+            }
           }
-          batchData.push({
-            value,
-            unit,
-            type: key,
-            startTime: new Date(sample.startDate),
-            endTime: new Date(sample.endDate)
-          });
+  
+          // Ensure startDate and endDate are present and convert them to Date objects
+          if (sample?.startDate && sample?.endDate) {
+            reqData.push({
+              type: key as "STEPS" | "HEART_RATE" | "HRV" | "CALORIES",
+              value,
+              unit,
+              startTime: new Date(sample.startDate),
+              endTime: new Date(sample.endDate)
+            });
+          }
         }
       }
     }
+  
+    console.log(`Prepared ${reqData.length} health data samples for API submission`);
+  
+    // Call the API with the prepared data
 
-    console.log(`Prepared ${batchData.length} health data samples for API submission`);
-
-    await addHealthData(batchData, {
-      async onSuccess(){
-        await AsyncStorage.setItem('lastSyncTime', new Date().toISOString()); 
+    addHealthData(reqData, {
+      async onSuccess() {
+        await AsyncStorage.setItem('lastSyncTime', new Date().toISOString());
       }
-    }); // Send batch data to API
- 
+    });
   };
+  
 
   const syncHealthData = async () => {
     if (!user?.hasHealthKitAuthorize) {

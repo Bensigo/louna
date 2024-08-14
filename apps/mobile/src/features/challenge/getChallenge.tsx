@@ -78,7 +78,7 @@ const GetChallenge: React.FC<GetChallengeProps> = ({ id }) => {
 
           <YStack padding="$4">
             <XStack justifyContent="space-between" alignItems="center">
-              <H2>{challenge.name}</H2>
+              <H2 color={colorScheme.secondary.darkGray}>{challenge.name}</H2>
               {challenge.ownerId === user?.id && (
                 <Button
                   icon={<Cog size={20} color={colorScheme.primary.lightGreen} />}
@@ -88,29 +88,29 @@ const GetChallenge: React.FC<GetChallengeProps> = ({ id }) => {
                 />
               )}
             </XStack>
-            <Paragraph>{challenge.description}</Paragraph>
+            <Paragraph color={colorScheme.secondary.darkGray}>{challenge.description}</Paragraph>
          
             
             <YStack gap="$2" marginTop="$4">
               <XStack alignItems="center" gap="$2">
                 <Calendar size={20} color={colorScheme.text.secondary} />
-                <Text>Starts: {format(new Date(challenge.startDateTime), 'PPP p')}</Text>
+                <Text color={colorScheme.secondary.darkGray}>Starts: {format(new Date(challenge.startDateTime), 'PPP p')}</Text>
               </XStack>
               {challenge.endDateTime && (
                 <XStack alignItems="center" gap="$2">
                   <Clock size={20} color={colorScheme.text.secondary} />
-                  <Text>Ends: {format(new Date(challenge.endDateTime), 'PPP p')}</Text>
+                  <Text color={colorScheme.secondary.darkGray}>Ends: {format(new Date(challenge.endDateTime), 'PPP p')}</Text>
                 </XStack>
               )}
             </YStack>    
             <YStack gap="$2" marginTop="$4">
               {challenge?.capacity > 0 && <XStack alignItems="center" gap="$2">
                 <Users size={20} color={colorScheme.text.secondary} />
-                <Text>Capacity: {challenge.capacity}</Text>
+                <Text color={colorScheme.secondary.darkGray}>Capacity: {challenge.capacity}</Text>
               </XStack>}
               <XStack alignItems="center" gap="$2">
                 <User size={20} color={colorScheme.text.secondary} />
-                <Text>Participants: {challenge.members?.length || 0}</Text>
+                <Text color={colorScheme.secondary.darkGray}>Participants: {challenge.members?.length || 0}</Text>
               </XStack>
                  
             {challenge.location &&   (
@@ -134,7 +134,7 @@ const GetChallenge: React.FC<GetChallengeProps> = ({ id }) => {
                 </MapView>
                 <XStack alignItems="center" gap="$2">
                   <MapPin size={20} color={Colors.light.text} />
-                  <Text>{challenge.location.address}</Text>
+                  <Text color={colorScheme.secondary.darkGray}>{challenge.location.address}</Text>
                 </XStack>
               </YStack>
             )}
