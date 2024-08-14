@@ -58,13 +58,15 @@ export const TRPCProvider = (props: { children: React.ReactNode }) => {
       links: [
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
-          async headers() {
+          async headers(header) {
             const { data } = await supabase.auth.getSession();
             const token = data.session?.access_token;
             console.log({ token })
             return {
-              authorization: token,
-              'x-trpc-source': 'expo-react'
+               Authorization: `Bearer ${token}`,
+              'x-trpc-source': 'expo-react',
+              "app-token": token,
+              ...header
             };
           },
         })

@@ -8,6 +8,8 @@ import { appRouter, createTRPCContext } from "@lumi/api";
 // Initialize CORS middleware
 const cors = Cors({
   methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Authorization", "Content-Type", 'x-trpc-source', 'app-token'],
+  origin: '*'
 });
 
 // Helper function to run middleware
