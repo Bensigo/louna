@@ -42,11 +42,13 @@ export const createTRPCContext = async (opts: {
     // React Native will pass their token through headers,
     // browsers will have the session cookie set
     const token = req.headers.authorization ?? req.headers['app-token'];
-   
+    console.time('about to fetch user')
     const user = token
       ? await supabase.auth.getUser(token as string)
       : await supabase.auth.getUser();
+
     const source = req.headers["x-trpc-source"] ?? "unknown";  
+    console.timeEnd('got user')
     return {
       user: user.data.user,
       prisma,
