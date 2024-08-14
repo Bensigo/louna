@@ -93,7 +93,7 @@ model HealthData {
     startDateTime DateTime    @db.Timestamp(6)
     endDateTime   DateTime?    @db.Timestamp(6)
     uinit String
-    value String
+    value Int
     
   createdAt     DateTime    @default(now()) @db.Timestamp(6)
    updatedAt     DateTime    @default(now()) @db.Timestamp(6) @updatedAt

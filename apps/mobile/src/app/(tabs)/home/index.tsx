@@ -6,13 +6,17 @@ import { useAppUser } from "~/provider/user";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AppleHealthKit from 'react-native-health';
 import { healthKitPermission } from "~/integration/healthKit";
+import { api, RouterInputs } from "~/utils/api";
+
+
+type HealthDataApiInput = RouterInputs['healthDataLog']['createMany']
 
 const HomeScreen = () => {
   const [appState, setAppState] = useState(AppState.currentState);
 
   const [hasPermissions, setHasPermissions] = useState(false);
-
   const user = useAppUser()
+  const { mutate: addHealthData  } = api.healthDataLog.createMany.useMutation()
 
   useEffect(() => {
 
@@ -29,10 +33,10 @@ const HomeScreen = () => {
 
   const syncData = async (startDate: string) => {
     const healthData = {
-      steps: [],
-      heartRateVariability: [],
-      heartRate: [],
-      energyBurned: []
+      STEPS: [],
+      HRV: [],
+      HEART_RATE: [],
+      CALORIES: []
     };
 
     const fetchHealthData = async (method: Function, key: string) => {
@@ -51,12 +55,15 @@ const HomeScreen = () => {
         });
       });
     };
-
+    
+    
+    
+    
     await Promise.all([
-      fetchHealthData(AppleHealthKit.getDailyStepCountSamples, 'steps'),
-      fetchHealthData(AppleHealthKit.getHeartRateVariabilitySamples, 'heartRateVariability'),
-      fetchHealthData(AppleHealthKit.getHeartRateSamples, 'heartRate'),
-      fetchHealthData(AppleHealthKit.getActiveEnergyBurned, 'energyBurned'),
+      fetchHealthData(AppleHealthKit.getDailyStepCountSamples, 'STEPS'),
+      fetchHealthData(AppleHealthKit.getHeartRateVariabilitySamples, 'HRV'),
+      fetchHealthData(AppleHealthKit.getHeartRateSamples, 'HEART_RATE'),
+      fetchHealthData(AppleHealthKit.getActiveEnergyBurned, 'CALORIES'),
     ]);
 
     // Send data to your API
@@ -65,8 +72,31 @@ const HomeScreen = () => {
 
   // Function to send health data to the API
   const sendHealthDataToAPI = async (healthData: any) => {
-     console.log({ healthData })
-     // send data to api in batch base on object key  and  save lastSyncTime
+    const batchData: HealthDataApiInput[] = [];
+    for (const [key, samples] of Object.entries(healthData)) {
+      if (Array.isArray(samples)) {
+        for (const sample of samples) {
+          let value = (sample?.value)as number
+          let  unit = ''
+          if (key === 'HRV'){
+             value = parseInt((value * 1000).toFixed(0))
+             unit = 'ms'
+          }
+          batchData.push({
+            value,
+            unit,
+            type: key,
+            startTime: new Date(sample.startDate),
+            endTime: new Date(sample.endDate)
+          });
+        }
+      }
+    }
+
+    console.log(`Prepared ${batchData.length} health data samples for API submission`);
+
+    await addHealthData(batchData); // Send batch data to API
+    await AsyncStorage.setItem('lastSyncTime', new Date().toISOString()); // Save last sync time
   };
 
   const syncHealthData = async () => {
