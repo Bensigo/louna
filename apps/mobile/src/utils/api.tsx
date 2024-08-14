@@ -66,7 +66,7 @@ export const TRPCProvider = (props: { children: React.ReactNode }) => {
                Authorization: `Bearer ${token}`,
               'x-trpc-source': 'expo-react',
               "app-token": token,
-              ...header
+         
             };
           },
         })
