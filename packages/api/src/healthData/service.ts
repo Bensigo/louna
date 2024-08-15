@@ -1,7 +1,15 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, HealthDataType } from "@prisma/client";
 import { z } from "zod";
+import { startOfDay, startOfWeek, startOfMonth, startOfYear, endOfDay, endOfWeek, endOfMonth, endOfYear, subDays, subWeeks, subMonths, subYears } from 'date-fns';
 
 import { CreateHealthDataSchema } from "./schema";
+
+type Interval = 'day' | 'week' | 'month' | 'year';
+
+interface HealthDataPoint {
+  timestamp: Date;
+  value: number;
+}
 
 export class HealthDataService {
   private prisma: PrismaClient;
@@ -114,5 +122,63 @@ export class HealthDataService {
     });
 
     return result;
+  }
+
+  async getHealthData(
+    profileId: string,
+    type: HealthDataType,
+    interval: Interval
+  ): Promise<HealthDataPoint[]> {
+    const now = new Date();
+    const { start, end } = this.getDateRange(now, interval);
+
+    const healthData = await this.prisma.healthData.findMany({
+      where: {
+        profileId,
+        type,
+        startDateTime: {
+          gte: start,
+          lte: end,
+        },
+      },
+      select: {
+        startDateTime: true,
+        value: true,
+      },
+      orderBy: {
+        startDateTime: 'asc',
+      },
+    });
+
+    return healthData.map(data => ({
+      timestamp: data.startDateTime,
+      value: data.value,
+    }));
+  }
+
+  private getDateRange(now: Date, interval: Interval): { start: Date, end: Date } {
+    let start: Date;
+    let end: Date = now;
+
+    switch (interval) {
+      case 'day':
+        start = startOfDay(now);
+        end = endOfDay(now);
+        break;
+      case 'week':
+        start = startOfWeek(subWeeks(now, 1));
+        end = endOfWeek(now);
+        break;
+      case 'month':
+        start = startOfMonth(subMonths(now, 1));
+        end = endOfMonth(now);
+        break;
+      case 'year':
+        start = startOfYear(subYears(now, 1));
+        end = endOfYear(now);
+        break;
+    }
+
+    return { start, end };
   }
 }

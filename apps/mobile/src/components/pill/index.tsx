@@ -1,6 +1,6 @@
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { styled } from "tamagui";
+import { Text, TouchableOpacity,  } from "react-native";
+import { styled, View } from "tamagui";
 
 import { Colors, colorScheme } from "~/constants/colors";
 
@@ -34,7 +34,7 @@ const Pill: React.FC<PillProps> = ({
   onPress,
   bg = "white",
   color = colorScheme.text.secondary,
-  borderColor = colorScheme.border.secondary,
+  borderColor = 'wheat',
 }) => {
   return (
     <PillContainer

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FlatList, Image, StyleSheet, Text, View, RefreshControl, TouchableWithoutFeedback } from "react-native";
-import { Button as TamaguiButton, XStack, YStack } from "tamagui";
+import { Card, Button as TamaguiButton, XStack, YStack } from "tamagui";
 import { Users2, Clock , Calendar, } from '@tamagui/lucide-icons'
 
 import type { RouterOutputs } from "@lumi/api";
@@ -35,7 +35,22 @@ const ChallengeCard = ({ item }: { item: Challenges[0] }) => {
 
   return (
     <TouchableWithoutFeedback onPress={goToDetail}>
-      <View style={styles.card}>
+      <Card 
+         elevate
+         size="$4"
+         bordered
+         animation="bouncy"
+         scale={0.9}
+         hoverStyle={{ scale: 0.925 }}
+         pressStyle={{ scale: 0.875 }}
+         borderWidth={1}
+         borderColor={'wheat'}
+         margin="$1"
+         shadowOffset={{ width: 0, height: 1 }}
+         shadowOpacity={0.05}
+         shadowRadius={2}
+      style={styles.card}
+      >
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
         <View style={styles.info}>
           <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
@@ -68,7 +83,7 @@ const ChallengeCard = ({ item }: { item: Challenges[0] }) => {
             </TamaguiButton>
           )}
         </View>
-      </View>
+      </Card>
     </TouchableWithoutFeedback>
   );
 };

@@ -13,7 +13,7 @@ const RootLayout = () => {
   return (
     <View flex={1}>
      <View paddingHorizontal={10}>
-     <H1 fontSize={25} fontWeight={'bold'} color={colorScheme.text.primary}>Challenges</H1>
+     <H1 fontSize={30} fontWeight={'bold'} color={colorScheme.text.primary}>Challenges</H1>
      </View>
       <Stack >
         <Stack.Screen
