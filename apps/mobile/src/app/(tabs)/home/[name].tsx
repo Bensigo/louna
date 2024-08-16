@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { View, Text, ScrollView } from 'tamagui';
 import HealthDataChart from '~/features/home/chart';
+import { colorScheme } from '~/constants/colors';
 
 const HealthSummaryDetail = () => {
   const { name } = useLocalSearchParams();
@@ -17,8 +18,8 @@ const HealthSummaryDetail = () => {
     } 
  })()
   return (
-    <ScrollView flex={1} py="$5" px={'$2'}>
-         <Text fontSize={24} fontWeight="bold" color="#333">
+    <ScrollView flex={1} paddingTop="$6" px={'$3'}>
+         <Text fontSize={24} fontWeight="bold" color={colorScheme.primary.lightGreen}>
            {getName} Health Details
         </Text>
        <HealthDataChart name={name} />

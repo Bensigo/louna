@@ -1,14 +1,32 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import Healthkit, {
   HKQuantityTypeIdentifier,
-  HKUpdateFrequency,
+  HKUnits,
+
 } from "@kingstinct/react-native-healthkit";
-import { api } from "~/utils/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { HKQuantitySample } from "@kingstinct/react-native-healthkit";
 
-const HealthKitContext = createContext<null>(null);
 
-let isBackgroundObserversSetup = false;
+// Types and interfaces
+export type HealthDataType = 'CALORIES' | 'STEPS' | 'HRV' | 'HEART_RATE';
+
+interface HealthSample {
+  type: HealthDataType;
+  value: number;
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  unit: string;
+}
+
+interface HealthKitContextType {
+  isAuthorized: boolean;
+  getMostRecentValue: (type: HealthDataType) => Promise<number | null>;
+  getIntervalData: (type: HealthDataType, startDate: Date, endDate: Date) => Promise<HealthSample[]>;
+
+}
+
+const HealthKitContext = createContext<HealthKitContextType | null>(null);
 
 const identifiers = [
   HKQuantityTypeIdentifier.activeEnergyBurned,
@@ -17,75 +35,114 @@ const identifiers = [
   HKQuantityTypeIdentifier.heartRateVariabilitySDNN,
 ];
 
-// Function to save the anchor to AsyncStorage
-const saveAnchor = async (type: string, anchor: string) => {
-  await AsyncStorage.setItem(`healthkit_anchor_${type}`, anchor);
-};
-
-// Function to retrieve the anchor from AsyncStorage
-const getAnchor = async (type: string) => {
-  return await AsyncStorage.getItem(`healthkit_anchor_${type}`);
-};
-
-// Function to map health samples to the schema using a default time value
-const mapSamplesToSchema = (samples: any[], type: string) => {
-  return samples.map((sample) => ({
+// Helper function
+const mapSamplesToSchema = (samples: HKQuantitySample[], type: HealthDataType): HealthSample[] => {
+  return samples?.map((sample) => ({
     type,
     value: sample.quantity,
     id: sample.uuid,
-    startTime: sample.startDate ? new Date(sample.startDate) : new Date(), // Use current time if missing
-    endTime: sample.endDate ? new Date(sample.endDate) : new Date(), // Use current time if missing
+    startTime: new Date(sample.startDate),
+    endTime: new Date(sample.endDate),
     unit: sample.unit,
   }));
 };
 
-// Function to set up background observers for health data
-const setupBackgroundObservers = () => {
-  if (isBackgroundObserversSetup) return;
-  isBackgroundObserversSetup = true;
+// HealthKitProvider component
+export const HealthKitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
-  identifiers.forEach((identifier) => {
-    Healthkit.enableBackgroundDelivery(identifier, HKUpdateFrequency.immediate);
+  const requestPermissions = async () => {
+    try {
+      return await Healthkit.requestAuthorization(identifiers);
+    } catch (error) {
+      console.error("Error requesting HealthKit permissions:", error);
+      return false;
+    }
+  };
 
-    Healthkit.subscribeToChanges(identifier, async () => {
-      const previousAnchor = await getAnchor(identifier);
-      const { newAnchor, samples, deletedSamples } =
-        await Healthkit.queryQuantitySamples(identifier, {
-          anchor: previousAnchor || undefined,
-          limit: 10,
-          
-        });
-        console.log({ samples })
-      const newHealthData = mapSamplesToSchema(samples, identifier);
-      const deletedHealthData = mapSamplesToSchema(deletedSamples, identifier);
-      
-      // Save to database
-      saveToDb({
-        new: newHealthData.length ? newHealthData : [],
-        deleted: deletedHealthData.length ? deletedHealthData : [],
-      });
+  const getMostRecentValue = async (type: HealthDataType): Promise<number | null> => {
+    if (!isAuthorized) return null;
 
-      // Save the new anchor
-      if (newAnchor) {
-        await saveAnchor(identifier, newAnchor);
+
+    const { identifier, unit } = getIdentifierAndUnitFromType(type);
+    
+    try {
+      let result: number | null = null;
+
+      if (type === 'STEPS' || type === 'CALORIES') {
+        // For steps and active energy burned, get the sum for the day
+        const now = new Date();
+        const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+        const samples = await Healthkit.queryStatisticsForQuantity(identifier, unit, startOfDay);
+   
+        result =  Math.round(samples.sumQuantity?.quantity)
+        // result = Math.round(samples.reduce((sum, sample) => sum + sample.quantity, 0));
+      } else {
+        // For other types, get the most recent value
+        const sample = await Healthkit.getMostRecentQuantitySample(identifier, unit);
+        result = sample ? Math.round(sample.quantity) : null;
       }
+
+      return result;
+    } catch (error) {
+      console.error(`Error fetching ${type} data: `, error);
+      return null;
+    }
+  };
+
+
+ 
+
+  const getIntervalData = async (type: HealthDataType, startDate: Date, endDate: Date): Promise<HealthSample[]> => {
+    if (!isAuthorized) return [];
+
+    const identifier = getIdentifierAndUnitFromType(type);
+    const samples = await Healthkit.queryQuantitySamples(identifier.identifier, {
+      from: startDate,
+      to: endDate,
     });
-  });
+
+    return mapSamplesToSchema(samples, type);
+  };
+
+  useEffect(() => {
+    const setupHealthKit = async () => {
+      const authorized = await requestPermissions();
+      setIsAuthorized(authorized);
+    };
+
+    setupHealthKit();
+  }, []);
+
+  return (
+    <HealthKitContext.Provider value={{ isAuthorized, getMostRecentValue, getIntervalData }}>
+      {children}
+    </HealthKitContext.Provider>
+  );
 };
 
-// Provider component to set up the HealthKit context
-export const HealthKitProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  // Ensure background observers are set up on initialization
-  setupBackgroundObservers();
+// Helper functions for type conversions
+function getIdentifierFromType(type: HealthDataType): HKQuantityTypeIdentifier {
+  switch (type) {
+    case 'CALORIES': return HKQuantityTypeIdentifier.activeEnergyBurned;
+    case 'STEPS': return HKQuantityTypeIdentifier.stepCount;
+    case 'HRV': return HKQuantityTypeIdentifier.heartRateVariabilitySDNN;
+    case 'HEART_RATE': return HKQuantityTypeIdentifier.heartRate;
+    default: throw new Error(`Unsupported type: ${type}`);
+  }
+}
 
-  const { mutate: saveToDb, isLoading } = api.healthDataLog.createMany.useMutation();
+function getIdentifierAndUnitFromType(type: HealthDataType): { identifier: HKQuantityTypeIdentifier, unit: HKUnits | string } {
+  switch (type) {
+    case 'CALORIES': return { identifier: HKQuantityTypeIdentifier.activeEnergyBurned, unit: HKUnits.Kilocalorie };
+    case 'STEPS': return { identifier: HKQuantityTypeIdentifier.stepCount, unit: HKUnits.Count };
+    case 'HRV': return { identifier: HKQuantityTypeIdentifier.heartRateVariabilitySDNN, unit: 'ms' };
+    case 'HEART_RATE': return { identifier: HKQuantityTypeIdentifier.heartRate, unit: 'count/min'};
+    default: throw new Error(`Unsupported type: ${type}`);
+  }
+}
 
-  return <HealthKitContext.Provider value={null}>{children}</HealthKitContext.Provider>;
-};
-
-// Hook to use the HealthKit context
-export const useHealthKit = () => {
-  return useContext(HealthKitContext);
+// Custom hook to use HealthKit context
+export const useHealthKit = (): HealthKitContextType => {
+ return React.useContext(HealthKitContext)
 };

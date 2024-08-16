@@ -12,8 +12,10 @@ export const CreateHealthDataSchema = z.object({
 
 export const CreateHealthSamples = z.object({
     new: z.array(CreateHealthDataSchema).optional(),
-    deleted: z.array(CreateHealthDataSchema).optional()
 })
+
+
+export const DeletedFromDbSchema = z.array(z.string())
 
 
 

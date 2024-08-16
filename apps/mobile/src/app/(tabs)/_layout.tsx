@@ -16,7 +16,6 @@ export default function TabLayout() {
 
   useEffect(() => {
     if (user){
-      console.log({ user })
       if (!user.hasPref){
          router.push('/(onboarding)/')
       }

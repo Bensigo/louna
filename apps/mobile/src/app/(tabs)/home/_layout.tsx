@@ -5,6 +5,7 @@ import { HealthKitProvider } from "~/integration/healthKit";
 
 const RootLayout = () => {
   return (
+    <HealthKitProvider>
    <View paddingHorizontal={10} flex={1}>
        <H1 fontSize={30} fontWeight={'bold'} color={colorScheme.text.primary}>Louna</H1>
     <Stack>
@@ -18,6 +19,7 @@ const RootLayout = () => {
       />
     </Stack>
    </View>
+   </HealthKitProvider>
   )
 };
 

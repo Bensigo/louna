@@ -5,6 +5,7 @@ import { Tabs } from 'tamagui';
 import { colorScheme } from '~/constants/colors';
 import { format, startOfDay, startOfWeek, startOfMonth, startOfYear, parseISO } from 'date-fns';
 import { api } from '~/utils/api';
+import { HealthDataType, useHealthKit } from '~/integration/healthKit';
 
 
 interface HealthDataPoint {
@@ -13,7 +14,6 @@ interface HealthDataPoint {
 }
 
 const FIXED_BAR_COUNT = 14; // This sets the number of bars we always want to display
-const VISIBLE_BARS = 7; // Number of bars visible at once
 
 function processDataForChart(data: HealthDataPoint[], interval: string) {
   const groupedData = new Map<string, { value: number, timestamp: Date }>();
@@ -112,21 +112,56 @@ const StyledButton = styled(Button, {
 
 const HealthDataChart = ({ name }: {name: string }) => {
   const [interval, setInterval] = useState('day');
+  const [isLoading, setLoading] = useState(false)
   const [data, setData] = useState([]);
 
-  const {isLoading, data: chartData } = api.healthDataLog.list.useQuery({ type: name, interval })
+  const { getIntervalData, isAuthorized } = useHealthKit()
+  
+  const getStartTimeFromInterval = () => {
+    const now = new Date();
+    switch (interval) {
+      case 'day':
+        return new Date(now.setHours(0, 0, 0, 0));
+      case 'week':
+        const dayOfWeek = now.getDay();
+        return new Date(now.setDate(now.getDate() - dayOfWeek));
+      case 'month':
+        return new Date(now.getFullYear(), now.getMonth(), 1);
+      case 'year':
+        return new Date(now.getFullYear(), 0, 1);
+      default:
+        return now;
+    }
+  }
 
   useEffect(() => {
-    if (chartData?.length){
-        const processedData = processDataForChart(chartData, interval);
-        setData(processedData);
-    } else {
-        setData([]);
-    }
-  }, [chartData]);
+    if (isAuthorized) {
+      const handleFetchAndProcessData = async () => {
+        try {
+          setLoading(true)
+          const now = new Date()
+          const startTime = getStartTimeFromInterval()
+          const healthData = await getIntervalData(name as HealthDataType, startTime, now)
+         
+          const chartData = healthData.map(sample => ({
+            timestamp: sample.startTime,
+            ...(name === 'HEART_RATE' ? { value: Math.round(sample.value/10) } : { value: Math.round(sample.value) })
+          }));
+          const processedData = processDataForChart(chartData, interval);
+          setData(processedData);
+          setLoading(false)
+        } catch (err) {
+          console.log(err)
+          setLoading(false)
+        }
+      }
 
-  const maxValue = data.length > 0 ? Math.max(...data.map((item) => item.value), 1) : 100;
-  const averageValue = data.length > 0 ? data.reduce((sum, item) => sum + item.value, 0) / data.length : 0;
+      void handleFetchAndProcessData();
+    } else {
+      setData([]);
+    }
+  }, [isAuthorized, interval, name]);
+
 
 
   const getUnit = (name: string) => {
@@ -135,7 +170,7 @@ const HealthDataChart = ({ name }: {name: string }) => {
         return 'Steps';
       case 'hrv':
         return 'ms';
-      case 'heart rate':
+      case 'heart_rate':
         return 'BPM';
       // Add more cases as needed
       case 'calories':
@@ -189,48 +224,64 @@ const HealthDataChart = ({ name }: {name: string }) => {
             ))}
           </Tabs.List>
         </StyledTabs>
-           <View >
-             <XStack alignItems='center' justifyContent='flex-start'>
-               <H3>{name}</H3>
-               <Text fontSize={18} fontWeight="bold" color={colorScheme.primary.green} marginLeft={10}>
-                  {calChartData()} {getUnit(name)}
-               </Text>
-             </XStack>
-           </View>
+          
 
         {isLoading ? (
           <View height={250} justifyContent="center" alignItems="center">
             <Text color="#666">Loading...</Text>
           </View>
         ) : (
-            <View height={250} paddingTop={20} width="100%" >
+            <View height={250} paddingTop={20} marginTop={30} width="100%" >
     
             <BarChart
               data={data.map(item => ({ value: item.value }))}
               barWidth={24}
-              spacing={16}
-              roundedTop
-              roundedBottom
-              hideRules
+              spacing={16}           
+              
               xAxisThickness={1}
               yAxisThickness={0}
               yAxisTextStyle={{ color: '#999', fontSize: 12 }}
               xAxisLabelTextStyle={{ color: '#999', fontSize: 10 }}
               noOfSections={5}
-              maxValue={maxValue}
-              barBorderRadius={4}
+           
+              roundedTop={false}
+              roundedBottom={false}
+              barBorderRadius={5}
+              
               frontColor={colorScheme.primary.lightGreen}
               gradientColor="#8a7dfd"
-              showXAxisLabels
+              
               xAxisLabelTexts={data.map((item, index) => 
                 index % 2 === 0 ? item.formattedLabel : ''
               )}
-              xAxisLabelWidth={40}
+            
               rotateLabel
+              isAnimated
               xAxisLabelsHeight={40}
               xAxisLabelsVerticalShift={3}
-              width={300} // Adjust this value as needed
-              height={200}
+              width={300}
+              renderTooltip={(item, index) => {
+                const selectedItem = data[index];
+                return  (
+                  <Card
+                    elevate
+                    my={'$2'}
+                    size="$2"
+                    backgroundColor={'white'}
+                    
+                    padding={'$3'}
+                   
+                  >
+                    <Text fontSize={14} fontWeight="bold" color={colorScheme.secondary.darkGray}>
+                      {item.value} {getUnit(name)}
+                    </Text>
+                    {/* <Text fontSize={12} color={colorScheme.secondary.gray}>
+                      {new Date(selectedItem.startTime).toLocaleString()}
+                    </Text> */}
+                  </Card>
+                );
+              }}
+              height={220}
             />
           </View>
         )}
