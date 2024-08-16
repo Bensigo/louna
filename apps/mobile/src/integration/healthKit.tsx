@@ -1,144 +1,91 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
-import AppleHealthKit, { HealthPermission } from 'react-native-health';
-import type { HealthInputOptions, HealthKitPermissions } from 'react-native-health';
+import React, { createContext, useContext } from "react";
+import Healthkit, {
+  HKQuantityTypeIdentifier,
+  HKUpdateFrequency,
+} from "@kingstinct/react-native-healthkit";
+import { api } from "~/utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const healthKitPermission: HealthKitPermissions = {
-   permissions: {
-    read: [
-        AppleHealthKit.Constants.Permissions.HeartRate,
-       AppleHealthKit.Constants.Permissions.HeartRateVariability,
-       AppleHealthKit.Constants.Permissions.ActiveEnergyBurned,
-       AppleHealthKit.Constants.Permissions.StepCount,
-       AppleHealthKit.Constants.Permissions.Steps,
+const HealthKitContext = createContext<null>(null);
 
-      ],
-      write: [
-    
-      ],
-   }
-} as const;
+let isBackgroundObserversSetup = false;
 
-interface HealthKitContextType {
-  hasPermissions: boolean;
-  requestPermissions: () => void;
-  readData: (dataType: HealthPermission, options: HealthInputOptions) => Promise<any>;
-  writeData: (dataType: HealthPermission, value: number, options: HealthInputOptions) => Promise<void>;
-}
+const identifiers = [
+  HKQuantityTypeIdentifier.activeEnergyBurned,
+  HKQuantityTypeIdentifier.stepCount,
+  HKQuantityTypeIdentifier.heartRate,
+  HKQuantityTypeIdentifier.heartRateVariabilitySDNN,
+];
 
-const HealthKitContext = createContext<HealthKitContextType | null>(null);
-
-export const HealthKitProvider = ({ children }: { children: ReactNode }) => {
-  const [hasPermissions, setHasPermissions] = useState(false);
-
-  const requestPermissions =  () => {
-      AppleHealthKit.initHealthKit(healthKitPermission, (error, result) => {
-        if (error){
-            console.error('Error initializing HealthKit:', error);
-            return 
-        }
-         setHasPermissions(true)
-    });
-    
-  };
-
-  const readData = async (dataType: HealthPermission, options: HealthInputOptions) => {
-    if (!hasPermissions) {
-      throw new Error('HealthKit permissions not granted');
-    }
-    return new Promise((resolve, reject) => {
-      switch (dataType) {
-        case HealthPermission.HeartRate:
-          AppleHealthKit.getHeartRateSamples(options, (err, results) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(results);
-            }
-          });
-          break;
-        case HealthPermission.StepCount:
-          AppleHealthKit.getStepCount(options, (err, results) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(results);
-            }
-          });
-          break;
-        case HealthPermission.HeartRateVariability:
-          AppleHealthKit.getHeartRateVariabilitySamples(options, (err, results) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(results);
-            }
-          });
-          break;
-        case HealthPermission.ActiveEnergyBurned:
-          AppleHealthKit.getActiveEnergyBurned(options, (err, results) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(results);
-            }
-          });
-          break;
-        default:
-          reject(new Error('Unsupported data type'));
-      }
-    });
-  };
-
-  const writeData = async (dataType: HealthPermission, value: number, options: HealthInputOptions) => {
-    if (!hasPermissions) {
-      throw new Error('HealthKit permissions not granted');
-    }
-    return new Promise<void>((resolve, reject) => {
-      switch (dataType) {
-        case HealthPermission.HeartRate:
-          AppleHealthKit.saveHeartRateSample(
-            { ...options, value },
-            (err, results) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve();
-              }
-            }
-          );
-          break;
-        case HealthPermission.StepCount:
-          AppleHealthKit.saveSteps(
-            { ...options, value },
-            (err, results) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve();
-              }
-            }
-          );
-          break;
-        // Add cases for other data types as needed
-        default:
-          reject(new Error('Unsupported data type'));
-      }
-    });
-  };
-
-  useEffect(() => {
-   void requestPermissions();
-  }, []);
-
-  
-  return (
-    <HealthKitContext.Provider value={{ writeData, readData, hasPermissions, requestPermissions }}>
-      {children}
-    </HealthKitContext.Provider>
-  );
+// Function to save the anchor to AsyncStorage
+const saveAnchor = async (type: string, anchor: string) => {
+  await AsyncStorage.setItem(`healthkit_anchor_${type}`, anchor);
 };
 
+// Function to retrieve the anchor from AsyncStorage
+const getAnchor = async (type: string) => {
+  return await AsyncStorage.getItem(`healthkit_anchor_${type}`);
+};
+
+// Function to map health samples to the schema using a default time value
+const mapSamplesToSchema = (samples: any[], type: string) => {
+  return samples.map((sample) => ({
+    type,
+    value: sample.quantity,
+    id: sample.uuid,
+    startTime: sample.startDate ? new Date(sample.startDate) : new Date(), // Use current time if missing
+    endTime: sample.endDate ? new Date(sample.endDate) : new Date(), // Use current time if missing
+    unit: sample.unit,
+  }));
+};
+
+// Function to set up background observers for health data
+const setupBackgroundObservers = () => {
+  if (isBackgroundObserversSetup) return;
+  isBackgroundObserversSetup = true;
+
+  identifiers.forEach((identifier) => {
+    Healthkit.enableBackgroundDelivery(identifier, HKUpdateFrequency.immediate);
+
+    Healthkit.subscribeToChanges(identifier, async () => {
+      const previousAnchor = await getAnchor(identifier);
+      const { newAnchor, samples, deletedSamples } =
+        await Healthkit.queryQuantitySamples(identifier, {
+          anchor: previousAnchor || undefined,
+          limit: 10,
+          
+        });
+        console.log({ samples })
+      const newHealthData = mapSamplesToSchema(samples, identifier);
+      const deletedHealthData = mapSamplesToSchema(deletedSamples, identifier);
+      
+      // Save to database
+      saveToDb({
+        new: newHealthData.length ? newHealthData : [],
+        deleted: deletedHealthData.length ? deletedHealthData : [],
+      });
+
+      // Save the new anchor
+      if (newAnchor) {
+        await saveAnchor(identifier, newAnchor);
+      }
+    });
+  });
+};
+
+// Provider component to set up the HealthKit context
+export const HealthKitProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  // Ensure background observers are set up on initialization
+  setupBackgroundObservers();
+
+  const { mutate: saveToDb, isLoading } = api.healthDataLog.createMany.useMutation();
+
+  return <HealthKitContext.Provider value={null}>{children}</HealthKitContext.Provider>;
+};
+
+// Hook to use the HealthKit context
 export const useHealthKit = () => {
   return useContext(HealthKitContext);
 };

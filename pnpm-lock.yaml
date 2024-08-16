@@ -35,6 +35,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.9.0
         version: 3.9.0(react-hook-form@7.52.2)
+      '@kingstinct/react-native-healthkit':
+        specifier: ^8.2.0
+        version: 8.2.0(react-native@0.74.5)(react@18.2.0)
       '@react-native-async-storage/async-storage':
         specifier: 1.23.1
         version: 1.23.1(react-native@0.74.5)
@@ -2828,6 +2831,16 @@ packages:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
     dev: true
+
+  /@kingstinct/react-native-healthkit@8.2.0(react-native@0.74.5)(react@18.2.0):
+    resolution: {integrity: sha512-RA2sDOts1EX2V+6sLFfyg8Xjpfcz4fXrTCfgjEuIUF4LVzSaE4QqO/buLmsB8XrMjAwsqmdJO1Wmfp9yHqTyFA==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.23.2)(@types/react@18.2.79)(react@18.2.0)
+    dev: false
 
   /@lazy-array/util-unique@1.0.5:
     resolution: {integrity: sha512-IEJjIjEuCYUtWyj4w8EIu/S31H/VxJOqX32YebyiY6gfSA2sdjKMteUVyiXhez3k9jg1s5QGYPcyl00dz5klzA==}

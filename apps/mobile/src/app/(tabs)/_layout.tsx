@@ -1,4 +1,4 @@
-import { StatusBar } from "react-native";
+import {  StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, Tabs } from "expo-router";
 import { Activity, Home, Smile, User } from "@tamagui/lucide-icons";
@@ -8,16 +8,11 @@ import {  colorScheme } from "~/constants/colors";
 import { useAppUser } from "~/provider/user";
 
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 import { useEffect, useState } from "react";
 
 export default function TabLayout() {
   const user = useAppUser()
-
-
- 
 
   useEffect(() => {
     if (user){

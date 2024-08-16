@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Card, YStack, XStack, styled } from 'tamagui';
+import { View, Text, Card, YStack, XStack, styled, Button, H3 } from 'tamagui';
 import { BarChart } from 'react-native-gifted-charts';
 import { Tabs } from 'tamagui';
 import { colorScheme } from '~/constants/colors';
@@ -12,6 +12,9 @@ interface HealthDataPoint {
     value: number
 }
 
+const FIXED_BAR_COUNT = 14; // This sets the number of bars we always want to display
+const VISIBLE_BARS = 7; // Number of bars visible at once
+
 function processDataForChart(data: HealthDataPoint[], interval: string) {
   const groupedData = new Map<string, { value: number, timestamp: Date }>();
 
@@ -21,13 +24,17 @@ function processDataForChart(data: HealthDataPoint[], interval: string) {
     groupedData.set(key, { value: currentData.value + point.value, timestamp: currentData.timestamp });
   });
 
-  return Array.from(groupedData, ([label, { value, timestamp }]) => ({ 
+  const sortedData = Array.from(groupedData, ([label, { value, timestamp }]) => ({ 
     value,
     label,
     timestamp,
     formattedLabel: formatLabel(timestamp, interval)
   }))
     .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+  // Select up to FIXED_BAR_COUNT evenly spaced data points
+  const step = Math.max(1, Math.floor(sortedData.length / FIXED_BAR_COUNT));
+  return sortedData.filter((_, index) => index % step === 0).slice(-FIXED_BAR_COUNT);
 }
 
 function formatLabel(date: Date, interval: string): string {
@@ -61,51 +68,6 @@ function getGroupKey(date: Date, interval: string): string {
 }
 
 
-  function getMockHealthData(interval: string): HealthDataPoint[] {
-    const now = new Date();
-    const data: HealthDataPoint[] = [];
-    let start: Date;
-  
-    switch (interval) {
-      case 'day':
-        start = startOfDay(now);
-        for (let i = 0; i < 24; i++) {
-          data.push({
-            timestamp: new Date(start.getTime() + i * 60 * 60 * 1000),
-            value: Math.floor(Math.random() * 100)
-          });
-        }
-        break;
-      case 'week':
-        start = startOfWeek(now);
-        for (let i = 0; i < 7; i++) {
-          data.push({
-            timestamp: new Date(start.getTime() + i * 24 * 60 * 60 * 1000),
-            value: Math.floor(Math.random() * 1000)
-          });
-        }
-        break;
-      case 'month':
-        start = startOfMonth(now);
-        for (let i = 0; i < 30; i++) {
-          data.push({
-            timestamp: new Date(start.getTime() + i * 24 * 60 * 60 * 1000),
-            value: Math.floor(Math.random() * 5000)
-          });
-        }
-        break;
-      case 'year':
-        start = startOfYear(now);
-        for (let i = 0; i < 12; i++) {
-          data.push({
-            timestamp: new Date(start.getTime() + i * 30 * 24 * 60 * 60 * 1000),
-            value: Math.floor(Math.random() * 50000)
-          });
-        }
-        break;
-    }
-  return data;
-}
 
 
 const intervals = [
@@ -119,7 +81,7 @@ const StyledCard = styled(Card, {
   backgroundColor: 'white',
   borderRadius: 16,
   shadowOpacity: 0.1,
-
+  width: '100%', // Make the card full width
 });
 
 const StyledTabs = styled(Tabs, {
@@ -139,26 +101,67 @@ const StyledTabsTriggerText = styled(Text, {
   fontSize: 14,
 });
 
+const StyledButton = styled(Button, {
+  backgroundColor: colorScheme.primary.green,
+  color: 'white',
+  borderRadius: 8,
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  marginRight: 8,
+});
+
 const HealthDataChart = ({ name }: {name: string }) => {
   const [interval, setInterval] = useState('day');
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-//   const {} = api.healthDataLog.
+  const {isLoading, data: chartData } = api.healthDataLog.list.useQuery({ type: name, interval })
 
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      const mockData = getMockHealthData(interval);
-      const processedData = processDataForChart(mockData, interval);
-      setData(processedData);
-      setLoading(false);
-    }, 1000);
-  }, [interval]);
+    if (chartData?.length){
+        const processedData = processDataForChart(chartData, interval);
+        setData(processedData);
+    } else {
+        setData([]);
+    }
+  }, [chartData]);
+
+  const maxValue = data.length > 0 ? Math.max(...data.map((item) => item.value), 1) : 100;
+  const averageValue = data.length > 0 ? data.reduce((sum, item) => sum + item.value, 0) / data.length : 0;
+
+
+  const getUnit = (name: string) => {
+    switch (name.toLowerCase()) {
+      case 'steps':
+        return 'Steps';
+      case 'hrv':
+        return 'ms';
+      case 'heart rate':
+        return 'BPM';
+      // Add more cases as needed
+      case 'calories':
+        return 'Cal'
+      default:
+        return '';
+    }
+  };
+
+
+  const calChartData = () => {
+    if (data.length === 0) return 'No data';
+
+    const value = name.toLowerCase() === 'steps' || name.toLowerCase() === 'calories'
+      ? data.reduce((sum, item) => sum + item.value, 0)
+      : data.reduce((sum, item) => sum + item.value, 0) / data.length;
+
+    const formattedValue = value.toFixed(1);
+    const prefix = name.toLowerCase() === 'steps' || name.toLowerCase() === 'calories' ? 'Total' : 'Avg';
+
+    return `${prefix} ${formattedValue}`;
+  }
 
   return (
-    <StyledCard padding="$4" width="100%">
-      <YStack space="$4">
+    <StyledCard padding="$4">
+      <YStack space="$4" width="100%">
        
         <StyledTabs
           value={interval}
@@ -186,14 +189,24 @@ const HealthDataChart = ({ name }: {name: string }) => {
             ))}
           </Tabs.List>
         </StyledTabs>
-        {loading ? (
+           <View >
+             <XStack alignItems='center' justifyContent='flex-start'>
+               <H3>{name}</H3>
+               <Text fontSize={18} fontWeight="bold" color={colorScheme.primary.green} marginLeft={10}>
+                  {calChartData()} {getUnit(name)}
+               </Text>
+             </XStack>
+           </View>
+
+        {isLoading ? (
           <View height={250} justifyContent="center" alignItems="center">
             <Text color="#666">Loading...</Text>
           </View>
-        ) : data.length > 0 ? (
-          <View height={250} paddingTop={20}>
+        ) : (
+            <View height={250} paddingTop={20} width="100%" >
+    
             <BarChart
-              data={data.map(item => ({ value: item.value, label: item.formattedLabel }))}
+              data={data.map(item => ({ value: item.value }))}
               barWidth={24}
               spacing={16}
               roundedTop
@@ -202,21 +215,23 @@ const HealthDataChart = ({ name }: {name: string }) => {
               xAxisThickness={1}
               yAxisThickness={0}
               yAxisTextStyle={{ color: '#999', fontSize: 12 }}
-              
               xAxisLabelTextStyle={{ color: '#999', fontSize: 10 }}
               noOfSections={5}
-              maxValue={Math.max(...data.map((item) => item.value))}
+              maxValue={maxValue}
               barBorderRadius={4}
               frontColor={colorScheme.primary.lightGreen}
               gradientColor="#8a7dfd"
               showXAxisLabels
+              xAxisLabelTexts={data.map((item, index) => 
+                index % 2 === 0 ? item.formattedLabel : ''
+              )}
               xAxisLabelWidth={40}
               rotateLabel
+              xAxisLabelsHeight={40}
+              xAxisLabelsVerticalShift={3}
+              width={300} // Adjust this value as needed
+              height={200}
             />
-          </View>
-        ) : (
-          <View height={250} justifyContent="center" alignItems="center">
-            <Text color="#666">No data available</Text>
           </View>
         )}
       </YStack>

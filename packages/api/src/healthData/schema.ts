@@ -3,10 +3,17 @@ import { z } from 'zod';
 export const CreateHealthDataSchema = z.object({
     type: z.enum(['STEPS', 'HEART_RATE', 'HRV', 'CALORIES']),
     value: z.number(),
+    id: z.string(),
     startTime: z.date(),
     endTime: z.date(),
     unit: z.string().optional(), // Optional field
 });
+
+
+export const CreateHealthSamples = z.object({
+    new: z.array(CreateHealthDataSchema).optional(),
+    deleted: z.array(CreateHealthDataSchema).optional()
+})
 
 
 

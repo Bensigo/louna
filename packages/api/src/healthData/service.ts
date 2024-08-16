@@ -31,6 +31,7 @@ export class HealthDataService {
         data: batch.map((item) => ({
           type: item.type,
           value: item.value,
+          dataId: item.id,
           startDateTime: item.startTime,
           endDateTime: item.endTime,
           ...(item.unit ? { unit: item.unit }: {}),

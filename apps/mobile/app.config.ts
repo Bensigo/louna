@@ -44,8 +44,10 @@ const defineConfig = (): ExpoConfig => ({
     "expo-apple-authentication",
     "expo-secure-store",
     "expo-router",
-    ["react-native-health", {
-      // "isClinicalDataEnabled": true,
+  ["@kingstinct/react-native-healthkit", {
+    "NSHealthShareUsageDescription": "Allow app to access your health data",
+    "NSHealthUpdateUsageDescription": false,  // if you have no plans to update data, you could skip adding it to your info.plist
+    "background": true // if you have no plans to use it in background mode, you could skip adding it to the entitlements
   }],
     [
       "expo-build-properties",

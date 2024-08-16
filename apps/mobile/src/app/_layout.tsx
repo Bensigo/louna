@@ -12,6 +12,7 @@ import { UserProvider } from "../provider/user";
 import { TRPCProvider } from "../utils/api";
 import { supabase } from "../utils/supabase";
 import { useColorScheme } from "react-native";
+import { HealthKitProvider } from "~/integration/healthKit";
 
 const tamaguiConfig = createTamagui(config);
 
@@ -28,13 +29,14 @@ export default function RootLayout() {
                         >
         <StatusBar />
           <UserProvider>
+            <HealthKitProvider>
             <Stack>
               <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
             </Stack>
-           
+            </HealthKitProvider>
           </UserProvider>
           </ThemeProvider>
           </Theme>

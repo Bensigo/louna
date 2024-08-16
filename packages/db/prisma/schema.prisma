@@ -92,6 +92,7 @@ model HealthData {
     type      HealthDataType
     profileId String
     profile   Profile        @relation(fields: [profileId], references: [id])
+    dataId    String
     startDateTime DateTime    @db.Timestamp(6)
     endDateTime   DateTime?    @db.Timestamp(6)
     unit String?

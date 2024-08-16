@@ -1,14 +1,26 @@
 import { protectedProcedure } from "../trpc";
 import { HealthDataService } from "./service";
-import { CreateHealthDataSchema, GetHealthDataSchema } from "./schema";
+import { CreateHealthDataSchema, CreateHealthSamples, GetHealthDataSchema } from "./schema";
 import { z } from "zod";
+import { prisma } from "@lumi/db";
 
 
 export const createHealthDataController = protectedProcedure
-.input(z.array(CreateHealthDataSchema))
+.input(CreateHealthSamples)
 .mutation(async ({ ctx, input }) => {
   const healthDataService = new HealthDataService(ctx.prisma);
-  return await healthDataService.createMany(input, ctx.user.id);
+  if (input?.deleted.length){
+    const ids = input.deleted.map((sample) => sample.id)
+    prisma.healthData.deleteMany({
+      where: {
+        profileId: ctx.user.id,
+        dataId: {
+          in: ids
+        }
+      }
+    })
+  }
+  return await healthDataService.createMany(input.new, ctx.user.id);
 })
 
 
