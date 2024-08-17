@@ -13,9 +13,6 @@ export const GetTipSchema = z.object({
 }).refine(data => data.min <= data.max, {
   message: "Min must be less than or equal to max",
   path: ["min"],
-}).refine(data => data.total >= data.min && data.total <= data.max, {
-  message: "Total must be between min and max",
-  path: ["total"],
 });
 
 
