@@ -9,6 +9,7 @@ import type {  HealthDataPoint } from './utils/util';
 import StatsCard from "./statsCard"
 import { colorScheme } from '~/constants/colors';
 import { format } from 'date-fns';
+import { api } from '~/utils/api';
 
 interface HealthDataChartProps {
   name: HealthDataType;
@@ -69,6 +70,9 @@ const HealthDataChart: React.FC<HealthDataChartProps> = ({ name }) => {
   });
   const [selectedDataPoint, setSelectedDataPoint] = useState(null);
 
+
+  const { mutate: getInsight , data: insight, isLoading: isAiLoading } = api.coach.getHealthInsight.useMutation()
+
   const { getIntervalData, isAuthorized } = useHealthKit();
 
   const intervalOptions = [
@@ -117,6 +121,9 @@ const HealthDataChart: React.FC<HealthDataChartProps> = ({ name }) => {
         
         min = Math.min(...values);
         max = Math.max(...values);
+
+        const type = name === 'CALORIES' ? 'ENERGY_BURNED' : name
+        getInsight({ avg: average, min, max, ...(total ? { total }: {}), dataType: type  })
         
         setStats({ average, total, min, max });
       } else {
@@ -221,7 +228,7 @@ const HealthDataChart: React.FC<HealthDataChartProps> = ({ name }) => {
            
           </View>
 
-        <StatsCard name={name} interval={interval} stats={stats} />
+        <StatsCard name={name} interval={interval} stats={stats} insightTip={insight} isLoading={isAiLoading} />
       </YStack>
     </ScrollView>
   );

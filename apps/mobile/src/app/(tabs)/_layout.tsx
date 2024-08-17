@@ -63,14 +63,6 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="coach"
-          options={{
-            tabBarLabel: "Coach",
-            tabBarHideOnKeyboard: true,
-            tabBarIcon: ({ color }) => <Smile color={color} />,
-          }}
-        />
-        <Tabs.Screen
           name="profile"
           options={{
             tabBarLabel: "Profile",
