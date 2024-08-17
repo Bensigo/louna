@@ -56,7 +56,7 @@ const StatsCard = ({ name, interval, stats,  insight, isLoading} : { name: Healt
  
 
 
-
+ console.log({ insight, isLoading })
 
   const StatItem = ({ label, value, name }: { label: string; value: number | null, name: string }) => (
     <YStack alignItems="center" flex={1}>

@@ -25,9 +25,10 @@ Maximum: ${max}
 ${total ? `Total: ${total}` : ''}
 Consider their unique situation, offer encouragement, and suggest a gentle way to improve or maintain their  ${dataType}. Be empathetic and supportive in your response.`;
 
-      const suggestion = service.makeSuggestion<
+      const suggestion = await service.makeSuggestion<
         z.infer<typeof TipAiResponseSchema>
       >(prompt, TipAiResponseSchema);
+      console.log({ suggestion })
       return suggestion;
     } catch (error) {
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: error });
