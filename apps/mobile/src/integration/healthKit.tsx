@@ -122,7 +122,7 @@ export const HealthKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 };
 
 // Helper functions for type conversions
-function getIdentifierFromType(type: HealthDataType): HKQuantityTypeIdentifier {
+export function getIdentifierFromType(type: HealthDataType): HKQuantityTypeIdentifier {
   switch (type) {
     case 'CALORIES': return HKQuantityTypeIdentifier.activeEnergyBurned;
     case 'STEPS': return HKQuantityTypeIdentifier.stepCount;
@@ -132,9 +132,9 @@ function getIdentifierFromType(type: HealthDataType): HKQuantityTypeIdentifier {
   }
 }
 
-function getIdentifierAndUnitFromType(type: HealthDataType): { identifier: HKQuantityTypeIdentifier, unit: HKUnits | string } {
+export function getIdentifierAndUnitFromType(type: HealthDataType): { identifier: HKQuantityTypeIdentifier, unit: HKUnits | string } {
   switch (type) {
-    case 'CALORIES': return { identifier: HKQuantityTypeIdentifier.activeEnergyBurned, unit: HKUnits.Kilocalorie };
+    case 'CALORIES': return { identifier: HKQuantityTypeIdentifier.activeEnergyBurned, unit:  'cal' };
     case 'STEPS': return { identifier: HKQuantityTypeIdentifier.stepCount, unit: HKUnits.Count };
     case 'HRV': return { identifier: HKQuantityTypeIdentifier.heartRateVariabilitySDNN, unit: 'ms' };
     case 'HEART_RATE': return { identifier: HKQuantityTypeIdentifier.heartRate, unit: 'count/min'};

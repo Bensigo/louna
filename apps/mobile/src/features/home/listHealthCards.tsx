@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Card, XStack, YStack, Text, Stack } from 'tamagui';
 import { Heart, Footprints, Activity, Flame, ChevronRight } from '@tamagui/lucide-icons';
 import { api } from '~/utils/api';
-import { TouchableOpacity } from 'react-native';
+import { RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import Healthkit, { HKQuantityTypeIdentifier, HKUnits } from '@kingstinct/react-native-healthkit';
 import { useHealthKit } from '~/integration/healthKit';
@@ -104,99 +104,108 @@ interface HealthData {
 type StressLevel = 'Low' | 'Medium' | 'High' | 'Unknown';
 
 
+export const calculateStressLevel = (hrv: number | undefined): StressLevel => {
+  if (hrv === undefined) return 'Unknown';
+  // Implement your stress level calculation logic here
+  // For example:
+  if (hrv > 70) return 'Low';
+  if (hrv > 45) return 'Medium';
+  return 'High';
+};
+
 const HealthCardList: React.FC = () => {
  
   const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const { isAuthorized, getMostRecentValue } = useHealthKit()
 
-  const calculateStressLevel = (hrv: number | undefined): StressLevel => {
-    if (hrv === undefined) return 'Unknown';
-    // Implement your stress level calculation logic here
-    // For example:
-    if (hrv > 70) return 'Low';
-    if (hrv > 45) return 'Medium';
-    return 'High';
-  };
+  const fetchHealthData = useCallback(async () => {
+    try {
+      setLoading(true);
+      if (isAuthorized) {
+        console.log({ isAuthorized });
+        const steps = await getMostRecentValue('STEPS');
+        const heartRate = await getMostRecentValue('HEART_RATE');
+        const hrv = await getMostRecentValue('HRV');
+        const energyBurned = await getMostRecentValue('CALORIES');
+        
+        const stressLevel = calculateStressLevel(hrv ?? undefined);
+
+        setHealthData({
+          steps: steps ?? 0,
+          heartRate: heartRate ?? 0,
+          hrv: hrv ?? 0,
+          stressLevel,
+          energyBurned: energyBurned ?? 0,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching health data:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [isAuthorized, getMostRecentValue]);
 
   useEffect(() => {
-    const fetchHealthData = async () => {
-      try {
-        setLoading(true)
-         if (isAuthorized){
-          console.log({ isAuthorized })
-          const steps = await getMostRecentValue('STEPS')
-          const heartRate = await getMostRecentValue('HEART_RATE')
-          const hrv = await getMostRecentValue('HRV');
-          const energyBurned = await getMostRecentValue('CALORIES')
-          
-          const stressLevel = calculateStressLevel(hrv ?? undefined);
-  
-          
-  
-          setHealthData({
-            steps: steps ?? 0,
-            heartRate: heartRate ?? 0,
-            hrv: hrv ?? 0,
-            stressLevel,
-            energyBurned: energyBurned ?? 0,
-          });
-         }
-        setLoading(false)
-      } catch (error) {
-        console.error('Error fetching health data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     void fetchHealthData();
-  }, [isAuthorized]);
-  
-  
+  }, [fetchHealthData]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    void fetchHealthData();
+  }, [fetchHealthData]);
 
   return (
-    <YStack  mt={'$3'} justifyContent="space-between" gap="$2">
-      <HealthCard
-        name='STEPS'
-        title="Steps" 
-        value={isLoading ? "-" : healthData?.steps ?? 0} 
-        unit="steps" 
-        icon={<Footprints size={24} />} 
-        backgroundColor="#def8d3" 
-        iconColor="#4caf50" 
-      />
-      <HealthCard 
-      name='HEART_RATE'
-        title="Heart Rate" 
-        value={isLoading ? "-" : healthData?.heartRate ?? 0} 
-        unit="bpm" 
-        icon={<Heart size={24} />} 
-        backgroundColor="#fde8e8" 
-        iconColor="#f44336" 
-      />
-      <HealthCard 
-      name="HRV"
-        title="HRV" 
-        value={isLoading ? "-" : healthData?.hrv ?? 0} 
-        unit="ms" 
-        icon={<Activity size={24} />} 
-        secondaryTitle="Stress"
-        secondaryValue={isLoading ? "-" : healthData?.stressLevel ?? "N/A"}
-        secondaryUnit=""
-        backgroundColor="#e6f7ff"
-        iconColor="#2196f3"
-      />
-      <HealthCard 
-        title="Energy" 
-        value={isLoading ? "-" : healthData?.energyBurned ?? 0} 
-        unit="kcal" 
-        icon={<Flame size={24} />} 
-        backgroundColor="#fff7e6" 
-        iconColor="#ff9800" 
-        name='CALORIES'
-      />
-    </YStack>
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <YStack mt={'$3'} justifyContent="space-between" gap="$2">
+        <HealthCard
+          name='STEPS'
+          title="Steps" 
+          value={isLoading ? "-" : healthData?.steps ?? 0} 
+          unit="steps" 
+          icon={<Footprints size={24} />} 
+          backgroundColor="#def8d3" 
+          iconColor="#4caf50" 
+        />
+        <HealthCard 
+          name='HEART_RATE'
+          title="Heart Rate" 
+          value={isLoading ? "-" : healthData?.heartRate ?? 0} 
+          unit="bpm" 
+          icon={<Heart size={24} />} 
+          backgroundColor="#fde8e8" 
+          iconColor="#f44336" 
+        />
+        <HealthCard 
+          name="HRV"
+          title="HRV" 
+          value={isLoading ? "-" : healthData?.hrv ?? 0} 
+          unit="ms" 
+          icon={<Activity size={24} />} 
+          secondaryTitle="Stress Level"
+          secondaryValue={isLoading ? "-" : healthData?.stressLevel ?? "N/A"}
+          secondaryUnit=""
+          backgroundColor="#e6f7ff"
+          iconColor="#2196f3"
+        />
+        <HealthCard 
+          title="Energy" 
+          value={isLoading ? "-" : healthData?.energyBurned ?? 0} 
+          unit="kcal" 
+          icon={<Flame size={24} />} 
+          backgroundColor="#fff7e6" 
+          iconColor="#ff9800" 
+          name='CALORIES'
+        />
+      </YStack>
+    </ScrollView>
   )
 };
 
