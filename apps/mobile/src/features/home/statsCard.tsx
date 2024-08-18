@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { Card, YStack, Text, XStack, Spinner, View, Circle, Avatar } from 'tamagui';
 import Healthkit from '@kingstinct/react-native-healthkit';
-import { useHealthKit, getIdentifierAndUnitFromType } from '~/integration/healthKit';
+import { useHealthKit, getIdentifierAndUnitFromType, HealthDataType } from '~/integration/healthKit';
 import { getStartTimeFromInterval } from './chart';
 import { colorScheme } from '~/constants/colors';
 import { calculateStressLevel } from './listHealthCards';
 import { getUnit } from './utils/util';
+import { WebView } from 'react-native-webview' 
+import { Linking, TouchableWithoutFeedback } from 'react-native';
+
+
 
 type Stats = {
   average: number | null;
@@ -50,13 +55,10 @@ const getColorForValue = (value: number | null, type: HealthDataType): string =>
 
 
 
-const StatsCard = ({ name, interval, stats,  insight, isLoading} : { name: HealthDataType; interval: string , stats: Stats, isLoading: boolean, insight: any}) => {
-  const { isAuthorized } = useHealthKit();
-  
- 
+const StatsCard = ({ name, interval, stats,  insightTip, isLoading, link} : { name: HealthDataType; interval: string , link: string,  stats: Stats, isLoading: boolean, insightTip: any}) => {
+  console.log({ link })
+ const [showWebView, setShowWebview] = useState(false)
 
-
- console.log({ insight, isLoading })
 
   const StatItem = ({ label, value, name }: { label: string; value: number | null, name: string }) => (
     <YStack alignItems="center" flex={1}>
@@ -182,15 +184,34 @@ const StatsCard = ({ name, interval, stats,  insight, isLoading} : { name: Healt
                   Louna
                 </Text>
               </XStack>
-             {isLoading && 
-             ( <Text color={colorScheme.secondary.darkGray} fontSize="$5">
-                 {insight?.insight}
+               <YStack>
+               <Text color={colorScheme.secondary.darkGray} fontSize="$5">
+                 {insightTip}
               </Text>
-            )}
+              <TouchableWithoutFeedback onPress={() => {
+                  console.log("--", link)
+                  Linking.openURL(link)
+                }}>
+                     <Text 
+                color={colorScheme.primary.lightGreen} 
+                fontSize="$6" 
+                marginTop="$2" 
+                
+              >
+               Learn more
+              </Text>
+              </TouchableWithoutFeedback>
+             
+               </YStack>
+            
             </YStack>
           </Card>
         </XStack>
       </YStack>
+      {showWebView && <WebView
+                      source={{ uri: link }}
+                      style={{ flex: 1 }}
+                    />}
     </Card>
   );
 };

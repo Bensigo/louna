@@ -73,6 +73,7 @@ const HealthDataChart: React.FC<HealthDataChartProps> = ({ name }) => {
 
   const { mutate: getInsight , data: insight, isLoading: isAiLoading } = api.coach.getHealthInsight.useMutation()
 
+
   const { getIntervalData, isAuthorized } = useHealthKit();
 
   const intervalOptions = [
@@ -228,7 +229,7 @@ const HealthDataChart: React.FC<HealthDataChartProps> = ({ name }) => {
            
           </View>
 
-        <StatsCard name={name} interval={interval} stats={stats} insightTip={insight} isLoading={isAiLoading} />
+        <StatsCard name={name} interval={interval} stats={stats} link={insight?.link}  insightTip={insight?.insight ?? ''} isLoading={isAiLoading} />
       </YStack>
     </ScrollView>
   );

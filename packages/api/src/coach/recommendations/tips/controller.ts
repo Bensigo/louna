@@ -23,7 +23,7 @@ Average: ${avg}
 Minimum: ${min}
 Maximum: ${max}
 ${total ? `Total: ${total}` : ''}
-Consider their unique situation, offer encouragement, and suggest a gentle way to improve or maintain their  ${dataType}. Be empathetic and supportive in your response.`;
+Consider their unique situation, offer encouragement, and suggest a gentle way to improve or maintain their  ${dataType}, and it should have use to the user. Be empathetic and supportive in your response. Always include a link to refs the user to read`;
 
       const suggestion = await service.makeSuggestion<
         z.infer<typeof TipAiResponseSchema>

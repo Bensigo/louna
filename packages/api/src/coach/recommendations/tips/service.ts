@@ -15,7 +15,7 @@ export class TipService {
         prompt,
         schema,
       })
-      console.log({ suggestion }, '=========')
+     
       return suggestion.object;
     } catch (error) {
       console.error('Error making suggestion:', error);
