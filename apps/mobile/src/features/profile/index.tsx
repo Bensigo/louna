@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, YStack, Image, H1, XStack, Input, debounce, ScrollView } from 'tamagui';
+import { View, Text, YStack, Image, H1, XStack, Input, debounce, ScrollView, Card } from 'tamagui';
 import { decode } from 'base64-arraybuffer'
 import * as ImagePicker from 'expo-image-picker';
 import { colorScheme } from '~/constants/colors';
 import  activities from '~/constants/activities';
-import { Edit3 } from '@tamagui/lucide-icons';
-import { api } from '~/utils/api';
+import { Clock1, Edit3 } from '@tamagui/lucide-icons';
+import { api, type RouterOutputs } from '~/utils/api';
 import { useAppUser } from '~/provider/user';
 import { supabase } from '~/utils/supabase';
-import { Alert, Keyboard, Pressable } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Keyboard, Pressable, RefreshControl } from 'react-native';
 import Pill from '~/components/pill';
+import { format } from 'date-fns';
 
 interface AvatarProps {
   url?: string;
@@ -79,11 +80,7 @@ const Avatar: React.FC<AvatarProps> = ({ url, onChange, userId }) => {
   );
 };
 
-const InterestTag = ({ name }: { name: string }) => (
-  <View backgroundColor={colorScheme.primary.lightGreen} paddingHorizontal="$2" paddingVertical="$1" borderRadius="$4">
-    <Text color="white">{name}</Text>
-  </View>
-);
+
 
 const InterestsList = ({ interests, selectedInterests, onUpdate }: { interests: string[], selectedInterests: string[], onUpdate: (interests: string[]) => void }) => {
   const [showAll, setShowAll] = useState(false);
@@ -123,28 +120,100 @@ const InterestsList = ({ interests, selectedInterests, onUpdate }: { interests: 
     </YStack>
   );
 };
+type Activity = RouterOutputs['challenges']['get']
 
-const ActivityItem = ({ name, startTime, endTime }: { name: string; startTime: string; endTime: string }) => (
-  <XStack space="$2" alignItems="center">
-    <Image source={{ uri: 'https://via.placeholder.com/60x60' }} width={60} height={60} />
-    <YStack>
-      <Text fontSize="$4" fontWeight="bold" color={colorScheme.text.primary}>{name}</Text>
-      <Text fontSize="$3" color={colorScheme.text.secondary}>Start Time: {startTime}</Text>
-      <Text fontSize="$3" color={colorScheme.text.secondary}>End Time: {endTime}</Text>
-    </YStack>
-  </XStack>
-);
+const ActivityItem = ({ activity }: { activity: Activity }) => {
+  const { name, startDateTime, imageUrl } = activity;
+  return (
+    <Card
+      backgroundColor={'white'}
+      bordered
+      borderColor={'white'}
+      my={'$1'}
+      animation="bouncy"
+      scale={0.9}
+      hoverStyle={{ scale: 0.925 }}
+      pressStyle={{ scale: 0.875 }}
+    >
+      <XStack space="$3" padding="$3" alignItems="center">
+        <Image
+          source={{ uri: imageUrl ?? 'https://via.placeholder.com/80x80' }}
+          width={80}
+          height={80}
+          borderRadius="$2"
+        />
+        <YStack space="$2" flex={1}>
+          <Text fontSize="$5" fontWeight="bold" color={colorScheme.text.primary}>
+            {name}
+          </Text>
+          <XStack alignItems="center" space="$2">
+            <Clock1 size={18} color={colorScheme.text.secondary} />
+            <Text fontSize="$3" color={colorScheme.text.secondary}>
+              {format(new Date(startDateTime), 'PPp')}
+            </Text>
+          </XStack>
+        </YStack>
+      </XStack>
+    </Card>
+  );
+};
 
-const DoneActivities = ({ activities }: { activities: Array<{ name: string; startTime: string; endTime: string }> }) => (
-  <YStack space="$2">
-    <Text fontSize="$5" fontWeight="bold" color={colorScheme.text.primary}>Done Activities</Text>
+const DoneActivities = () => {
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const { data, refetch, isLoading, isRefetching } = api.challenges.completed.useQuery(
+    { page, limit: 10 },
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const hasNextPage = data ? data?.currentPage < data?.totalPages : false;
+
+  const onRefresh = () => {
+    refetch();
+  };
+
+  const onLoadMore = () => {
+    if (hasNextPage && !isLoadingMore) {
+      setIsLoadingMore(true);
+      setPage(prevPage => prevPage + 1);
+      setIsLoadingMore(false);
+    }
+  };
+
+  return (
     <YStack space="$2">
-      {activities.map((activity, index) => (
-        <ActivityItem key={index} {...activity} />
-      ))}
+      <Text fontSize="$5" fontWeight="bold" color={colorScheme.text.primary}>Done Activities</Text>
+      {data?.challenges.length === 0 && !isLoading ? (
+        <Text fontSize="$4" color={colorScheme.text.secondary} textAlign="center">
+          No completed activities yet.
+        </Text>
+      ) : (
+        <FlatList
+          data={data?.challenges ?? []}
+          renderItem={({ item }) => <ActivityItem activity={item} />}
+          keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={onRefresh}
+            />
+          }
+          onEndReached={onLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isLoadingMore ? (
+              <ActivityIndicator size="small" color={colorScheme.primary.lightGreen} />
+            ) : null
+          }
+        />
+      )}
     </YStack>
-  </YStack>
-);
+  );
+};
 
 const Profile = () => {
   const utils = api.useUtils()
@@ -152,13 +221,6 @@ const Profile = () => {
   const [name, setName] = useState('');
   const user = useAppUser();
   const [seletectedIntrest, setSeletedIntrest] = useState([])
-
-  // Mock data for interests and activities
- 
-  const doneActivities = [
-    { name: 'Activity Name', startTime: '10:00 AM', endTime: '11:00 AM' },
-    { name: 'Activity Name', startTime: '1:00 PM', endTime: '2:00 PM' },
-  ];
 
 
   useState(() => {
@@ -199,6 +261,8 @@ const Profile = () => {
   })
   }
 
+
+  const handleRefresh = () => {}
   
   return (
     <ScrollView>
@@ -240,6 +304,7 @@ const Profile = () => {
            />
          </XStack>
      <InterestsList interests={activities} selectedInterests={seletectedIntrest} onUpdate={handleUpdateIntrest}  />
+     <DoneActivities />
    </YStack>
  </YStack>
  </ScrollView>

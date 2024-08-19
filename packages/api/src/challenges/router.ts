@@ -6,6 +6,7 @@ export const challengeRouter = createTRPCRouter({
   list: Controller.listChallengesController,
   delete: Controller.deleteChallengeController,
   update: Controller.updateChallengeController,
+  completed: Controller.completedChallengesController,
   join: Controller.joinChallengeController,
   get: Controller.getChallengeController,
 });
