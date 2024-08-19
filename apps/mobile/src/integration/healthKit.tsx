@@ -74,7 +74,7 @@ export const HealthKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         const now = new Date();
         const startOfDay = new Date(now.setHours(0, 0, 0, 0));
         const samples = await Healthkit.queryStatisticsForQuantity(identifier, unit, startOfDay);
-   
+        console.log({ samples })
         result =  Math.round(samples.sumQuantity?.quantity)
         // result = Math.round(samples.reduce((sum, sample) => sum + sample.quantity, 0));
       } else {

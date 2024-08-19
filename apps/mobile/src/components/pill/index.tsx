@@ -16,7 +16,7 @@ const PillContainer = styled(View, {
   borderRadius: 12,
   padding: 5,
   minWidth: 100,
-  height: 40,
+  height: 35,
   alignItems: "center",
   justifyContent: "center",
   borderWidth: 1,
@@ -34,7 +34,7 @@ const Pill: React.FC<PillProps> = ({
   onPress,
   bg = "white",
   color = colorScheme.text.secondary,
-  borderColor = 'wheat',
+  borderColor =colorScheme.border.secondary
 }) => {
   return (
     <PillContainer

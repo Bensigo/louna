@@ -1,18 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { Card, YStack, Text, XStack, Spinner, View, Circle, Avatar } from 'tamagui';
-import Healthkit from '@kingstinct/react-native-healthkit';
-import { useHealthKit, getIdentifierAndUnitFromType, HealthDataType } from '~/integration/healthKit';
-import { getStartTimeFromInterval } from './chart';
+import React, {  useState } from 'react';
+import { Card, YStack, Text, XStack, View, Circle, Avatar, Button } from 'tamagui';
+import type {  HealthDataType } from '~/integration/healthKit';
 import { colorScheme } from '~/constants/colors';
 import { calculateStressLevel } from './listHealthCards';
 import { getUnit } from './utils/util';
 import { WebView } from 'react-native-webview' 
-import { Linking, TouchableWithoutFeedback } from 'react-native';
+import {  TouchableWithoutFeedback, Modal } from 'react-native';
+import { X } from '@tamagui/lucide-icons';
 
-
-
-type Stats = {
+interface Stats {
   average: number | null;
   min: number | null;
   max: number | null;
@@ -188,15 +184,11 @@ const StatsCard = ({ name, interval, stats,  insightTip, isLoading, link} : { na
                <Text color={colorScheme.secondary.darkGray} fontSize="$5">
                  {insightTip}
               </Text>
-              <TouchableWithoutFeedback onPress={() => {
-                  console.log("--", link)
-                  Linking.openURL(link)
-                }}>
+              <TouchableWithoutFeedback onPress={() => setShowWebview(true)}>
                      <Text 
                 color={colorScheme.primary.lightGreen} 
                 fontSize="$6" 
                 marginTop="$2" 
-                
               >
                Learn more
               </Text>
@@ -208,10 +200,30 @@ const StatsCard = ({ name, interval, stats,  insightTip, isLoading, link} : { na
           </Card>
         </XStack>
       </YStack>
-      {showWebView && <WebView
-                      source={{ uri: link }}
-                      style={{ flex: 1 }}
-                    />}
+      
+      <Modal
+        visible={showWebView}
+        animationType="slide"
+        onRequestClose={() => setShowWebview(false)}
+      >
+        <View style={{ flex: 1 }}>
+          <Button
+            icon={X}
+            size="$4"
+            circular
+            position="absolute"
+            top="$6"
+            left="$4"
+            zIndex={1}
+            onPress={() => setShowWebview(false)}
+            backgroundColor="$gray5"
+          />
+          <WebView
+            source={{ uri: link }}
+            style={{ flex: 1 }}
+          />
+        </View>
+      </Modal>
     </Card>
   );
 };

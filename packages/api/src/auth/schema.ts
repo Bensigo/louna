@@ -4,7 +4,7 @@ export const updateProfileSchema = z.object({
   id: z.string().uuid(),
   name: z.string().optional(),
   image: z.string().optional(),
-  email: z.string().email().optional(),
+  intrest: z.array(z.string()).optional(),
 });
 
 export const deleteProfileSchema = z.object({

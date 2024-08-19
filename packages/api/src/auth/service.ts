@@ -22,18 +22,34 @@ export const getProfile = async (id: string, ctx) => {
       },
     });
   }
-  console.log({ profile })
+  
   return profile;
 };
 
 export const updateProfile = async (
   id: string,
-  data: { name?: string; image?: string; email?: string },
+  data: { name?: string; image?: string; intrest?: string[] },
 ) => {
-  return await prisma.profile.update({
-    where: { id },
-    data,
-  });
+  const { intrest, name, image } = data
+
+  if (name || image){
+    return await prisma.profile.update({
+      where: { id },
+      data: {
+        ...( name? { name}: {}),
+        ...( image ? { image }: {}),
+      },
+    });
+  }
+
+  if (intrest.length){
+    return prisma.preference.update({ where: {
+      userId: id
+    }, data: {
+        intrest
+    }})
+  }
+  
 };
 
 export const deleteProfile = async (id: string) => {
