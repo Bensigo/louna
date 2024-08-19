@@ -29,11 +29,12 @@ export const JoinedChallenges = () => {
     isRefetching
   } = api.challenges.list.useQuery({
     startDate: today,
+    id: user?.id,
    ...(activitity ? { activities: [activitity] }: {}),
    hasJoined: true,
     skip: 0,
     limit: 50
-  });
+  }, { enabled: !!user });
 
   const onRefresh = useCallback(async () => {
     await refetch();

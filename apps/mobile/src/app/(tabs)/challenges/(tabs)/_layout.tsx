@@ -19,6 +19,7 @@ const RootLayout = () => {
        
         <TopTab  screenOptions={{
           tabBarActiveTintColor: colorScheme.secondary.gray,
+          
           tabBarStyle: {
             backgroundColor: 'transparent'
           },
@@ -32,9 +33,9 @@ const RootLayout = () => {
             </View>
           },
       }} >
-        <TopTab.Screen name="joined" options={{ title: 'Joined'}}></TopTab.Screen>
+        <TopTab.Screen name="suggested" options={{ title: 'Suggested'}}></TopTab.Screen>
         <TopTab.Screen name="upcoming" options={{ title: 'Upcoming'}}></TopTab.Screen>
-        <TopTab.Screen name="created" options={{ title: 'Owned'}}></TopTab.Screen>
+        <TopTab.Screen name="joined" options={{ title: 'Reserved'}}></TopTab.Screen>
       </TopTab>
       </View>
     );

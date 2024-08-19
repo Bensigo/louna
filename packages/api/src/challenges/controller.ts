@@ -42,15 +42,11 @@ export const createChallengesController = protectedProcedure
           "https://xjhjbokiyhipxuumzpii.supabase.co/storage/v1/object/public/challenges/placeholder.png";
       }
 
-      // const newChallenge = await challengeService.createChallenge(
-      //   input,
-      //   ownerId,
-      //   imageUrl
-      // );
-      const { locationLat, locationLng, locationName, ...reset } = input;
-      const newChallenge = prisma.challenge.create({
+      const { locationLat, locationLng, locationName, ...rest } = input;
+      const newChallenge = await prisma.challenge.create({
         data: {
-          ...reset,
+          ...rest,
+          name: input.name,
           imageUrl,
           capacity: parseInt(input?.capacity || "0", 10),
           visibility: input.visibility === "Public",
@@ -65,6 +61,18 @@ export const createChallengesController = protectedProcedure
           owner: {
             connect: { id: ownerId },
           },
+          members: {
+            create: [
+              {
+                profileId: ctx.user.id,
+               
+              },
+            ],
+          },
+        },
+        include: {
+          members: true,
+          owner: true,
         },
       });
 
@@ -81,7 +89,7 @@ export const listChallengesController = protectedProcedure
   .input(listChallengeSchema)
   .query(async ({ ctx, input }) => {
     try {
-      console.log("=========== backend api called ==============");
+    
 
       const { id, startDate, isUpcoming, hasJoined, activities, skip, limit } =
         input;
@@ -101,16 +109,14 @@ export const listChallengesController = protectedProcedure
           hasSome: activities,
         };
       }
-      if (id) {
-        where.ownerId = id;
-      }
+   
 
       if (hasJoined) {
         where.members = {
           some: {
-            AND: [
+            OR: [
               {
-                id: ctx.user.id,
+                profileId: ctx.user.id,
               },
               {
                 isDone: false,
