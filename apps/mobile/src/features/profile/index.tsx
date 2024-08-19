@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, YStack, Image, H1, XStack, Input, debounce, ScrollView, Card } from 'tamagui';
+import { View, Text, YStack, Image, H1, XStack, Input, debounce, ScrollView, Card, Spinner } from 'tamagui';
 import { decode } from 'base64-arraybuffer'
 import * as ImagePicker from 'expo-image-picker';
 import { colorScheme } from '~/constants/colors';
 import  activities from '~/constants/activities';
-import { Clock1, Edit3 } from '@tamagui/lucide-icons';
+import { Clock1, Edit3, Settings } from '@tamagui/lucide-icons';
 import { api, type RouterOutputs } from '~/utils/api';
 import { useAppUser } from '~/provider/user';
 import { supabase } from '~/utils/supabase';
@@ -20,6 +20,7 @@ interface AvatarProps {
 
 const Avatar: React.FC<AvatarProps> = ({ url, onChange, userId }) => {
   const [imgUrl, setImageUrl] = useState(url)
+  const [isLoading, setIsLoading] = useState(true)
   const handleChangeAvatar = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -64,17 +65,35 @@ const Avatar: React.FC<AvatarProps> = ({ url, onChange, userId }) => {
   return (
     <Pressable onPress={handleChangeAvatar}>
       <View alignItems="center" justifyContent="center">
-          <View>
+        <View>
           <Image
-          source={{ uri: imgUrl || 'https://via.placeholder.com/150' }}
-          width={120}
-          height={120}
-          borderRadius={60}
-        />
-        <View position="absolute" bottom={0} right={0} backgroundColor="white" borderRadius={15} padding={5}>
-          <Edit3 size={20} color={colorScheme.primary.lightGreen} />
-        </View>
+            source={{ uri: imgUrl ?? 'https://via.placeholder.com/150' }}
+            width={90}
+            height={90}
+            borderRadius={45}
+            onLoadStart={() => setIsLoading(true)}
+            onLoad={() => setIsLoading(false)}
+            onError={() => setIsLoading(false)}
+          />
+          {isLoading && (
+            <View 
+              position="absolute" 
+              top={0} 
+              left={0} 
+              right={0} 
+              bottom={0} 
+              backgroundColor="$gray5" 
+              justifyContent="center" 
+              alignItems="center"
+              borderRadius={45}
+            >
+              <Spinner size="large" color={colorScheme.primary.lightGreen} />
+            </View>
+          )}
+          <View position="absolute" bottom={0} right={0} backgroundColor="white" borderRadius={15} padding={5}>
+            <Edit3 size={20} color={colorScheme.primary.lightGreen} />
           </View>
+        </View>
       </View>
     </Pressable>
   );
@@ -85,6 +104,7 @@ const Avatar: React.FC<AvatarProps> = ({ url, onChange, userId }) => {
 const InterestsList = ({ interests, selectedInterests, onUpdate }: { interests: string[], selectedInterests: string[], onUpdate: (interests: string[]) => void }) => {
   const [showAll, setShowAll] = useState(false);
   const [currentlySeleted, setCurrentlySelected] = useState(selectedInterests)
+
 
   const displayedInterests = showAll ? interests : interests.slice(0, 9);
   const toggleInterest = (interest: string) => {
@@ -97,7 +117,7 @@ const InterestsList = ({ interests, selectedInterests, onUpdate }: { interests: 
 
   return (
     <YStack space="$2">
-      <Text fontSize="$5" fontWeight="bold" color={colorScheme.text.primary}>Interests</Text>
+      <Text fontSize="$5" fontWeight="bold" color={colorScheme.text.secondary}>Interests</Text>
       <XStack flexWrap="wrap" space="$2">
         {displayedInterests.map((interest, index) => (
           <Pill
@@ -124,24 +144,45 @@ type Activity = RouterOutputs['challenges']['get']
 
 const ActivityItem = ({ activity }: { activity: Activity }) => {
   const { name, startDateTime, imageUrl } = activity;
+  const [isLoading, setIsLoading] = useState(true);
+
   return (
     <Card
       backgroundColor={'white'}
-      bordered
       borderColor={'white'}
-      my={'$1'}
+      marginVertical={'$1'}
       animation="bouncy"
       scale={0.9}
       hoverStyle={{ scale: 0.925 }}
       pressStyle={{ scale: 0.875 }}
     >
       <XStack space="$3" padding="$3" alignItems="center">
-        <Image
-          source={{ uri: imageUrl ?? 'https://via.placeholder.com/80x80' }}
-          width={80}
-          height={80}
-          borderRadius="$2"
-        />
+        <View width={80} height={80} borderRadius="$2">
+          <Image
+            source={{ uri: imageUrl ?? 'https://via.placeholder.com/80x80' }}
+            width={80}
+            height={80}
+            borderRadius="$2"
+            onLoadStart={() => setIsLoading(true)}
+            onLoad={() => setIsLoading(false)}
+            onError={() => setIsLoading(false)}
+          />
+          {isLoading && (
+            <View 
+              position="absolute" 
+              top={0} 
+              left={0} 
+              right={0} 
+              bottom={0} 
+              backgroundColor="$gray5" 
+              justifyContent="center" 
+              alignItems="center"
+              borderRadius="$2"
+            >
+              <Spinner size="small" color={colorScheme.primary.lightGreen} />
+            </View>
+          )}
+        </View>
         <YStack space="$2" flex={1}>
           <Text fontSize="$5" fontWeight="bold" color={colorScheme.text.primary}>
             {name}
@@ -170,7 +211,7 @@ const DoneActivities = () => {
     }
   );
 
-  const hasNextPage = data ? data?.currentPage < data?.totalPages : false;
+  const hasNextPage = data ? data.currentPage < data.totalPages : false;
 
   const onRefresh = () => {
     refetch();
@@ -186,7 +227,7 @@ const DoneActivities = () => {
 
   return (
     <YStack space="$2">
-      <Text fontSize="$5" fontWeight="bold" color={colorScheme.text.primary}>Done Activities</Text>
+      <Text fontSize="$5" fontWeight="bold" color={colorScheme.text.secondary}>Done Activities</Text>
       {data?.challenges.length === 0 && !isLoading ? (
         <Text fontSize="$4" color={colorScheme.text.secondary} textAlign="center">
           No completed activities yet.
@@ -217,22 +258,22 @@ const DoneActivities = () => {
 
 const Profile = () => {
   const utils = api.useUtils()
-  const { mutate: updateProfile, isLoading } = api.auth.update.useMutation()
+  const { mutate: updateProfile } = api.auth.update.useMutation()
   const [name, setName] = useState('');
   const user = useAppUser();
-  const [seletectedIntrest, setSeletedIntrest] = useState([])
+  const [seletectedIntrest, setSeletedIntrest] = useState<string[]>([])
 
 
-  useState(() => {
+  useEffect(() => {
      if (user && user.hasPref){
-        setName(user.name)
+        setName(user.name ?? '')
         setSeletedIntrest(user.preference?.intrest)
      }
   }, [user])
 
   const handleUpdateUserProfileImg = (url: string) => {
     updateProfile({
-        id: user?.id,
+        id: user?.id ?? '',
         image: url,
         
     }, {
@@ -248,7 +289,7 @@ const Profile = () => {
 
   const handleUpdateIntrest= (intrest: string[]) => {
     updateProfile({
-      id: user?.id,
+      id: user?.id ?? '',
       intrest
       
   }, {
@@ -261,17 +302,31 @@ const Profile = () => {
   })
   }
 
-
-  const handleRefresh = () => {}
   
   return (
     <ScrollView>
     <YStack flex={1} padding="$4" backgroundColor="white">
-    <H1 fontSize={30} fontWeight={'bold'} color={colorScheme.text.primary}> Profile</H1>
-   <YStack mt={'$5' } gap={'$3'}>
+   <XStack justifyContent="space-between" alignItems="center">
+     <H1 fontSize={30} fontWeight={'bold'} color={colorScheme.text.primary}>Profile</H1>
+     <Pressable onPress={() => {
+       // TODO: Implement menu list display logic
+       Alert.alert(
+         "Profile Options",
+         "Choose an action",
+         [
+           { text: "Logout", onPress: () => {/* TODO: Implement logout */} },
+           { text: "Delete Profile", onPress: () => {/* TODO: Implement profile deletion */} },
+           { text: "Cancel", style: "cancel" }
+         ]
+       );
+     }}>
+       <Settings size={24} color={colorScheme.text.primary} />
+     </Pressable>
+   </XStack>
+   <YStack marginTop="$5" gap="$4">
          <Avatar userId={user?.id ?? ''} url={user?.image ?? ''} onChange={handleUpdateUserProfileImg} />
          <XStack alignItems="flex-start" width={'100%'} flexDirection="column">
-           <Text fontSize="$4" color={colorScheme.text.primary} marginBottom="$1" alignSelf="flex-start">Name</Text>
+           <Text fontSize="$4" color={colorScheme.text.secondary} marginBottom="$1" alignSelf="flex-start">Name</Text>
            <Input
              value={name}
              onChangeText={(newName) => {
@@ -283,7 +338,7 @@ const Profile = () => {
                      name: newName
                    }, {
                      async onSuccess() {
-                       await api.auth.me.invalidate();
+                       await utils.auth.me.invalidate();
                        Keyboard.dismiss();
                      },
                      onError() {
@@ -298,13 +353,16 @@ const Profile = () => {
              textAlign="left"
              color={colorScheme.secondary.darkGray}
              backgroundColor={'white'}
+             borderColor={colorScheme.text.secondary}
              width="100%"
              fontWeight="bold"
              marginTop="$1"
            />
          </XStack>
-     <InterestsList interests={activities} selectedInterests={seletectedIntrest} onUpdate={handleUpdateIntrest}  />
-     <DoneActivities />
+    {seletectedIntrest.length > 0  &&  <InterestsList interests={activities} selectedInterests={seletectedIntrest} onUpdate={handleUpdateIntrest}  />}
+    <View mt={'$2'}>
+    <DoneActivities />
+    </View>
    </YStack>
  </YStack>
  </ScrollView>
