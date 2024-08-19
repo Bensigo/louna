@@ -212,3 +212,41 @@ export const joinChallengeController = protectedProcedure
       });
     }
   });
+
+
+  export const completedChallengesController = protectedProcedure
+    .input(z.object({
+      page: z.number().int().positive().default(1),
+      limit: z.number().int().positive().default(10)
+    }))
+    .query(async ({ ctx, input }) => {
+      const { prisma, user } = ctx;
+      const { page, limit } = input;
+      const skip = (page - 1) * limit;
+
+      const [challenges, totalCount] = await Promise.all([
+        prisma.challenge.findMany({
+          where: {
+            ownerId: user.id,
+            isDone: true
+          },
+          skip,
+          take: limit,
+          orderBy: {
+            updatedAt: 'desc'
+          }
+        }),
+        prisma.challenge.count({
+          where: {
+            ownerId: user.id,
+            isDone: true
+          }
+        })
+      ]);
+
+      return {
+        challenges,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page
+      };
+    });
