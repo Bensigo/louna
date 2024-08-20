@@ -16,19 +16,19 @@ export const createChallengeController = protectedProcedure.input(createChalleng
       const validatedData = createChallengeSchema.parse(input);
 
       // Create a transaction for challenge creation and participant addition
-      await ctx.prisma.$transaction((tx) => {
+      await ctx.prisma.$transaction(async (tx) => {
         const challenge = await tx.challenge.create({
           data: {
             ...validatedData,
             creatorId: userId,
           },
-        })
-        tx.challengeParticipation.create({
+        });
+        await tx.challengeParticipation.create({
           data: {
             userId: userId,
             challengeId: challenge.id,
           },
-        }),
+        })
       });
 
       return {

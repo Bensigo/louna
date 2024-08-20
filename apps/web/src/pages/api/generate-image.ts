@@ -53,24 +53,18 @@ export default async function handler(
   // Rest of the API logic
   if (req.method === 'POST') {
     try {
-      const { name, activity, description, userId  } = req.body as {
+      const { name, userId  } = req.body as {
         name: string;
-        activity: string;
-        description: string;
         userId: string
       }
-
-      console.log("==========called=======")
-
       const prompt = `
         A bright vibrant cover image for health and wellness challenge event.
         Name: ${name}
-        activity: ${activity}
         `
 
       const input = {
         prompt,
-        output_quality: 60, // change to 90 on prod
+        output_quality: 70, // change to 90 on prod
         aspect_ratio: "1:1",
         output_format: "jpg",
       }
