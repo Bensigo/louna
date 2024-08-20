@@ -80,7 +80,7 @@ model Challenge {
   baselineValue      Float?               // Nullable for free sessions
   isFreeSession      Boolean              @default(false)  // Flag to indicate a free session
   interval           Interval?            // Nullable for free sessions
-  participations     ChallengeParticipation[]
+  participants     ChallengeParticipation[]
   results            ChallengeResult[]
 
   @@index([creatorId], name: "idx_challenge_creator")

@@ -25,6 +25,7 @@ export const createChallengeSchema = z.object({
 
 
 export const updateChallengeSchema = z.object({
+  id: z.string(),
   title: z.string().min(1, 'Title is required').optional(),
   description: z.string().optional(),
   imageUrl: z.string().url().optional(),
@@ -39,7 +40,6 @@ export const updateChallengeSchema = z.object({
   type: z.enum(['MEDITATION', 'BREATHWORK', 'YOGA', 'ICE_BATH']).optional(),
   goalType: z.enum(['HRV', 'HEART_RATE', 'RESTING_HEART_RATE', 'DURATION']).optional(),
   goalValue: z.number().positive().optional(),
-  baselineValue: z.number().optional(),
   isFreeSession: z.boolean().optional(),
   interval: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']).optional(),
 });
@@ -58,6 +58,7 @@ export const listChallengesSchema = z.object({
   limit: z.number().int().positive().default(10),
   type: z.enum(['MEDITATION', 'BREATHWORK', 'YOGA', 'ICE_BATH']).optional(),
   isFreeSession: z.boolean().optional(),
+  isOwner: z.boolean().optional()
 });
 
 export const deleteChallengeSchema = z.object({
