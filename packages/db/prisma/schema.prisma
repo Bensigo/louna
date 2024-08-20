@@ -20,11 +20,9 @@ model Profile {
   hasPref Boolean @default(false)
   hasHealthKitAuthorize Boolean @default(false)
   preference Preference?
-  ownedChallenges      Challenge[]
-  joinedChallenges ChallengeMembers[]
-  healthData HealthData[]
-  challengeHealthLogs ChallengeHealthLog[]
-  suggestedChallenges SuggestedChallenge[]
+  challengesCreated Challenge[]          @relation("CreatorChallenges")
+  participations    ChallengeParticipation[]
+  results ChallengeResult[]
 }
 
 
@@ -35,105 +33,73 @@ model Preference {
   height Decimal
   weight Decimal
   intrest String[]
-  
   user   Profile     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime    @default(now()) @db.Timestamp(6)
   updatedAt     DateTime    @default(now()) @db.Timestamp(6) @updatedAt
 
   @@index([id], name: "idx_preference_id")
 }
+model ChallengeParticipation {
+  id          String    @id @default(uuid())
+  user        Profile      @relation(fields: [userId], references: [id])
+  userId      String
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  challengeId String
+  joinedAt    DateTime  @default(now())
+}
 
+model ChallengeResult {
+  id          String    @id @default(uuid())
+  user        Profile      @relation(fields: [userId], references: [id])
+  userId      String
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  challengeId String
+  result      Float
+  recordedAt  DateTime  @default(now())
+}
+
+enum ChallengeType {
+  MEDITATION
+  BREATHWORK
+  YOGA
+  ICE_BATH
+}
 model Challenge {
-  id            String      @id @default(uuid()) @db.VarChar(256)
-  name          String      @db.VarChar(256)
-  imageUrl      String      @db.VarChar(256)
-  description   String      @db.VarChar(1024)
-  location      Json?       @db.JsonB
-  startDateTime DateTime    @db.Timestamp(6)
-  endDateTime   DateTime?    @db.Timestamp(6)
-  activities    String[]  
-  capacity      Int         @default(1)
-  visibility    Boolean     @default(false)
-  isDone         Boolean     @default(false)
-  createdAt     DateTime    @default(now()) @db.Timestamp(6)
-  updatedAt     DateTime    @default(now()) @db.Timestamp(6) @updatedAt
-  owner         Profile     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId       String      @db.VarChar(256)
-  members       ChallengeMembers[]
-  healthLogs    ChallengeHealthLog[]
-  
-  @@index([ownerId], name: "idx_challenge_owner")
-  @@index([activities], name: "idx_challenge_activity")
-  @@index([startDateTime], name: "idx_challenge_start_date")
-  @@index([endDateTime], name: "idx_challenge_end_date")
+  id                 String               @id @default(uuid())
+  title              String?
+  description        String?
+  creator            Profile              @relation("CreatorChallenges", fields: [creatorId], references: [id])
+  creatorId          String
+  createdAt          DateTime             @default(now())
+  imageUrl           String?
+  startDate          DateTime
+  endDate            DateTime
+  type               ChallengeType
+  goalType           GoalType?            // Nullable for free sessions
+  goalValue          Float?               // Nullable for free sessions
+  baselineValue      Float?               // Nullable for free sessions
+  isFreeSession      Boolean              @default(false)  // Flag to indicate a free session
+  interval           Interval?            // Nullable for free sessions
+  participations     ChallengeParticipation[]
+  results            ChallengeResult[]
+
+  @@index([creatorId], name: "idx_challenge_creator")
+  @@index([type], name: "idx_challenge_type")
+  @@index([startDate], name: "idx_challenge_start_date")
+  @@index([endDate], name: "idx_challenge_end_date")
 }
 
-model ChallengeMembers {
-  id  String  @id @default(uuid()) 
-  challenge Challenge @relation(fields: [challengeId], references: [id])
-  challengeId String @db.VarChar(256)
-  isDone         Boolean     @default(false)
-  profile  Profile @relation(fields: [profileId], references: [id])
-  profileId String @db.VarChar(256)
-  joinedAt DateTime @default(now()) @db.Timestamp(6)
-  @@index([challengeId], name: "idx_challenge_members_challenge")
-  @@index([profileId], name: "idx_challenge_members_profile")
+enum Interval {
+  DAILY
+  WEEKLY
+  MONTHLY
 }
 
-enum HealthDataType {
-  STEPS
-  HEART_RATE
+
+
+enum GoalType {
   HRV
-  CALORIES
-}
-
-model HealthData {
-    id        String         @id @default(uuid())
-    type      HealthDataType
-    profileId String
-    profile   Profile        @relation(fields: [profileId], references: [id])
-    dataId    String
-    startDateTime DateTime    @db.Timestamp(6)
-    endDateTime   DateTime?    @db.Timestamp(6)
-    unit String?
-    value Float   
-     createdAt     DateTime    @default(now()) @db.Timestamp(6)
-   updatedAt     DateTime    @default(now()) @db.Timestamp(6) @updatedAt
-    @@index([profileId])
-}
-
-model ChallengeHealthLog {
-  id            String         @id @default(uuid())
-  challengeId   String
-  challenge     Challenge      @relation(fields: [challengeId], references: [id])
-  profileId     String
-  profile       Profile        @relation(fields: [profileId], references: [id])
-  type          HealthDataType
-  value         String
-  unit          String?
-  timestamp     DateTime       @default(now())
-
-  @@index([challengeId, profileId])
-  @@index([timestamp])
-}
-
-
-enum DIFICULTY {
-  Easy
-  Medium
-  Hard
-}
-
-model SuggestedChallenge {
-   id  String         @id @default(uuid())
-   name          String      @db.VarChar(256)
-  imageUrl      String      @db.VarChar(256)
-  description   String      @db.VarChar(1024)
-  isCreated Boolean @default(false)
-  diffculty     DIFICULTY
-  activity   String      @db.VarChar(1024)
-  ownerId       String      @db.VarChar(256)
-  owner      Profile     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  createdAt     DateTime    @default(now()) @db.Timestamp(6)
-  updatedAt     DateTime    @default(now()) @db.Timestamp(6) @updatedAt
+  HEART_RATE
+  RESTING_HEART_RATE
+  DURATION          // New goal type for activities where duration matters
 }
