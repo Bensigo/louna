@@ -91,7 +91,11 @@ export const listChallengeController = protectedProcedure.input(listChallengesSc
     take: limit,
     skip: offset,
     include: {
-      participants: true,
+      participants: {
+        include: {
+          user: true
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -120,7 +124,11 @@ export const getChallengeController = protectedProcedure.input(getChallengeSchem
     const challenge = await ctx.prisma.challenge.findUnique({
       where: { id },
       include: {
-        participants: true,
+        participants: {
+          include: {
+            user: true
+          },
+        },
         creator: true,
       },
     });
