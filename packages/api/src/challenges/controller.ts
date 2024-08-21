@@ -59,7 +59,7 @@ export const listChallengeController = protectedProcedure.input(listChallengesSc
     query = { ...query, isFreeSession }
   }
 
-  if (isOwner){
+  if (isJoined){
     query = {
       ...query,
       participants: {
