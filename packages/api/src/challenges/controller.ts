@@ -84,7 +84,9 @@ export const listChallengeController = protectedProcedure.input(listChallengesSc
   const challenges = await ctx.prisma.challenge.findMany({
     where: {
       ...query,
-    
+      startDate: {
+        lt: new Date(),
+      }
     },
     take: limit,
     skip: offset,
