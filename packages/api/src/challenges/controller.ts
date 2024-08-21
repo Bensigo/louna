@@ -51,7 +51,7 @@ export const createChallengeController = protectedProcedure.input(createChalleng
 
 
 export const listChallengeController = protectedProcedure.input(listChallengesSchema).query(async ({ ctx, input }) => {
-  const { isFreeSession, isOwner, type, page, limit } = input;
+  const { isFreeSession, isJoined, type, page, limit } = input;
 
   let query = {}
 
@@ -62,7 +62,13 @@ export const listChallengeController = protectedProcedure.input(listChallengesSc
   if (isOwner){
     query = {
       ...query,
-      creatorId: ctx.user.id
+      participants: {
+        some: {
+          AND: {
+            userId: ctx.user.id
+          }
+        }
+      }
     }
   }
 
@@ -78,6 +84,7 @@ export const listChallengeController = protectedProcedure.input(listChallengesSc
   const challenges = await ctx.prisma.challenge.findMany({
     where: {
       ...query,
+    
     },
     take: limit,
     skip: offset,

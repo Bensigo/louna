@@ -59,7 +59,7 @@ export const listChallengesSchema = z.object({
   limit: z.number().int().positive().default(10),
   type: z.enum(['MEDITATION', 'BREATHWORK', 'YOGA', 'ICE_BATH']).optional(),
   isFreeSession: z.boolean().optional(),
-  isOwner: z.boolean().optional()
+  isJoined: z.boolean().optional()
 });
 
 export const deleteChallengeSchema = z.object({
