@@ -7,6 +7,7 @@ export const createChallengeSchema = z.object({
   description: z.string().optional(),
   imageUrl: z.string().url().optional(),
   startDate: z.date().optional(),
+  tempId: z.string(),
   endDate: z.date().optional().refine((endDate, context) => {
     const { startDate } = context.parent;
     if (startDate && endDate && endDate <= startDate) {
@@ -64,3 +65,8 @@ export const listChallengesSchema = z.object({
 export const deleteChallengeSchema = z.object({
   id: z.string().uuid('Invalid challenge ID format'),
 });
+
+export const generateImageSchema = z.object({
+  tempId: z.string(),
+  name: z.string()
+})

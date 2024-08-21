@@ -72,6 +72,7 @@ model Challenge {
   creatorId          String
   createdAt          DateTime             @default(now())
   imageUrl           String?
+  tempId            String
   startDate          DateTime
   endDate            DateTime
   type               ChallengeType

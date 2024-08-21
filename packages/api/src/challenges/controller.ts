@@ -4,7 +4,7 @@ import { z } from "zod";
 
 
 import { protectedProcedure } from "../trpc";
-import { createChallengeSchema, deleteChallengeSchema, getChallengeSchema, listChallengesSchema, updateChallengeSchema } from "./schema";
+import { createChallengeSchema, deleteChallengeSchema, generateImageSchema, getChallengeSchema, listChallengesSchema, updateChallengeSchema } from "./schema";
 
 
 export const createChallengeController = protectedProcedure.input(createChallengeSchema).mutation(async ({ ctx, input}) => {
@@ -210,5 +210,36 @@ export const joinChallengeController = protectedProcedure.input(getChallengeSche
 })
 
 
+export const generateImageController = protectedProcedure.input(generateImageSchema).mutation(async ({ input, ctx }) => {
+  try {
+    // Make an HTTP call to the image generation API
+    const response = await axios.post(
+      "/api/generate-image",
+      {
+        name: input.name,
+        userId: ctx.user.id,
+      },
+    );
+    const imageUrl = await response.data; // Adjust this based on the API response structure
+   console.log({ imageUrl })
+    if (imageUrl){
+        await ctx.prisma.challenge.updateMany({
+          where: {
+            tempId: input.tempId,
+            creatorId: ctx.user.id,
+          },
+          data: {
+            imageUrl
+          }
+        })
+    }
+  } catch (imageError) {
+    console.error("Failed to generate image:", imageError);
+    // Use a fallback image URL if generation fails
+    throw new TRPCError('Unable to upadte image')
+ 
+  }
 
+
+})
 
