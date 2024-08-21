@@ -8,9 +8,9 @@ export const createChallengeSchema = z.object({
   imageUrl: z.string().url().optional(),
   startDate: z.date().optional(),
   tempId: z.string(),
-  endDate: z.date().optional().refine((endDate, context) => {
-    const { startDate } = context.parent;
-    if (startDate && endDate && endDate <= startDate) {
+  endDate: z.date().optional().refine((data) => {
+    const { startDate,  endDate} = data;
+    if (startDate && endDate && endDate < startDate) {
       return false;
     }
     return true;
@@ -31,8 +31,8 @@ export const updateChallengeSchema = z.object({
   description: z.string().optional(),
   imageUrl: z.string().url().optional(),
   startDate: z.date().optional(),
-  endDate: z.date().optional().refine((endDate, context) => {
-    const { startDate } = context.parent;
+  endDate: z.date().optional().refine((data) => {
+    const { startDate,  endDate} = data;
     if (startDate && endDate && endDate < startDate) {
       return false;
     }
