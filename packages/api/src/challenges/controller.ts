@@ -221,7 +221,7 @@ export const generateImageController = protectedProcedure.input(generateImageSch
   try {
     // Make an HTTP call to the image generation API
     const response = await axios.post(
-      "/api/generate-image",
+      "https://louna.vercel.app/api/generate-image",
       {
         name: input.name,
         userId: ctx.user.id,
