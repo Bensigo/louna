@@ -85,7 +85,7 @@ export const listChallengeController = protectedProcedure.input(listChallengesSc
     where: {
       ...query,
       startDate: {
-        lt: new Date(),
+        gte: new Date(),
       }
     },
     take: limit,
