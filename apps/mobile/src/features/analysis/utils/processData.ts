@@ -5,20 +5,20 @@ import { eachHourOfInterval, eachDayOfInterval, eachMonthOfInterval, format } fr
 
 export function processDataForChart(data: HealthDataPoint[], interval: string, dataType: HealthDataType) {
   const now = new Date();
-  let startDate = getStartTimeFromInterval(interval);
+  const startDate = getStartTimeFromInterval(interval);
   let labelFormat: string;
 
   switch (interval) {
-    case 'day':
+    case 'D':
       labelFormat = 'HH:mm';
       break;
-    case 'week':
+    case 'W':
       labelFormat = 'EEE';
       break;
-    case 'month':
+    case 'M':
       labelFormat = 'dd';
       break;
-    case 'year':
+    case 'Y':
       labelFormat = 'MMM';
       break;
     default:
@@ -29,14 +29,14 @@ export function processDataForChart(data: HealthDataPoint[], interval: string, d
 
   // Initialize all time units
   let timeUnits: Date[];
-  if (interval === 'day') {
+  if (interval === 'D') {
     timeUnits = eachHourOfInterval({ start: startDate, end: now });
-  } else if (interval === 'week' || interval === 'month') {
+  } else if (interval === 'W' || interval === 'month') {
     timeUnits = eachDayOfInterval({ start: startDate, end: now });
   } else {
     timeUnits = eachMonthOfInterval({ start: startDate, end: now });
   }
-
+  
   timeUnits.forEach(unit => {
     const key = getGroupKey(unit, interval);
     groupedData.set(key, { sum: 0, count: 0, timestamp: unit });
@@ -52,7 +52,7 @@ export function processDataForChart(data: HealthDataPoint[], interval: string, d
     }
   });
 
-  // Calculate final values
+  // Calculate final values and filter out zero values
   const processedData = Array.from(groupedData, ([label, { sum, count, timestamp }]) => {
     let value: number;
     if (dataType === 'STEPS' || dataType === 'CALORIES') {
@@ -66,7 +66,7 @@ export function processDataForChart(data: HealthDataPoint[], interval: string, d
       timestamp,
       formattedLabel: format(timestamp, labelFormat)
     };
-  }).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-
+  }).filter(({ value }) => value !== 0).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  console.log({ processedData })
   return processedData;
 }

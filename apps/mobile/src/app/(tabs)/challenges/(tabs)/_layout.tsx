@@ -33,7 +33,7 @@ const RootLayout = () => {
             </View>
           },
       }} >
-        <TopTab.Screen name="suggested" options={{ title: 'Suggested'}}></TopTab.Screen>
+        {/* <TopTab.Screen name="suggested" options={{ title: 'Suggested'}}></TopTab.Screen> */}
         <TopTab.Screen name="upcoming" options={{ title: 'Upcoming'}}></TopTab.Screen>
         <TopTab.Screen name="joined" options={{ title: 'Reserved'}}></TopTab.Screen>
       </TopTab>

@@ -1,142 +1,277 @@
-import React, { useState } from "react";
-import { View, Text, Button, Input, YStack, XStack } from "tamagui";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Colors, colorScheme } from "~/constants/colors";
-import { Cog, Trash } from "@tamagui/lucide-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { api } from "~/utils/api";
-import { ActivityIndicator, Alert } from "react-native";
+import { ActivityIndicator, Alert, Switch } from "react-native";
 import { router } from "expo-router";
+import { useForm, Controller } from "react-hook-form";
+import { colorScheme } from "~/constants/colors";
 
-interface ChallengeSettingsProps {
-    id: string;
-    endDate: string;
-    startDate: string
-}
+const ChallengeSettings = ({ id }) => {
+  const { control, handleSubmit, setValue, watch } = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+      isFreeSession: false,
+      startDate: new Date(),
+      endDate: new Date(),
+    },
+  });
 
-const ChallengeSettings: React.FC<ChallengeSettingsProps> = ({ id, startDate: start, endDate: end }) => {
-    const [startDate, setStartDate] = useState(new Date(start ?? new Date()));
-    const [endDate, setEndDate] = useState(new Date( end?? new Date()));
-    const [showStartPicker, setShowStartPicker] = useState(false);
-    const [showEndPicker, setShowEndPicker] = useState(false);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
 
+  const utils = api.useUtils();
+  const { mutate: updateChallenge, isLoading: isUpdating  } = api.challenges.update.useMutation();
+  const { data: challenge, isLoading } = api.challenges.get.useQuery({ id });
+  const { mutate: deleteChallenge , isLoading: isDeleting} = api.challenges.delete.useMutation();
 
-    const utils = api.useUtils()
-
-    const { mutate: updateChallenge} = api.challenges.update.useMutation()
-    const { mutate: deleteChallenge, isLoading } = api.challenges.delete.useMutation()
-
-
-    const handleStartChange = (event: Event, selectedDate?: Date) => {
-        setShowStartPicker(false);
-        if (selectedDate) {
-            setStartDate(selectedDate);
-            updateChallenge({
-                id,
-                startDateTime: selectedDate
-            }, {
-                onError(err: Error) {
-                    Alert.alert('Error', err.message);
-                },
-                onSuccess(){
-                    utils.challenges.get.invalidate()
-                }
-            });
-        }
-    };
-
-    const handleEndChange = (event: Event, selectedDate?: Date) => {
-        setShowEndPicker(false);
-        if (selectedDate) {
-            if (selectedDate > startDate) {
-                setEndDate(selectedDate);
-                updateChallenge({
-                    id,
-                    endDateTime: selectedDate
-                }, {
-                    onError(err: Error){
-                        Alert.alert('Error', err.message)
-                    },
-                    onSuccess(){
-                        utils.challenges.get.invalidate()
-                    }
-                })
-            } else {
-                Alert.alert('Error', 'End date must be after start date')
-            }
-        }
-    };
-
-
-
-
-    const handleDeleteChallenge = () => {
-        deleteChallenge({ id }, {
-            onError(err: Error){
-                Alert.alert('Error', err.message)
-            },
-            onSuccess(){
-                utils.challenges.get.invalidate()
-                router.push('/(tabs)/challenges/(tabs)/created')
-            }
-        })
+  useEffect(() => {
+    if (challenge) {
+      setValue("title", challenge.title || "");
+      setValue("description", challenge.description || "");
+      setValue("isFreeSession", challenge.isFreeSession || false);
+      setValue("startDate", new Date(challenge.startDate) || new Date());
+      setValue("endDate", new Date(challenge.endDate) || new Date());
     }
+  }, [challenge, setValue]);
 
+  const handleDateChange = (date, type) => {
+    setValue(type, date);
+    setShowStartPicker(false);
+    setShowEndPicker(false);
+  };
 
-
-    return (
-        <YStack flex={1} padding="$4" mt={60} gap="$4">
-            <XStack gap='$1' alignItems="center">
-                 <Text fontSize="$5" fontWeight="bold" color={colorScheme.secondary.darkGray}>Configuration</Text>
-                    <Cog size={17} color={colorScheme.text.secondary}/>
-           </XStack>
-            <XStack gap="$2" alignItems="center">
-                <Text color={colorScheme.text.secondary}>Start:</Text>
-                <Input
-                    flex={1}
-                    value={startDate.toLocaleString()}
-                    onPressIn={() => setShowStartPicker(true)}
-                />
-            </XStack>
-            {showStartPicker && (
-                <DateTimePicker
-                    value={startDate}
-                    mode="datetime"
-                    onChange={handleStartChange}
-                />
-            )}
-
-            <XStack space="$2" alignItems="center">
-                <Text color={colorScheme.text.secondary}>End:</Text>
-                <Input
-                    flex={1}
-                    value={endDate.toLocaleString()}
-                    onPressIn={() => setShowEndPicker(true)}
-                />
-            </XStack>
-            {showEndPicker && (
-                <DateTimePicker
-                    value={endDate}
-                    mode="datetime"
-                    onChange={handleEndChange}
-                />
-            )}
-
-            <View height={1} backgroundColor={Colors.light.text} marginVertical="$4" />
-
-           <XStack gap='$1' alignItems="center">
-                 <Text fontSize="$5" fontWeight="bold" color={colorScheme.secondary.darkGray}>Danger Zone</Text>
-                    <Trash size={17} color={colorScheme.text.secondary}/>
-           </XStack>
-
-            <Button
-                backgroundColor={colorScheme.accent.red}
-                color="white"
-                onPress={handleDeleteChallenge}
-            >
-               {isLoading ? <ActivityIndicator size={'small'} /> :  "Delete Challenge"}
-            </Button>
-        </YStack>
+  const handleDeleteChallenge = () => {
+    Alert.alert(
+      "Delete Challenge",
+      "Are you sure you want to delete this challenge?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive",
+          onPress: () => {
+            deleteChallenge({ id }, {
+              onError(err) {
+                Alert.alert('Error', err?.message || "An error occurred");
+              },
+              onSuccess() {
+                utils.challenges.get.invalidate();
+                router.push('/(tabs)/challenges/(tabs)/created');
+              }
+            });
+          }
+        },
+      ]
     );
+  };
+
+  const onSubmit = (data) => {
+    updateChallenge({
+      id,
+      ...data,
+    }, {
+      onError(err) {
+        Alert.alert('Error', err?.message || "An error occurred");
+      },
+      async onSuccess() {
+        await utils.challenges.get.invalidate();
+       
+      }
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container}>
+      
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Title</Text>
+        <Controller
+          control={control}
+          name="title"
+          render={({ field: { onChange, value } }) => (
+            <TextInput
+              style={styles.input}
+              onChangeText={onChange}
+              value={value}
+              placeholder="Enter challenge title"
+            />
+          )}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Description</Text>
+        <Controller
+          control={control}
+          name="description"
+          render={({ field: { onChange, value } }) => (
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              onChangeText={onChange}
+              value={value}
+              placeholder="Enter challenge description"
+              multiline
+              numberOfLines={4}
+            />
+          )}
+        />
+      </View>
+
+      <View style={styles.switchContainer}>
+        <Text style={styles.label}>Private Challenge</Text>
+        <Controller
+          control={control}
+          name="isFreeSession"
+          render={({ field: { onChange, value } }) => (
+            <Switch
+              value={value}
+              onValueChange={onChange}
+              trackColor={{ false: "#767577", true: "#81b0ff" }}
+              thumbColor={value ? "#f5dd4b" : "#f4f3f4"}
+            />
+          )}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Start Date</Text>
+        <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.dateButton}>
+          <Text style={styles.dateButtonText}>
+            {watch("startDate").toLocaleDateString()}
+          </Text>
+          <Ionicons name="calendar-outline" size={24} color={colorScheme.primary.lightGreen}  />
+        </TouchableOpacity>
+        {showStartPicker && (
+          <DateTimePicker
+            value={watch("startDate")}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => handleDateChange(selectedDate, "startDate")}
+          />
+        )}
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>End Date</Text>
+        <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.dateButton}>
+          <Text style={styles.dateButtonText}>
+            {watch("endDate").toLocaleDateString()}
+          </Text>
+          <Ionicons name="calendar-outline" size={24} color={colorScheme.primary.lightGreen} />
+        </TouchableOpacity>
+        {showEndPicker && (
+          <DateTimePicker
+            value={watch("endDate")}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => handleDateChange(selectedDate, "endDate")}
+          />
+        )}
+      </View>
+
+      <TouchableOpacity style={styles.saveButton} onPress={handleSubmit(onSubmit)}>
+        {isUpdating? <ActivityIndicator size={'small'} /> : <Text style={styles.saveButtonText}>Save Changes</Text>}
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteChallenge}>
+       {isDeleting ? <ActivityIndicator  size={'small'} /> : <Text style={styles.deleteButtonText}>Delete Challenge</Text>}
+      </TouchableOpacity>
+    </ScrollView>
+  );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 20,
+    paddingTop: 80
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: '#555',
+  },
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  dateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  saveButton: {
+    backgroundColor: colorScheme.primary.green,
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  deleteButton: {
+    backgroundColor: colorScheme.accent.red,
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
 
 export default ChallengeSettings;

@@ -9,13 +9,13 @@ export interface HealthDataPoint {
 export function getStartTimeFromInterval(interval: string): Date {
   const now = new Date();
   switch (interval) {
-    case 'day':
+    case 'D':
       return startOfDay(now);
-    case 'week':
+    case 'W':
       return startOfWeek(now);
-    case 'month':
+    case 'M':
       return startOfMonth(now);
-    case 'year':
+    case 'Y':
       return startOfYear(now);
     default:
       return now;
@@ -24,13 +24,13 @@ export function getStartTimeFromInterval(interval: string): Date {
 
 export function getGroupKey(date: Date, interval: string): string {
   switch (interval) {
-    case 'day':
+    case 'D':
       return format(date, 'HH:00');
-    case 'week':
+    case 'W':
       return format(date, 'EEEEEE');
-    case 'month':
+    case 'M':
       return format(date, 'dd');
-    case 'year':
+    case 'Y':
       return format(date, 'MMM');
     default:
       return '';

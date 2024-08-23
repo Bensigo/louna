@@ -24,13 +24,13 @@ import { z } from "zod";
 import { LocationSearch } from "~/components/locationSearch";
 import Pill from "~/components/pill";
 import activities from "~/constants/activities";
-import { Colors } from "~/constants/colors";
+import { Colors, colorScheme } from "~/constants/colors";
 
 const schema = z.object({
   locationName: z.string().optional(),
   locationLat: z.number().optional(),
   locationLng: z.number().optional(),
-  activities: z.array(z.string()).min(1, "At least one activity is required"),
+  activity: z.string(),
 });
 
 export type FormData = z.infer<typeof schema>;
@@ -49,10 +49,10 @@ export function RadioGroupItemWithLabel(props: {
   const id = `radiogroup-${props.value}`;
   return (
     <XStack alignItems="center" gap="$4">
-      <RadioGroup.Item value={props.value} id={id} size={props.size}>
+      <RadioGroup.Item value={props.value} id={id} size={props.size}  backgroundColor={colorScheme.border.secondary}>
         <RadioGroup.Indicator />
       </RadioGroup.Item>
-      <Label size={props.size} htmlFor={id}>
+      <Label size={props.size} htmlFor={id}  color={colorScheme.secondary.darkGray}>
         {props.label}
       </Label>
     </XStack>
@@ -75,7 +75,7 @@ export const AdditionalDetailsForm: React.FC<AdditionalDetailsFormProps> = ({
     resolver: zodResolver(schema),
     defaultValues: {
       ...defaultValues,
-      activities: defaultValues.activities || [],
+      activity: defaultValues.activities[0],
     },
   });
 
@@ -98,43 +98,48 @@ export const AdditionalDetailsForm: React.FC<AdditionalDetailsFormProps> = ({
   }));
 
   return (
-    <KeyboardAvoidingView
+    <ScrollView>
+      <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <YStack gap="$4" padding="$4">
         <H3>Additional Details</H3>
         {/* Location Search */}
-
+        
+        <View>
+          <LocationSearch onLocationSelect={handleLocationSelect} />
+        </View>
         {/* Activities */}
         <Controller
-          name="activities"
+          name="activity"
           control={control}
           render={({ field: { value, onChange }, formState: { errors } }) => (
             <View>
               <Text>Activities</Text>
               <Text fontSize={"$2"} color={Colors.light.tint}>
-                Select one or more activities
+                Select an activity
               </Text>
-              {errors.activities && (
+              {errors.activity && (
                 <Text marginVertical={"$2"} fontSize={10} color="$red10">
-                  {errors.activities.message}
+                  {errors.activity.message}
                 </Text>
               )}
               <FlatList
                 data={activities.slice(0, showMore ? activities.length : 10)}
                 keyExtractor={(item, i) => item + i}
                 extraData={value}
-                numColumns={3}
+                numColumns={2}
                 renderItem={({ item: activity }) => (
                   <Pill
                     onPress={() => {
-                      const newActivities = value.includes(activity)
-                        ? value.filter((a) => a !== activity)
-                        : [...value, activity];
-                      onChange(newActivities);
+                      // const newActivities = value.includes(activity)
+                      //   ? value.filter((a) => a !== activity)
+                      //   : [...value, activity];
+                      onChange(activity);
                     }}
-                    bg={value.includes(activity) ? Colors.light.primary : "white"}
+                    color={value ===(activity) ?  "white": colorScheme.secondary.gray }
+                    bg={value === (activity) ? colorScheme.primary.lightGreen : "white"}
                     style={{ margin: 4 }}
                   >
                     {activity}
@@ -152,9 +157,6 @@ export const AdditionalDetailsForm: React.FC<AdditionalDetailsFormProps> = ({
           )}
         />
 
-        <View>
-          <LocationSearch onLocationSelect={handleLocationSelect} />
-        </View>
 
         <TouchableOpacity
           ref={submitButtonRef}
@@ -165,5 +167,6 @@ export const AdditionalDetailsForm: React.FC<AdditionalDetailsFormProps> = ({
         />
       </YStack>
     </KeyboardAvoidingView>
+    </ScrollView>
   );
 };

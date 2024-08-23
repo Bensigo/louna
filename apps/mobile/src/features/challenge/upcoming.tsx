@@ -21,7 +21,8 @@ export const UpcomingChallenges = () => {
   //     activities: []
   //   } 
 
-   
+
+
   const { 
     data, 
     isLoading, 
@@ -29,11 +30,11 @@ export const UpcomingChallenges = () => {
     isRefetching
   } = api.challenges.list.useQuery({
     startDate: today,
-   ...(activitity ? { activities: [activitity] }: {}),
-   isUpcoming: true,
-    skip: 0,
-    limit: 50
-  });
+   ...( activitity ? {  type: activitity, }: {}),
+   isFreeSession: false,
+    skip,
+    limit,
+  }, { enabled: !!user, keepPreviousData: true });
 
   const onRefresh = useCallback(async () => {
     await refetch();
@@ -51,7 +52,7 @@ export const UpcomingChallenges = () => {
         loadMore={loadMore} 
         onRefresh={onRefresh} 
         onSelectActivity={(val) => setActivity(val)} 
-        challenges={data || []} 
+        challenges={data?.challenges ?? []} 
         isLoading={isLoading} 
         refreshing={isRefetching} 
       />

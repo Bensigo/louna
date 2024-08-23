@@ -12,7 +12,7 @@ import axios from "axios";
 import debounce from "lodash/debounce";
 import { Input } from "tamagui";
 
-import { Colors } from "~/constants/colors";
+import { Colors, colorScheme } from "~/constants/colors";
 
 interface Location {
   title: string;
@@ -73,6 +73,8 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     <View>
       <Input
         placeholder="Search for location"
+        backgroundColor={'white'}
+        color={colorScheme.secondary.gray}
         onChangeText={(text) => {
           setSearchQuery(text);
           debouncedSearchLocation(text);

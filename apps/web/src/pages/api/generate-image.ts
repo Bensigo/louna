@@ -71,6 +71,7 @@ export default async function handler(
 
       const output = await replicate.run("black-forest-labs/flux-schnell", { input });
 
+
       if (!output) {
         throw new Error('Unable to generate image')
       }

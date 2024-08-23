@@ -1,9 +1,9 @@
 import React from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { View, Text, ScrollView, YStack } from 'tamagui';
-import HealthDataChart from '~/features/home/chart';
+import HealthDataChart from '~/features/analysis/chart';
 import { colorScheme } from '~/constants/colors';
-import StatskCard from '~/features/home/statsCard';
+import StatskCard from '~/features/analysis/statsCard';
 
 const HealthSummaryDetail = () => {
   const { name } = useLocalSearchParams();
@@ -24,7 +24,7 @@ const HealthSummaryDetail = () => {
            {getName} Health Details
         </Text>
       <YStack mt={'$3'} gap="$4">
-      <HealthDataChart name={name} />
+       <HealthDataChart name={name} />
       </YStack>
     </ScrollView>
   );

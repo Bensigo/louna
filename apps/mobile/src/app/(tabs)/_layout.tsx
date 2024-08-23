@@ -1,7 +1,7 @@
 import {  StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, Tabs } from "expo-router";
-import { Activity, Home, Smile, User } from "@tamagui/lucide-icons";
+import { Activity, Home, GanttChartSquare, User } from "@tamagui/lucide-icons";
 
 import { CustomTabBar } from "~/components/customTabBar";
 import {  colorScheme } from "~/constants/colors";
@@ -56,10 +56,17 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="stats"
+          options={{
+            tabBarLabel: "Stats",
+            tabBarIcon: ({ color }) => <Activity color={color} />
+          }}
+        />
+        <Tabs.Screen
           name="challenges"
           options={{
             tabBarLabel: "Challenges",
-            tabBarIcon: ({ color }) => <Activity color={color} />,
+            tabBarIcon: ({ color }) => <GanttChartSquare color={color} />,
           }}
         />
         <Tabs.Screen

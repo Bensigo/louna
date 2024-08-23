@@ -1,18 +1,13 @@
-import { ScrollView } from "tamagui";
+import React from 'react';
+import { View, Text } from 'tamagui';
 
-import HealthCardList from "~/features/home/listHealthCards";
-
-
-const HomeScreen =   () => {
-
-
-
-
-
+const HomeScreen = () => {
   return (
-    <ScrollView flex={1}>
-      <HealthCardList />
-    </ScrollView>
+    <View flex={1} justifyContent="center" alignItems="center">
+      <Text fontSize={24} fontWeight="bold" color="black">
+        Welcome to the Home Screen
+      </Text>
+    </View>
   );
 };
 

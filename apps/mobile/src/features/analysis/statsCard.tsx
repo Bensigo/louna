@@ -48,7 +48,12 @@ const getColorForValue = (value: number | null, type: HealthDataType): string =>
   }
 }
 
-
+const healthDataImportance = {
+  STEPS: "Tracks daily physical activity, which is crucial for overall fitness and can help in weight management and cardiovascular health.",
+  HEART_RATE: "Monitors heart health and can provide insights into cardiovascular fitness, stress levels, and overall well-being.",
+  HRV: "Measures the variation in time between heartbeats, which is a key indicator of stress levels, recovery, and overall health.",
+  CALORIES: "Helps in managing energy expenditure and maintaining a balanced diet by tracking the number of calories burned during activities."
+};
 
 
 const StatsCard = ({ name, interval, stats,  insightTip, isLoading, link} : { name: HealthDataType; interval: string , link: string,  stats: Stats, isLoading: boolean, insightTip: any}) => {
@@ -97,8 +102,8 @@ const StatsCard = ({ name, interval, stats,  insightTip, isLoading, link} : { na
                 </Text>
               </XStack>
               <Text color={colorScheme.secondary.darkGray} fontSize="$5">
-                Based on your recent activity, it seems you&apos;ve been making steady progress. Keep up the good work and remember to stay hydrated throughout the day!
                 
+              {healthDataImportance[name]}
               </Text>
             </YStack>
           </Card>

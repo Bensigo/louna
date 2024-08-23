@@ -101,6 +101,9 @@ importers:
       expo-build-properties:
         specifier: ^0.12.5
         version: 0.12.5(expo@51.0.26)
+      expo-calendar:
+        specifier: ~13.0.5
+        version: 13.0.5(expo@51.0.26)
       expo-constants:
         specifier: ~16.0.2
         version: 16.0.2(expo@51.0.26)
@@ -8287,6 +8290,14 @@ packages:
       ajv: 8.17.1
       expo: 51.0.26(@babel/core@7.25.2)(@babel/preset-env@7.23.2)
       semver: 7.6.3
+    dev: false
+
+  /expo-calendar@13.0.5(expo@51.0.26):
+    resolution: {integrity: sha512-Wkk7eHvlyhWz2csxU6guYA2HFcLUfYpmlsdMy4a6bneBmFqIZG/ldnLKq/lcQ+BCrfI3fOULt3aNdF6SlZtLlw==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 51.0.26(@babel/core@7.25.2)(@babel/preset-env@7.23.2)
     dev: false
 
   /expo-constants@16.0.2(expo@51.0.26):

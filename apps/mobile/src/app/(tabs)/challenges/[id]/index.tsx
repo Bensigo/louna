@@ -8,9 +8,9 @@ const ChallengeDetailsScreen = () => {
   const { id } = useLocalSearchParams();
 
   return (
-    <YStack flex={1} justifyContent="center" alignItems="center">
+    
        <GetChallenge id={id as string} />
-    </YStack>
+ 
   );
 };
 

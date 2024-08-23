@@ -1,5 +1,5 @@
-import React, {  useImperativeHandle, useRef } from "react";
-import {  TouchableOpacity } from "react-native";
+import React, { useImperativeHandle, useRef, useState } from "react";
+import { TouchableOpacity } from "react-native";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -22,7 +22,7 @@ import { RadioGroupItemWithLabel } from "./more";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().optional(),
   capacity: z.string().optional(),
   visibility: z.enum(["Public", "Private"]),
   startDateTime: z.date(),
@@ -36,9 +36,6 @@ interface BasicInfoFormProps {
   formRef?: React.RefObject<{ submit: () => void }>;
   defaultValues: FormData;
 }
-
-
-
 
 export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   onSubmit,
@@ -58,10 +55,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
 
   const submitButtonRef = useRef(null);
   const user = useAppUser();
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
 
- 
-
-  // Expose submit method to parent via ref
   useImperativeHandle(formRef, () => ({
     submit: async () => {
       const isValid = await trigger();
@@ -69,49 +65,15 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     },
   }));
 
-
-
   return (
-    <Form flex={1} padding="$4">
+    <Form flex={1} padding="$2">
       <YStack gap="$4">
-        <H3 textAlign="center">Create a Fun Challenge</H3>
+        <H3 textAlign="center" color={colorScheme.secondary.darkGray}>
+          Create a Challenge
+        </H3>
         <Text textAlign="center" color={Colors.light.tint}>
           Start with the basic details
         </Text>
-
-        {/* <Controller
-          name="image"
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            <XStack alignItems="center" justifyContent="center" space="$4">
-              <Pressable
-                onPress={() =>
-                  selectImageForUpload((value: string) => onChange(value))
-                }
-              >
-                <Image
-                  source={
-                    value
-                      ? { uri: value }
-                      : require("../../../../../assets/placeholder.png")
-                  }
-                  width={120}
-                  height={120}
-                  borderRadius="$8"
-                  borderWidth={1}
-                  borderColor={Colors.light.border}
-                  backgroundColor={Colors.light.placeholder}
-                />
-              </Pressable>
-              <Text fontSize={"12px"} color={Colors.light.textSecondary}>
-                {value ? "Change Avatar" : "Pick an Avatar"}
-              </Text>
-            </XStack>
-          )}
-        />
-        {errors.image && (
-          <Text color={Colors.light.error}>{errors.image.message}</Text>
-        )} */}
 
         <Controller
           name="name"
@@ -125,8 +87,12 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               <Input
                 value={value}
                 onChangeText={onChange}
+                backgroundColor={'white'}
+                onBlur={onBlur}
+                borderColor={colorScheme.border.secondary}
                 onBlur={onBlur}
                 placeholder="Challenge Name"
+                color={colorScheme.text.secondary}
                 borderRadius="$4"
                 padding="$2"
               />
@@ -138,7 +104,7 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
         <Controller
           name="description"
           control={control}
-          rules={{ required: "Description required" }}
+        
           render={({
             field: { onChange, value, onBlur },
             fieldState: { error },
@@ -148,6 +114,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
+                backgroundColor={'white'}
+                borderColor={colorScheme.border.secondary}
+                color={colorScheme.text.secondary}
                 placeholder="About the challenge"
                 multiline
                 numberOfLines={5}
@@ -159,7 +128,6 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           )}
         />
 
-        {/* Capacity */}
         <Controller
           name="capacity"
           control={control}
@@ -168,6 +136,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               <Text>Capacity (Optional)</Text>
               <Input
                 value={value}
+                backgroundColor={'white'}
+                borderColor={colorScheme.border.secondary}
+                color={colorScheme.text.secondary}
                 onChangeText={onChange}
                 placeholder="Capacity"
               />
@@ -176,14 +147,13 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           )}
         />
 
-        {/* Visibility */}
         <Controller
           name="visibility"
           control={control}
           render={({ field: { onChange, value } }) => (
             <YStack gap="$1">
               <Text>Visibility</Text>
-              <RadioGroup value={value} onValueChange={onChange}>
+              <RadioGroup value={value} onValueChange={onChange} >
                 <XStack gap={"$3"}>
                   <RadioGroupItemWithLabel
                     size="$3"
@@ -193,6 +163,7 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                   <RadioGroupItemWithLabel
                     size="$3"
                     value="Private"
+                  
                     label="Private"
                   />
                 </XStack>
@@ -207,23 +178,35 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
         <Controller
           name="startDateTime"
           control={control}
-          rules={{ required: "Start Tiime is required" }}
+          rules={{ required: "Start Time is required" }}
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <YStack gap="$1">
               <XStack alignItems="center" gap="$4">
-                <Text>Start:</Text>
-                <DateTimePicker
-                  value={value}
-                  mode="datetime"
-                  accentColor={colorScheme.primary.green}
-                  textColor={colorScheme.text.secondary}
-                  display="compact"
-                  onChange={(event, selectedDate) => {
-                    onChange(selectedDate);
-                  }}
-                />
-              </XStack>
-              {error?.message && <Text color={"$red10"}>{error.message}</Text>}
+                <Text color={colorScheme.secondary.darkGray}>Start:</Text>
+                <TouchableOpacity onPress={() => setShowStartPicker(true)}>
+                  <Text color={value ? colorScheme.secondary.darkGray : colorScheme.secondary.gray}>
+                    {value ? value.toLocaleString() : "Select Start Time"}
+                  </Text>
+                </TouchableOpacity>
+                </XStack>
+
+                {showStartPicker && (
+                  <DateTimePicker
+                    value={value || new Date()}
+                    mode="datetime"
+                    accentColor={colorScheme.primary.green}
+                    textColor={colorScheme.text.secondary}
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      if (event.type === "set"){
+                        onChange(selectedDate);
+                        setShowEndPicker(false);
+                       }
+                    }}
+                  />
+                )}
+          
+              {error?.message && <Text color={Colors.error.text}>{error.message}</Text>}
             </YStack>
           )}
         />
@@ -235,21 +218,32 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
             <YStack gap="$1">
               <XStack alignItems="center" gap="$4">
                 <YStack>
-                  <Text>End :</Text>
-                  <Text fontSize={8}>(Optional)</Text>
+                  <Text color={colorScheme.secondary.darkGray}>End :</Text>
+                  <Text fontSize={8} color={colorScheme.secondary.darkGray}>(Optional)</Text>
                 </YStack>
-                <DateTimePicker
-                  value={value || new Date()}
-                  mode="datetime"
-                  accentColor={colorScheme.primary.green}
-                  textColor={colorScheme.text.secondary}
-                  display="default"
-                  onChange={(event, selectedDate) => {
-                    onChange(selectedDate);
-                  }}
-                />
-              </XStack>
-              {error?.message && <Text color={"$red10"}>{error.message}</Text>}
+                <TouchableOpacity onPress={() => setShowEndPicker(true)}>
+                  <Text color={value ? colorScheme.secondary.darkGray :  colorScheme.secondary.gray}>
+                    {value ? value.toLocaleString() : "Select End Time"}
+                  </Text>
+                </TouchableOpacity>
+                </XStack>
+                {showEndPicker && (
+                  <DateTimePicker
+                    value={value || new Date()}
+                    mode="datetime"
+                    accentColor={colorScheme.primary.green}
+                    textColor={colorScheme.text.secondary}
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                       if (event.type === "set"){
+                        onChange(selectedDate);
+                        setShowEndPicker(false);
+                       }
+                    }}
+                  />
+                )}
+            
+              {error?.message && <Text color={ colorScheme.accent.red}>{error.message}</Text>}
             </YStack>
           )}
         />

@@ -1,104 +1,208 @@
-import React, { useState } from "react";
-import { FlatList, Image, StyleSheet, Text, View, RefreshControl, TouchableWithoutFeedback } from "react-native";
-import { Card, Button as TamaguiButton, XStack, YStack } from "tamagui";
-import { Users2, Clock , Calendar, } from '@tamagui/lucide-icons'
+import React, { useCallback, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { router } from "expo-router";
+import { Calendar, Clock, PlusCircle, Trophy } from "@tamagui/lucide-icons";
+import { Avatar, Button, Card, XStack, YStack } from "tamagui";
 
 import type { RouterOutputs } from "@lumi/api";
 
 import Pill from "~/components/pill";
 import activities from "~/constants/activities";
-import { Colors , colorScheme} from "~/constants/colors";
-import { router } from "expo-router";
+import { Colors, colorScheme } from "~/constants/colors";
 import { useAppUser } from "~/provider/user";
+import { api } from "~/utils/api";
 
-type Challenges = RouterOutputs["challenges"]["list"];
+type Challenges = RouterOutputs["challenges"]["list"]["challenges"];
 
 interface ChallengeCardProps {
   loadMore: () => void;
-  onRefresh: () => void,
-  onSelectActivity: (val: string) => void,
-  challenges: Challenges,
-  isLoading: boolean,
-  refreshing: boolean
+  onRefresh: () => void;
+  onSelectActivity: (val: string) => void;
+  challenges: Challenges;
+  isLoading: boolean;
+  refreshing: boolean;
 }
 
+type ChallengeParticipation = {
+  id: string;
+  userId: string;
+  user: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+};
+
 const ChallengeCard = ({ item }: { item: Challenges[0] }) => {
-  console.log({ item })
-  const user = useAppUser()
+  const user = useAppUser();
   const formatDate = (date: Date) => date.toLocaleDateString();
   const formatTime = (date: Date) =>
     date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+  const { mutate: join } = api.challenges.join.useMutation();
+
   const goToDetail = () => {
-    router.push(`/(tabs)/challenges/${item.id}`)
+    router.push(`/(tabs)/challenges/${item.id}`);
   };
 
+  const joinChallenge = () => {
+    join(
+      {
+        id: item.id,
+      },
+      {
+        onError(error) {
+          Alert.alert("Error", error.message);
+        },
+      },
+    );
+  };
+
+  const participantsToShow =
+    (item.participants as ChallengeParticipation[])?.slice(0, 3) || [];
+  const remainingParticipants = (item.participants?.length || 0) - 3;
+
+
+  const getGoalType = (value: string) => {
+    switch(value){
+      case 'DURATION':
+        return 'Mins'
+        break;
+      default:
+        return '%(Increment)'
+    }
+  }
+
   return (
-    <TouchableWithoutFeedback onPress={goToDetail}>
-      <Card 
-         elevate
-         size="$4"
-         bordered
-         animation="bouncy"
-         scale={0.9}
-         hoverStyle={{ scale: 0.925 }}
-         pressStyle={{ scale: 0.875 }}
-         borderWidth={1}
-         borderColor={'wheat'}
-         margin="$1"
-         shadowOffset={{ width: 0, height: 1 }}
-         shadowOpacity={0.05}
-         shadowRadius={2}
-      style={styles.card}
-      >
-        <Image source={{ uri: item.imageUrl }} style={styles.image} />
-        <View style={styles.info}>
-          <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
-          <XStack style={styles.iconTextContainer}>
-            <Users2 size={16} color={Colors.light.text} />
-            <Text style={styles.infoText}>Capacity: {item.capacity}</Text>
-          </XStack>
-          <XStack style={styles.iconTextContainer}>
-            <Calendar size={16} color={Colors.light.text} />
-            <Text style={styles.infoText} numberOfLines={1} ellipsizeMode="tail">
-              {formatDate(item.startDateTime)} - {item.endDateTime ? formatDate(item.endDateTime) : 'N/A'}
-            </Text>
-          </XStack>
-          <XStack style={styles.iconTextContainer}>
-            <Clock size={16} color={Colors.light.text} />
-            <Text style={styles.infoText} numberOfLines={1} ellipsizeMode="tail">
-              {formatTime(item.startDateTime)} - {item.endDateTime ? formatTime(item.endDateTime) : 'N/A'}
-            </Text>
-          </XStack>
-          <XStack style={styles.iconTextContainer}>
-            <Users2 size={16} color={Colors.light.text} />
-            <Text style={styles.infoText}>Members: {item.members?.length || 0}</Text>
-          </XStack>
-          {item.ownerId !== user?.id && (
-            <TamaguiButton
-              style={styles.button}
-              onPress={() => console.log(`Joined challenge: ${item.name}`)}
+    <Card
+      size="$4"
+      bordered
+      animation="bouncy"
+      scale={0.9}
+      hoverStyle={{ scale: 0.925 }}
+      pressStyle={{ scale: 0.875 }}
+      borderRadius={16}
+      margin="$1"
+      backgroundColor={Colors.light.background}
+      onPress={goToDetail}
+    >
+      <XStack space="$3" padding="$3">
+        <Image
+          source={{
+            uri: item.imageUrl ?? "https://via.placeholder.com/100x100",
+          }}
+          style={styles.image}
+        />
+        <YStack flex={1} space="$2">
+          <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+            {item.title}
+          </Text>
+          <XStack space="$2" alignItems="center">
+            <Calendar size={16} color={colorScheme.text.secondary} />
+            <Text
+              style={styles.infoText}
+              numberOfLines={1}
+              ellipsizeMode="tail"
             >
-              <Text style={styles.buttonText}>Join</Text>
-            </TamaguiButton>
+              {formatDate(item?.startDate)} -{" "}
+              {item?.endDate ? formatDate(item?.endDate) : "N/A"}
+            </Text>
+          </XStack>
+          {/* <XStack space="$2" alignItems="center">
+            <Clock size={16} color={colorScheme.text.secondary} />
+            <Text style={styles.infoText} numberOfLines={1} ellipsizeMode="tail">
+              {formatTime(item?.startDate)} - {item.endDate ? formatTime(item.endDate) : 'N/A'}
+            </Text>
+          </XStack> */}
+          <XStack gap={'$2'}>
+              <Trophy size={16} color={colorScheme.text.secondary} />
+            <XStack  gap={'$1'}>
+              <Text style={styles.infoText}>{item.goalType}</Text>
+              <Text style={styles.infoText}>{`${item.goalValue} ${getGoalType(item.goalType)}`}</Text>
+            </XStack>
+          </XStack>
+        </YStack>
+      </XStack>
+      <XStack justifyContent="space-between" alignItems="center" padding="$3">
+        <XStack space="$1" alignItems="center">
+          {participantsToShow.map((participant) => (
+            <Avatar key={participant.id} size="$2" circular>
+              <Avatar.Image
+                source={{
+                  uri:
+                    participant.user?.image ||
+                    "https://via.placeholder.com/30x30",
+                }}
+              />
+            </Avatar>
+          ))}
+          {remainingParticipants > 0 && (
+            <View style={styles.remainingParticipants}>
+              <Text style={styles.remainingParticipantsText}>
+                +{remainingParticipants}
+              </Text>
+            </View>
           )}
-        </View>
-      </Card>
-    </TouchableWithoutFeedback>
+        </XStack>
+        {item.creatorId !== user?.id ||
+          (!item.participants.some((x) => x.userId === user.id) && (
+            <Button
+              size="$3"
+              theme="active"
+              backgroundColor={colorScheme.primary.green}
+              onPress={joinChallenge}
+            >
+              Join
+            </Button>
+          ))}
+      </XStack>
+    </Card>
   );
 };
 
-const ChallengeList: React.FC<ChallengeCardProps> = ({  onRefresh, onSelectActivity, loadMore, challenges, isLoading, refreshing }) => {
+const ChallengeList: React.FC<ChallengeCardProps> = ({
+  onRefresh,
+  onSelectActivity,
+  loadMore,
+  challenges,
+  isLoading,
+  refreshing,
+}) => {
   const [selectedActivityFilter, setSelectedActivityFilter] = useState("");
+  const onEndReachedCalledDuringMomentum = useRef(true);
+  const challengeRef = useRef();
+  const setActivity = (activity: string) => {
+    setSelectedActivityFilter(activity);
+    onSelectActivity(activity);
+  };
 
-    const setActivity = (activity: string) => {
-      setSelectedActivityFilter(activity)
-      onSelectActivity(activity)
-    }
+  const renderFooter = () => {
+    return refreshing ? (
+      <ActivityIndicator size="small" color={colorScheme.secondary.gray} />
+    ) : null;
+  };
 
+  const getItemLayout = useCallback(
+    (data, index) => ({
+      length: 200, // Replace with your item's fixed height
+      offset: 200 * index,
+      index,
+    }),
+    [],
+  );
 
   return (
-    <YStack flex={1} >
+    <YStack flex={1}>
       <View style={styles.pillContainer}>
         <FlatList
           horizontal
@@ -109,9 +213,16 @@ const ChallengeList: React.FC<ChallengeCardProps> = ({  onRefresh, onSelectActiv
           renderItem={({ item }) => (
             <Pill
               onPress={() => setActivity(item)}
-             
-              color={ selectedActivityFilter === item ? colorScheme.primary.lightGreen : colorScheme.text.secondary}
-              borderColor={ selectedActivityFilter === item ? colorScheme.primary.lightGreen : colorScheme.text.secondary}
+              color={
+                selectedActivityFilter === item
+                  ? colorScheme.primary.lightGreen
+                  : colorScheme.text.secondary
+              }
+              borderColor={
+                selectedActivityFilter === item
+                  ? colorScheme.primary.lightGreen
+                  : colorScheme.text.secondary
+              }
             >
               {item}
             </Pill>
@@ -121,20 +232,37 @@ const ChallengeList: React.FC<ChallengeCardProps> = ({  onRefresh, onSelectActiv
         />
       </View>
       <FlatList
-        data={challenges ?? []}
-        ListEmptyComponent={() => 
-          isLoading ? <Text>Loading...</Text> : <Text>No challenges found</Text>
-        }
+        data={challenges}
+        ListEmptyComponent={() => <Text>No challenges found</Text>}
         renderItem={({ item }) => <ChallengeCard item={item} />}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.container]}
+        contentContainerStyle={styles.container}
         onEndReached={loadMore}
-        onEndReachedThreshold={0.1}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        initialScrollIndex={0}
+        onMomentumScrollBegin={() => {
+          onEndReachedCalledDuringMomentum.current = false;
+        }}
+        ref={challengeRef}
+        scrollEnabled
         onRefresh={onRefresh}
+        ListFooterComponent={renderFooter}
         refreshing={refreshing}
+        onScrollToIndexFailed={({ index, averageItemLength }) => {
+          challengeRef.current?.scrollToOffset({
+            offset: index * averageItemLength,
+            animated: true,
+          });
+        }}
+        getItemLayout={getItemLayout}
+        removeClippedSubviews={true}
+        windowSize={21}
+        maxToRenderPerBatch={20}
+        updateCellsBatchingPeriod={50}
+        initialNumToRender={20}
+        onEndReachedThreshold={0.3}
       />
     </YStack>
   );
@@ -142,9 +270,7 @@ const ChallengeList: React.FC<ChallengeCardProps> = ({  onRefresh, onSelectActiv
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
-  
-
+    paddingHorizontal: 10,
   },
   pillList: {
     flexGrow: 0,
@@ -152,75 +278,36 @@ const styles = StyleSheet.create({
   pillContentContainer: {
     // alignItems: 'center',
   },
-  iconTextContainer: {
-    gap: 3,
-
-  },
   pillContainer: {
     height: 50,
     marginBottom: 10,
   },
-  card: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    marginBottom: 10,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-  
-
-  
-
-  },
-  infoText : {
-    color: "#808080"
-  },
   image: {
-    width: 120,
-    height: 100,
-    borderRadius: 8,
-    marginRight: 16,
+    width: 80,
+    height: 80,
+    borderRadius: 12,
   },
-  info: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 20,
+  title: {
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 8,
-    color: Colors.light.tint,
-  },
-  capacity: {
-    fontSize: 14,
-    marginBottom: 4,
-    color:  colorScheme.secondary.darkGray,
-  },
-  date: {
-    fontSize: 14,
-    marginBottom: 4,
-    color:  colorScheme.secondary.darkGray,
-  },
-  time: {
-    fontSize: 14,
-    marginBottom: 8,
-    color:  colorScheme.secondary.darkGray,
-  },
-  memberCount: {
-    fontSize: 14,
-    marginBottom: 12,
     color: colorScheme.secondary.darkGray,
+    marginBottom: 4,
   },
-  button: {
+  infoText: {
+    fontSize: 14,
+    color: colorScheme.text.secondary,
+  },
+  remainingParticipants: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: colorScheme.primary.green,
-    color: colorScheme.primary.white,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    justifyContent: "center",
     alignItems: "center",
   },
-  buttonText: {
-    color: Colors.light.tint,
-    fontSize: 16,
+  remainingParticipantsText: {
+    color: colorScheme.secondary.darkGray,
+    fontSize: 12,
     fontWeight: "bold",
   },
 });

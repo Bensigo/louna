@@ -10,7 +10,7 @@ import type { HKQuantitySample } from "@kingstinct/react-native-healthkit";
 // Types and interfaces
 export type HealthDataType = 'CALORIES' | 'STEPS' | 'HRV' | 'HEART_RATE';
 
-interface HealthSample {
+export interface HealthSample {
   type: HealthDataType;
   value: number;
   id: string;
@@ -101,7 +101,6 @@ export const HealthKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       from: startDate,
       to: endDate,
     });
-
     return mapSamplesToSchema(samples, type);
   };
 
