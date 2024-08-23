@@ -256,7 +256,55 @@ export const generateImageController = protectedProcedure.input(generateImageSch
     throw new TRPCError('Unable to upadte image')
  
   }
+})
 
+
+
+export const getCurrentActiveGoalsController = protectedProcedure.query(async ({ ctx }) => {
+  const userId = ctx.user.id;
+  const currentDate = new Date();
+
+
+  const activeGoals = await ctx.prisma.challenge.findMany({
+    where: {
+      isDone: false,
+      participants: {
+        some: {
+          userId: userId,
+          isDone: false, // Challenge not completed by the user
+        },
+      },
+      startDate: { lte: currentDate }, // Challenge has started
+      endDate: { gte: currentDate }, // Challenge has not ended
+    },
+    include: {
+      participants: {
+        where: {
+          userId: userId,
+        },
+        include: {
+          user: true,
+        },
+      },
+    },
+    orderBy: {
+      endDate: 'asc', // Sort by end date, showing the ones ending soonest first
+    },
+  });
+
+  const goals = activeGoals.map((challenge) => {
+    return {
+      id: challenge.id,
+      goalType: challenge.goalType,
+      value: challenge.goalValue,
+      title: challenge.title,
+      startDate: challenge.startDate,
+      endDate: challenge.endDate
+    }
+  })
+  // get the goal and 
+
+  return goals;
 
 })
 
