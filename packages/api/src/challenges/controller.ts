@@ -264,7 +264,10 @@ export const generateImageController = protectedProcedure.input(generateImageSch
 export const getCurrentActiveGoalsController = protectedProcedure.query(async ({ ctx }) => {
   const userId = ctx.user.id;
   const currentDate = new Date();
-
+  const startOfDay = new Date(currentDate);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(currentDate);
+  endOfDay.setHours(23, 59, 59, 999);
 
   const activeGoals = await ctx.prisma.challenge.findMany({
     where: {
@@ -275,8 +278,8 @@ export const getCurrentActiveGoalsController = protectedProcedure.query(async ({
           isDone: false, // Challenge not completed by the user
         },
       },
-      start: { lte: currentDate }, // Challenge has started
-      end: { gte: currentDate }, // Challenge has not ended
+      start: { lte: endOfDay }, // Challenge has started today or before
+      end: { gte: startOfDay }, // Challenge has not ended before today
     },
     include: {
       results: {
@@ -308,9 +311,7 @@ export const getCurrentActiveGoalsController = protectedProcedure.query(async ({
       end: challenge.end
     }
   })
-  // get the goal and 
 
   return goals;
-
 })
 

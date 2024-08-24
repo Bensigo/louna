@@ -68,8 +68,8 @@ const GetChallenge: React.FC<GetChallengeProps> = ({ id }) => {
         pathname: "/(tabs)/challenges/[id]/settings" as const,
         params: {
           id,
-          startDate: challenge.startDate.toISOString(),
-          endDate: challenge.endDate?.toISOString(),
+          start: challenge.start.toISOString(),
+          end: challenge.end?.toISOString(),
         },
       });
     }
@@ -84,9 +84,12 @@ const GetChallenge: React.FC<GetChallengeProps> = ({ id }) => {
     if (challenge) {
       const eventConfig = {
         title: challenge.title ?? '',
-        startDate: challenge.startDate.toISOString(),
-        endDate: challenge.endDate?.toISOString() || challenge.startDate.toISOString(),
+        startDate: challenge.start.toISOString(),
+        endDate: challenge.end?.toISOString() || challenge.start.toISOString(),
         notes: challenge.description ?? '',
+        alarms: [{
+          relativeOffset: -30 // 30 minutes before the event
+        }]
       };
       const { status } = await CalendarRN.requestCalendarPermissionsAsync();
       if (status === 'granted') {
@@ -94,21 +97,21 @@ const GetChallenge: React.FC<GetChallengeProps> = ({ id }) => {
           ? await getDefaultCalendarSource()
           : { isLocalAccount: true, name: 'Expo Calendar' };
 
-          const calendarID = await CalendarRN.createCalendarAsync({
-            title: 'Louna',
-            color: colorScheme.primary.green,
-            entityType: CalendarRN.EntityTypes.EVENT,
-            sourceId: defaultCalendarSource.id,
-            source: defaultCalendarSource,
-            name: 'internalCalendarName',
-            ownerAccount: 'personal',
-            accessLevel: CalendarRN.CalendarAccessLevel.OWNER,
-          });
-         const event =  await CalendarRN.createEventAsync(calendarID, eventConfig);
-         console.log({ event })
-         if (typeof event === 'string'){
-          Alert.alert("Sucess", "Calender event created")
-         }
+        const calendarID = await CalendarRN.createCalendarAsync({
+          title: 'Louna',
+          color: colorScheme.primary.green,
+          entityType: CalendarRN.EntityTypes.EVENT,
+          sourceId: defaultCalendarSource.id,
+          source: defaultCalendarSource,
+          name: 'internalCalendarName',
+          ownerAccount: 'personal',
+          accessLevel: CalendarRN.CalendarAccessLevel.OWNER,
+        });
+        const event = await CalendarRN.createEventAsync(calendarID, eventConfig);
+        console.log({ event });
+        if (typeof event === 'string') {
+          Alert.alert("Success", "Calendar event created with alarm set 30 minutes before the event.")
+        }
       }
     }
   };
@@ -132,12 +135,30 @@ const GetChallenge: React.FC<GetChallengeProps> = ({ id }) => {
   const getGoalType = (value: string) => {
     switch(value){
       case 'DURATION':
-        return 'Mins'
-        break;
+        return 'minutes';
+      case 'STEPS':
+        return 'Steps';
+      case 'CALORIES_BURN':
+        return 'Cal';
+      case 'DISTANCE':
+        return 'KM';
+      case 'STRESS_RELIEF':
+        return '%(Decrease)';
       default:
-        return '%(Increment)'
+        return
     }
   }
+  const goalTypeMapping = {
+    STRESS_RELIEF: "Reduce Stress",
+    DISTANCE: "Distance to Cover",
+    DURATION: "Challenge Duration",
+    STEPS: "Steps to Take",
+    CALORIES_BURN: "Calories to Burn",
+  } as const;
+
+  const displayGoalType = (type: keyof typeof goalTypeMapping) => {
+    return goalTypeMapping[type] || type;
+  };
 
   const participantsToShow = challenge.participants?.slice(0, 4) || [];
   const remainingParticipants = (challenge.participants?.length || 0) - 4;
@@ -200,14 +221,14 @@ const GetChallenge: React.FC<GetChallengeProps> = ({ id }) => {
               <InfoItem
                 icon={<Calendar size={20} color={colorScheme.text.secondary} />}
                 label="Start"
-                value={format(new Date(challenge.startDate), "PPP")}
+                value={format(new Date(challenge.start), "Pp")}
               />
               <InfoItem
                 icon={<Clock size={20} color={colorScheme.text.secondary} />}
                 label="End"
                 value={
-                  challenge.endDate
-                    ? format(new Date(challenge.endDate), "PPP")
+                  challenge.end
+                    ? format(new Date(challenge.end), "Pp")
                     : "N/A"
                 }
               />
@@ -224,7 +245,7 @@ const GetChallenge: React.FC<GetChallengeProps> = ({ id }) => {
               <InfoItem
                 icon={<Activity size={20} color={colorScheme.text.secondary} />}
                 label="Tracking"
-                value={challenge.goalType?.toString() || "Unlimited"}
+                value={challenge.goalType || "Unlimited"}
               />
               <InfoItem
                 icon={

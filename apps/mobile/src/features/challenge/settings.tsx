@@ -14,8 +14,8 @@ const ChallengeSettings = ({ id }) => {
       title: "",
       description: "",
       isFreeSession: false,
-      startDate: new Date(),
-      endDate: new Date(),
+      start: new Date(),
+      end: new Date(),
     },
   });
 
@@ -32,8 +32,8 @@ const ChallengeSettings = ({ id }) => {
       setValue("title", challenge.title || "");
       setValue("description", challenge.description || "");
       setValue("isFreeSession", challenge.isFreeSession || false);
-      setValue("startDate", new Date(challenge.startDate) || new Date());
-      setValue("endDate", new Date(challenge.endDate) || new Date());
+      setValue("start", new Date(challenge.start) ?? new Date());
+      setValue("end", new Date(challenge.end) ?? new Date(challenge.start as Date));
     }
   }, [challenge, setValue]);
 
@@ -148,16 +148,16 @@ const ChallengeSettings = ({ id }) => {
         <Text style={styles.label}>Start Date</Text>
         <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.dateButton}>
           <Text style={styles.dateButtonText}>
-            {watch("startDate").toLocaleDateString()}
+            {watch("start").toLocaleDateString()}
           </Text>
           <Ionicons name="calendar-outline" size={24} color={colorScheme.primary.lightGreen}  />
         </TouchableOpacity>
         {showStartPicker && (
           <DateTimePicker
-            value={watch("startDate")}
+            value={watch("start")}
             mode="datetime"
             display="spinner"
-            onChange={(event, selectedDate) => handleDateChange(selectedDate, "startDate")}
+            onChange={(event, selectedDate) => handleDateChange(selectedDate, "start")}
           />
         )}
       </View>
@@ -166,16 +166,16 @@ const ChallengeSettings = ({ id }) => {
         <Text style={styles.label}>End Date</Text>
         <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.dateButton}>
           <Text style={styles.dateButtonText}>
-            {watch("endDate").toLocaleDateString()}
+            {watch("end").toLocaleDateString()}
           </Text>
           <Ionicons name="calendar-outline" size={24} color={colorScheme.primary.lightGreen} />
         </TouchableOpacity>
         {showEndPicker && (
           <DateTimePicker
-            value={watch("endDate")}
+            value={watch("end")}
              mode="datetime"
             display="spinner"
-            onChange={(event, selectedDate) => handleDateChange(selectedDate, "endDate")}
+            onChange={(event, selectedDate) => handleDateChange(selectedDate, "end")}
           />
         )}
       </View>

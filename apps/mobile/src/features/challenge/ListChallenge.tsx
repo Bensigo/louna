@@ -45,7 +45,7 @@ type ChallengeParticipation = {
 
 const ChallengeCard = ({ item }: { item: Challenges[0] }) => {
   const user = useAppUser();
-  const formatDate = (date: Date) => date.toLocaleDateString();
+  const formatDate = (date: Date) => date?.toLocaleDateString();
   const formatTime = (date: Date) =>
     date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
@@ -76,12 +76,30 @@ const ChallengeCard = ({ item }: { item: Challenges[0] }) => {
   const getGoalType = (value: string) => {
     switch(value){
       case 'DURATION':
-        return 'Mins'
-        break;
+        return 'minutes';
+      case 'STEPS':
+        return 'Steps';
+      case 'CALORIES_BURN':
+        return 'Cal';
+      case 'DISTANCE':
+        return 'KM';
+      case 'STRESS_RELIEF':
+        return '%(Decrease)';
       default:
-        return '%(Increment)'
+        return
     }
   }
+  const goalTypeMapping = {
+    STRESS_RELIEF: "Reduce Stress",
+    DISTANCE: "Distance to Cover",
+    DURATION: "Challenge Duration",
+    STEPS: "Steps to Take",
+    CALORIES_BURN: "Calories to Burn",
+  } as const;
+
+  const displayGoalType = (type: keyof typeof goalTypeMapping) => {
+    return goalTypeMapping[type] || type;
+  };
 
   return (
     <Card
@@ -114,8 +132,8 @@ const ChallengeCard = ({ item }: { item: Challenges[0] }) => {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {formatDate(item?.startDate)} -{" "}
-              {item?.endDate ? formatDate(item?.endDate) : "N/A"}
+              {formatDate(item?.start)} -{" "}
+              {item?.end ? formatDate(item?.end) : "N/A"}
             </Text>
           </XStack>
           {/* <XStack space="$2" alignItems="center">
@@ -127,8 +145,8 @@ const ChallengeCard = ({ item }: { item: Challenges[0] }) => {
           <XStack gap={'$2'}>
               <Trophy size={16} color={colorScheme.text.secondary} />
             <XStack  gap={'$1'}>
-              <Text style={styles.infoText}>{item.goalType}</Text>
-              <Text style={styles.infoText}>{`${item.goalValue} ${getGoalType(item.goalType)}`}</Text>
+              <Text style={styles.infoText}>{`${item.goalValue} ${getGoalType(item.goalType)}`} - </Text>
+              <Text style={styles.infoText}>{displayGoalType(item.goalType)} </Text>
             </XStack>
           </XStack>
         </YStack>

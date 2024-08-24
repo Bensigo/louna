@@ -7,7 +7,7 @@ import {
   Platform,
   Pressable,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { ChevronDown, ChevronUp } from "@tamagui/lucide-icons";
@@ -23,7 +23,7 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import { z } from "zod";
+import { util, z } from "zod";
 
 import Pill from "~/components/pill";
 import { colorScheme } from "~/constants/colors";
@@ -88,6 +88,8 @@ const CreateChallenge = () => {
   });
 
   const { isValid } = useFormState({ control });
+  const navigation = useNavigation()
+  const utils = api.useUtils()
 
   const [showDates, setShowDates] = useState(false);
   const [showGoals, setShowGoals] = useState(false);
@@ -113,8 +115,11 @@ const CreateChallenge = () => {
         goalType: data.goalType,
         goalValue: parseFloat(data?.goalValue),
       }, {
-        onSuccess(){
-          router.push("/(tabs)/challenges/");
+        async onSuccess(){
+          // router.push("/(tabs)/challenges/");
+          await utils.challenges.invalidate()
+          navigation.navigate("(tabs)")
+          
         },
         onError(){
           Alert.alert("Error", "Unable to create challenge ");
