@@ -201,6 +201,10 @@ const ChallengeList: React.FC<ChallengeCardProps> = ({
     [],
   );
 
+  const handleRefresh = useCallback(() => {
+    onRefresh()
+  }, [])
+
   return (
     <YStack flex={1}>
       <View style={styles.pillContainer}>
@@ -239,7 +243,7 @@ const ChallengeList: React.FC<ChallengeCardProps> = ({
         contentContainerStyle={styles.container}
         onEndReached={loadMore}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         initialScrollIndex={0}
         onMomentumScrollBegin={() => {
@@ -262,7 +266,7 @@ const ChallengeList: React.FC<ChallengeCardProps> = ({
         maxToRenderPerBatch={20}
         updateCellsBatchingPeriod={50}
         initialNumToRender={20}
-        onEndReachedThreshold={0.3}
+        onEndReachedThreshold={0.1}
       />
     </YStack>
   );

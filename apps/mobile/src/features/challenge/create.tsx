@@ -28,33 +28,48 @@ import { z } from "zod";
 import Pill from "~/components/pill";
 import { colorScheme } from "~/constants/colors";
 import { useAppUser } from "~/provider/user";
-import { api, RouterInputs } from "~/utils/api";
+import { api, type RouterInputs } from "~/utils/api";
 
-const CHALLENGE_TYPES = ["BREATHWORK", "MEDITATION", "YOGA", "ICE_BATH"];
-const GOAL_TYPES = ["HRV", "DURATION", "HEART_RATE", "RESTING_HEART_RATE"];
+const CHALLENGE_TYPES = [
+  "BREATHWORK",
+  "MEDITATION",
+  "YOGA",
+  "SOCCER",
+  "BOXING",
+  "RUNNING",
+  "CYCLING",
+  "PILATES",
+  "HIKING",
+  "FASTING",
+];
+
+// const CHALLENGE_TYPES = ["BREATHWORK", "MEDITATION", "YOGA", "ICE_BATH"];
+// const GOAL_TYPES = ["HRV", "DURATION", "HEART_RATE", "RESTING_HEART_RATE"];
+const GOAL_TYPES = ["STRESS_RELIEF", "DISTANCE","DURATION", "STEPS", "CALORIES_BURN"];
 
 const GOAL_UNITS = {
-  HRV: "%(increase)",
+  STRESS_RELIEF: "%(Decrease)",
   DURATION: "minutes",
-  HEART_RATE: "%(increase)",
-  RESTING_HEART_RATE: "%(increase)",
+  STEPS: "Steps",
+  CALORIES_BURN: "Cal",
+  DISTANCE: 'KM'
 };
 
 type Input = RouterInputs["challenges"]["create"];
 
 const schema = z.object({
   title: z.string().min(1, "title is required"),
-  goalType: z.enum(["HRV", "HEART_RATE", "RESTING_HEART_RATE", "DURATION"]),
   goalValue: z.string().refine((val) => parseFloat(val)),
-  startDate: z.date(),
-  endDate: z.date().refine((data) => {
-    const { startDate, endDate } = data;
-    if (startDate && endDate && endDate < startDate) {
+  start: z.date(),
+  end: z.date().refine((data) => {
+    const { start, end } = data;
+    if (start && end && end< start) {
       return false;
     }
     return true;
-  }, "End date must be after start date"),
-  type: z.enum(["MEDITATION", "BREATHWORK", "YOGA", "ICE_BATH"]),
+  }, "End date must be after start date").optional(),
+  goalType: z.enum(GOAL_TYPES as [string, ...string[]]),
+  type: z.enum(CHALLENGE_TYPES as [string, ...string[]]),
 });
 
 const CreateChallenge = () => {
@@ -63,8 +78,8 @@ const CreateChallenge = () => {
     defaultValues: {
       title: "",
       type: undefined,
-      startDate: undefined,
-      endDate: undefined,
+      start: undefined,
+      end: undefined,
       goalType: undefined,
       goalValue: undefined,
     },
@@ -93,8 +108,8 @@ const CreateChallenge = () => {
         title: data.title,
         type: data.type,
         tempId,
-        startDate: data.startDate,
-        endDate: data.endDate,
+        start: data.start,
+        end: data.end,
         goalType: data.goalType,
         goalValue: parseFloat(data?.goalValue),
       }, {
@@ -126,9 +141,9 @@ const CreateChallenge = () => {
     onChange(date);
     setShowStartDatePicker(false);
     // Clear end date if it's less than the new start date
-    const endDate = watch("endDate");
-    if (endDate && endDate < date) {
-      setValue("endDate", null);
+    const end = watch("end");
+    if (end && end < date) {
+      setValue("end", null);
     }
   };
 
@@ -186,6 +201,7 @@ const CreateChallenge = () => {
                 </Label>
                 <FlatList
                   data={CHALLENGE_TYPES}
+                  numColumns={3}
                   renderItem={({ item }) => (
                     <Pill
                       key={item}
@@ -204,7 +220,7 @@ const CreateChallenge = () => {
                       {item.replace("_", " ")}
                     </Pill>
                   )}
-                  horizontal
+                 
                   showsHorizontalScrollIndicator={false}
                 />
                 {error && <Text color="red">{error.message}</Text>}
@@ -240,7 +256,7 @@ const CreateChallenge = () => {
           {showDates && (
             <YStack space={16}>
               <Controller
-                name="startDate"
+                name="start"
                 control={control}
                 rules={{
                   required: true,
@@ -252,7 +268,7 @@ const CreateChallenge = () => {
                   <YStack>
                     <XStack justifyContent="space-between" alignItems="center">
                       <Text color={colorScheme.secondary.darkGray}>
-                        Start Date:
+                        Start Time:
                       </Text>
                       <Pressable onPress={() => setShowStartDatePicker(true)}>
                         <Text color={colorScheme.secondary.darkGray}>
@@ -263,7 +279,7 @@ const CreateChallenge = () => {
                     {showStartDatePicker && (
                       <DateTimePicker
                         value={value ?? new Date()}
-                        mode="date"
+                        mode="datetime"
                         display="spinner"
                         textColor={colorScheme.secondary.darkGray}
                         onChange={(_, date) =>
@@ -276,7 +292,7 @@ const CreateChallenge = () => {
                 )}
               />
               <Controller
-                name="endDate"
+                name="end"
                 control={control}
                 rules={{
                   required: true,
@@ -288,7 +304,7 @@ const CreateChallenge = () => {
                   <YStack>
                     <XStack justifyContent="space-between" alignItems="center">
                       <Text color={colorScheme.secondary.darkGray}>
-                        End Date:
+                       End Time:
                       </Text>
                       <Pressable onPress={() => setShowEndDatePicker(true)}>
                         <Text color={colorScheme.secondary.darkGray}>
@@ -299,7 +315,7 @@ const CreateChallenge = () => {
                     {showEndDatePicker && (
                       <DateTimePicker
                         value={value ?? new Date()}
-                        mode="date"
+                        mode="datetime"
                         display="spinner"
                         textColor={colorScheme.secondary.darkGray}
                         onChange={(_, date) =>

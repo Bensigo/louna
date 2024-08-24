@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { protectedProcedure } from "../trpc";
 import { createChallengeSchema, deleteChallengeSchema, generateImageSchema, getChallengeSchema, listChallengesSchema, updateChallengeSchema } from "./schema";
+import { ChallengeType, GoalType } from "@lumi/db";
 
 
 export const createChallengeController = protectedProcedure.input(createChallengeSchema).mutation(async ({ ctx, input}) => {
@@ -84,7 +85,7 @@ export const listChallengeController = protectedProcedure.input(listChallengesSc
   const challenges = await ctx.prisma.challenge.findMany({
     where: {
       ...query,
-      startDate: {
+      start: {
         gte: new Date(),
       }
     },
@@ -163,7 +164,7 @@ export const deleteChallengeController = protectedProcedure.input(deleteChalleng
 export const updateChallengeController = protectedProcedure
   .input(updateChallengeSchema)
   .mutation(async ({ ctx, input }) => {
-    const { id, title, type, startDate, endDate, goalType, goalValue, description, isFreeSession, interval } = input;
+    const { id, title, type, start, end, goalType, goalValue, description, isFreeSession, interval } = input;
 
     // Ensure the user is the creator of the challenge
     const challenge = await ctx.prisma.challenge.findFirst({
@@ -182,11 +183,11 @@ export const updateChallengeController = protectedProcedure
       where: { id },
       data: {
         title,
-        type,
+        type: type as ChallengeType,
         interval,
-        startDate,
-        endDate,
-        goalType,
+        start,
+        end,
+        goalType: goalType as GoalType,
         goalValue,
         description,
         isFreeSession
@@ -274,10 +275,15 @@ export const getCurrentActiveGoalsController = protectedProcedure.query(async ({
           isDone: false, // Challenge not completed by the user
         },
       },
-      startDate: { lte: currentDate }, // Challenge has started
-      endDate: { gte: currentDate }, // Challenge has not ended
+      start: { lte: currentDate }, // Challenge has started
+      end: { gte: currentDate }, // Challenge has not ended
     },
     include: {
+      results: {
+        where: {
+          userId: userId,
+        }
+      },
       participants: {
         where: {
           userId: userId,
@@ -288,7 +294,7 @@ export const getCurrentActiveGoalsController = protectedProcedure.query(async ({
       },
     },
     orderBy: {
-      endDate: 'asc', // Sort by end date, showing the ones ending soonest first
+      end: 'asc', // Sort by end date, showing the ones ending soonest first
     },
   });
 
@@ -298,8 +304,8 @@ export const getCurrentActiveGoalsController = protectedProcedure.query(async ({
       goalType: challenge.goalType,
       value: challenge.goalValue,
       title: challenge.title,
-      startDate: challenge.startDate,
-      endDate: challenge.endDate
+      start: challenge.start,
+      end: challenge.end
     }
   })
   // get the goal and 

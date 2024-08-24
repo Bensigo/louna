@@ -155,8 +155,8 @@ const ChallengeSettings = ({ id }) => {
         {showStartPicker && (
           <DateTimePicker
             value={watch("startDate")}
-            mode="date"
-            display="default"
+            mode="datetime"
+            display="spinner"
             onChange={(event, selectedDate) => handleDateChange(selectedDate, "startDate")}
           />
         )}
@@ -173,8 +173,8 @@ const ChallengeSettings = ({ id }) => {
         {showEndPicker && (
           <DateTimePicker
             value={watch("endDate")}
-            mode="date"
-            display="default"
+             mode="datetime"
+            display="spinner"
             onChange={(event, selectedDate) => handleDateChange(selectedDate, "endDate")}
           />
         )}
@@ -194,7 +194,7 @@ const ChallengeSettings = ({ id }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#A3A3D8',
     padding: 20,
     paddingTop: 80
   },

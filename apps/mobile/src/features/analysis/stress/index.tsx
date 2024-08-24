@@ -3,10 +3,10 @@ import { View, Card, XStack, Button, Text, ScrollView, YStack } from "tamagui";
 import { LineChart } from "react-native-gifted-charts";
 import { Flame, Heart, Activity, BarChart2, Footprints, ChevronUp, ChevronDown } from "@tamagui/lucide-icons";
 import { colorScheme } from "~/constants/colors";
-import { HealthSample, useHealthKit } from "~/integration/healthKit";
+import { type HealthSample, useHealthKit } from "~/integration/healthKit";
 import { startOfDay, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { processDataForChart } from "../utils/processData";
-import { HealthDataPoint } from "../utils/util";
+import type {  HealthDataPoint } from "../utils/util";
 
 
 
@@ -110,12 +110,6 @@ const StressWrapper = () => {
   const [stressBreakdown, setStressBreakDown] = useState<StressBreakdown[]>([])
   const { isAuthorized, getMostRecentValue, getIntervalData } = useHealthKit()
 
-
-  const lineData = [
-    { value: 65 }, { value: 70 }, { value: 62 }, { value: 68 },
-    { value: 74 }, { value: 66 }, { value: 72 }
-  ];
-
   const fetchActivityData = useCallback(async () => {
     try {
       setLoadingActivity(true);
@@ -147,20 +141,19 @@ const StressWrapper = () => {
     const beginOfDay = startOfDay(now);
 
     const hrvs = await getIntervalData('HRV', beginOfDay, now);
-
     const reversedHrvs = hrvs?.reverse() ?? [];
     const currentHrv = reversedHrvs[0]?.value ?? 0;
     const prevHrv = reversedHrvs[1]?.value ?? 0;
     const difference = currentHrv - prevHrv;
-
+    
+    
     const percentage = (difference / prevHrv) * 100;
-  
     const isIncrease = difference > 0;
     const threshold = Object.keys(hrvTreashold).find(key => hrvTreashold[key] <= currentHrv);
     
     setHrvSummary({
       hrv: Math.round(currentHrv),
-      percentage: percentage.toFixed(2),
+      percentage: percentage === Infinity ? null : percentage.toFixed(2),
       isIncrease,
       treashold: threshold
     } as HrvSummary);
@@ -291,7 +284,8 @@ const StressWrapper = () => {
           </YStack>
           <YStack alignItems="flex-end">
             <Text fontSize="$7" fontWeight="bold" color={colorScheme.secondary.darkGray}>{hrvSummary?.hrv} <Text fontSize="$4" fontWeight="normal" color={colorScheme.secondary.gray}>ms</Text></Text>
-            <XStack alignItems="center" space="$1">
+            {!hrvSummary?.percentage ? <></> :<XStack alignItems="center" space="$1">
+              
               {hrvSummary?.isIncrease ? (
                 <ChevronUp size={16} color={colorScheme.primary.green} />
               ) : (
@@ -300,7 +294,7 @@ const StressWrapper = () => {
               <Text fontSize="$3" color={hrvSummary?.isIncrease ? colorScheme.primary.green : colorScheme.accent.red}>
                 {hrvSummary?.percentage}%
               </Text>
-            </XStack>
+            </XStack>}
           </YStack>
         </XStack>
       </Card>

@@ -60,10 +60,16 @@ model ChallengeResult {
 }
 
 enum ChallengeType {
-  MEDITATION
   BREATHWORK
+  MEDITATION
   YOGA
-  ICE_BATH
+  SOCCER
+  BOXING
+  RUNNING
+  CYCLING
+  PILATES
+  HIKING
+  FASTING
 }
 model Challenge {
   id                 String               @id @default(uuid())
@@ -74,9 +80,9 @@ model Challenge {
   createdAt          DateTime             @default(now())
   imageUrl           String?
   tempId            String
-  startDate          DateTime
+  start          DateTime
   isDone        Boolean @default(false)
-  endDate            DateTime
+  end            DateTime?
   type               ChallengeType
   goalType           GoalType?            // Nullable for free sessions
   goalValue          Float?               // Nullable for free sessions
@@ -88,8 +94,8 @@ model Challenge {
 
   @@index([creatorId], name: "idx_challenge_creator")
   @@index([type], name: "idx_challenge_type")
-  @@index([startDate], name: "idx_challenge_start_date")
-  @@index([endDate], name: "idx_challenge_end_date")
+  @@index([start], name: "idx_challenge_start")
+  @@index([end], name: "idx_challenge_end")
 }
 
 enum Interval {
@@ -101,8 +107,9 @@ enum Interval {
 
 
 enum GoalType {
-  HRV
-  HEART_RATE
-  RESTING_HEART_RATE
-  DURATION          // New goal type for activities where duration matters
+  STRESS_RELIEF
+  DISTANCE
+  DURATION
+  STEPS
+  CALORIES_BURN
 }
