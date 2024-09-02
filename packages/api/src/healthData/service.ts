@@ -117,22 +117,36 @@ export class HealthDataLogService {
   }) {
     try {
       return this.prisma.$transaction(async (prisma) => {
+        // Create the health data log without workouts
         const healthDataLog = await prisma.healthDataLog.create({
           data: {
             userId,
             timestamp: new Date(),
-            ...data,
-            ...(data.workouts.length ? {
-                workouts: {
-                    createMany: {
-                        data: data.workouts
-                    }
-                }
-            }: {})
-           
+            hrv: data.hrv,
+            rhr: data.rhr,
+            steps: data.steps,
+            energy: data.energy,
+            heartRate: data.heartRate,
+            sleepMins: data.sleepMins,
+            baselineHrv: data.baselineHrv,
+            baselineRhr: data.baselineRhr,
+            baselineSteps: data.baselineSteps,
+            baselineEnergy: data.baselineEnergy,
+            baselineHeartRate: data.baselineHeartRate,
+            baselineSleepMins: data.baselineSleepMins,
           },
         });
-        console.log({ healthDataLog })
+       console.log({ healthDataLog })
+        // Create workouts separately if there are any
+        if (data.workouts.length > 0) {
+          await prisma.workout.createMany({
+            data: data.workouts.map(workout => ({
+              ...workout,
+              healthDataLogId: healthDataLog.id,
+            })),
+          });
+        }
+
         await this.calculateAndCreateScores(userId, healthDataLog);
 
         return healthDataLog;
@@ -154,7 +168,7 @@ export class HealthDataLogService {
       baseLineEnergyBurned: healthData.baselineEnergy,
       todayEnergyBurned: healthData.energy,
     });
-
+    console.log({ stressScore })
     const recoveryScore = this.util.calRecoveryScore(
       healthData.baselineHrv,
       healthData.baselineRhr,
@@ -162,7 +176,7 @@ export class HealthDataLogService {
       healthData.rhr,
       healthData.sleepMins / 60 // Assuming sleepQuality is derived from sleep duration
     );
-
+    console.log({ recoveryScore })
     const wellnessScore = this.util.calWellnessScore({
       avgHRV: healthData.hrv,
       avgRHR: healthData.rhr,
@@ -171,7 +185,7 @@ export class HealthDataLogService {
       avgHeartRate: healthData.heartRate,
       sleepQuality: healthData.sleepMins / 60, // Assuming sleepQuality is derived from sleep duration
     });
-
+    console.log({ wellnessScore })
     const scores = [
       { type: HealthScoreType.Stress, score: this.util.calculatePercentage(stressScore), rawScore: stressScore },
       { type: HealthScoreType.Recovery, score: this.util.calculatePercentage(recoveryScore), rawScore: recoveryScore },
