@@ -1,5 +1,3 @@
-
-
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure } from "../trpc";
@@ -14,12 +12,10 @@ export const syncHealthDataController = protectedProcedure
     const { prisma } = ctx;
 
     try {
-      // Validate input using the schema
       const validatedData = HealthDataSchema.parse(input);
       const utilService = new UtilService();
       const healthDataLogService = new HealthDataLogService(prisma);
 
-      console.log({ validatedData });
       await prisma.$transaction(async (tx) => {
         const healthDataLog = await tx.healthDataLog.create({
           data: {
@@ -47,7 +43,6 @@ export const syncHealthDataController = protectedProcedure
           }
         });
 
-        console.log("Health data log created");
         const stressScore = utilService.calStressScore({
           baseLineHRV: healthDataLog.baselineHrv,
           todayHRV: healthDataLog.hrv,
@@ -58,16 +53,14 @@ export const syncHealthDataController = protectedProcedure
           baseLineEnergyBurned: healthDataLog.baselineEnergy,
           todayEnergyBurned: healthDataLog.energy,
         });
-        console.log({ stressScore });
 
         const recoveryScore = utilService.calRecoveryScore(
           healthDataLog.baselineHrv,
           healthDataLog.baselineRhr,
           healthDataLog.hrv,
           healthDataLog.rhr,
-          healthDataLog.sleepMins / 60 // Assuming sleepQuality is derived from sleep duration
+          healthDataLog.sleepMins / 60
         );
-        console.log({ recoveryScore });
 
         const wellnessScore = utilService.calWellnessScore({
           avgHRV: healthDataLog.hrv,
@@ -75,9 +68,8 @@ export const syncHealthDataController = protectedProcedure
           avgSteps: healthDataLog.steps,
           avgEnergyBurned: healthDataLog.energy,
           avgHeartRate: healthDataLog.heartRate,
-          sleepQuality: healthDataLog.sleepMins / 60, // Assuming sleepQuality is derived from sleep duration
+          sleepQuality: healthDataLog.sleepMins / 60,
         });
-        console.log({ wellnessScore });
 
         const scores = [
           { type: HealthScoreType.Stress, score: utilService.calculatePercentage(stressScore), rawScore: stressScore },
@@ -85,7 +77,6 @@ export const syncHealthDataController = protectedProcedure
           { type: HealthScoreType.Wellbeing, score: utilService.calculatePercentage(wellnessScore), rawScore: wellnessScore },
         ];
 
-        console.log({ scores });
         await tx.healthScore.createMany({
           data: scores.map(score => ({
             userId,
@@ -116,6 +107,138 @@ export const syncHealthDataController = protectedProcedure
     }
   });
 
+export const getScoreController =   protectedProcedure
+    .input(z.object({
+      type: z.enum(['Recovery', 'Wellbeing', 'Stress']),
+    }))
+    .query(async ({ ctx, input }) => {
+      const { type } = input;
+      const { prisma, user } = ctx;
+      const userId = user.id;
 
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
 
+      const aggregatedScore = await prisma.healthScore.aggregate({
+        where: {
+          userId,
+          type,
+          timestamp: {
+            gte: today,
+            lt: tomorrow,
+          },
+        },
+        _avg: {
+          rawScore: true,
+          score: true,
+        },
+      });
 
+      if (!aggregatedScore._avg.rawScore || !aggregatedScore._avg.score) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No health scores found for today',
+        });
+      }
+
+      return {
+        type,
+        rawScore: aggregatedScore._avg.rawScore,
+        score: aggregatedScore._avg.score,
+        id: `${userId}-${type}-${today.toISOString().split('T')[0]}`,
+      };
+    });
+    
+export const getTrendDataController = protectedProcedure
+  .input(z.object({
+    type: z.enum(['Recovery', 'Wellbeing', 'Stress']),
+    days: z.number().int().positive().default(7),
+  }))
+  .query(async ({ ctx, input }) => {
+    const { type, days } = input;
+    const { prisma, user } = ctx;
+    const userId = user.id;
+
+    const endDate = new Date();
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - days);
+
+    const scores = await prisma.healthScore.findMany({
+      where: {
+        userId,
+        type: type as HealthScoreType,
+        timestamp: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      orderBy: { timestamp: 'asc' },
+      select: {
+        timestamp: true,
+        score: true,
+      },
+    });
+
+    if (scores.length < 2) {
+      return { trend: "Not enough data", scores };
+    }
+
+    const firstScore = scores[0].score;
+    const lastScore = scores[scores.length - 1].score;
+    const overallChange = lastScore - firstScore;
+
+    let trend: string;
+    if (overallChange > 0) {
+      trend = "Improving";
+    } else if (overallChange < 0) {
+      trend = "Declining";
+    } else {
+      trend = "Stable";
+    }
+
+    const average = scores.reduce((sum, score) => sum + score.score, 0) / scores.length;
+    const min = Math.min(...scores.map(s => s.score));
+    const max = Math.max(...scores.map(s => s.score));
+
+    return {
+      trend,
+      overallChange,
+      average,
+      min,
+      max,
+      scores,
+    };
+  });
+
+export const getChartDataController = protectedProcedure
+  .input(z.object({
+    type: z.enum(['Recovery', 'Wellbeing', 'Stress']),
+    startDate: z.date(),
+    endDate: z.date(),
+  }))
+  .query(async ({ ctx, input }) => {
+    const { type, startDate, endDate } = input;
+    const { prisma, user } = ctx;
+    const userId = user.id;
+
+    const chartData = await prisma.healthScore.findMany({
+      where: {
+        userId,
+        type: type as HealthScoreType,
+        timestamp: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      orderBy: { timestamp: 'asc' },
+      select: {
+        timestamp: true,
+        score: true,
+        rawScore: true,
+      },
+    });
+
+    return chartData;
+  });
