@@ -115,24 +115,29 @@ export class HealthDataLogService {
       energyBurned: number;
     }>;
   }) {
-    return this.prisma.$transaction(async (prisma) => {
-      const healthDataLog = await prisma.healthDataLog.create({
-        data: {
-          userId,
-          timestamp: new Date(),
-          ...data,
-          workouts: {
-            createMany: {
-                data: data.workouts
+    try {
+      return this.prisma.$transaction(async (prisma) => {
+        const healthDataLog = await prisma.healthDataLog.create({
+          data: {
+            userId,
+            timestamp: new Date(),
+            ...data,
+            workouts: {
+              createMany: {
+                  data: data.workouts
+              }
             }
-          }
-        },
-      });
-      console.log({ healthDataLog })
-      await this.calculateAndCreateScores(userId, healthDataLog);
+          },
+        });
+        console.log({ healthDataLog })
+        await this.calculateAndCreateScores(userId, healthDataLog);
 
-      return healthDataLog;
-    });
+        return healthDataLog;
+      });
+    } catch (error) {
+      console.error('Error creating health data log:', error);
+      throw error;
+    }
   }
 
   private async calculateAndCreateScores(userId: string, healthData: any) {

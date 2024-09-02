@@ -79,12 +79,12 @@ export async function getData() {
       // console.log({ accActiveEnergyBurned, accHeartRate, accHrv, accRhr, accStepCount, accStandTime})
 
       const baseLineData = {
-        activeEnergyBurned: getBaseLineValue(accActiveEnergyBurned, 14),
-        stepCount: getBaseLineValue(accStepCount, 14),
-        heartRate: getBaseLineValue(accHeartRate, 14),
-        hrv: getBaseLineValue(accHrv, 14),
-        standTime: getBaseLineValue(accStandTime, 14),
-        rhr: getBaseLineValue(accRhr, 14),
+        activeEnergyBurned: Math.round(getBaseLineValue(accActiveEnergyBurned, 14)),
+        stepCount: Math.round(getBaseLineValue(accStepCount, 14)),
+        heartRate: Math.round(getBaseLineValue(accHeartRate, 14)),
+        hrv: Math.round(getBaseLineValue(accHrv, 14)),
+        standTime: Math.round(getBaseLineValue(accStandTime, 14)),
+        rhr: Math.round(getBaseLineValue(accRhr, 14)),
       };
 
       const yesterday = subDays(new Date(), 1);
@@ -96,8 +96,7 @@ export async function getData() {
       const workouStart = startOfDay(now)
       const todayWorkout =await  getWorkout(workouStart, now)
 
- 
-      await appApi.log.syncHealthData.mutate({
+      const data = {
         baselineData: baseLineData, 
         currentData,
         sleepData: {
@@ -110,7 +109,9 @@ export async function getData() {
           energyBurned: workout.totalEnergyBurned?.quantity,
 
         })) ?? []
-      })
+      }
+      
+      await appApi.log.syncHealthData.mutate(data)
 
    
     } catch (error) {
