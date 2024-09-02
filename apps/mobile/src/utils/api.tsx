@@ -5,11 +5,12 @@ import {
   useSupabaseClient,
 } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
+import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import superjson from "superjson";
 
 import type { AppRouter } from "@lumi/api";
+import { supabase } from "./supabase";
 
 /**
  * A set of typesafe hooks for consuming your API.
@@ -75,3 +76,24 @@ export const TRPCProvider = (props: { children: React.ReactNode }) => {
     </QueryClientProvider>
   );
 };
+
+
+export const appApi = createTRPCProxyClient<AppRouter>({
+  transformer: superjson,
+   links: [
+      httpBatchLink({
+        url: `${getBaseUrl()}/api/trpc`,
+        async headers(header) {
+          const { data } = await supabase.auth.getSession();
+          const token = data.session?.access_token;
+          return {
+             Authorization: `Bearer ${token}`,
+            'x-trpc-source': 'expo-react',
+            "app-token": token,
+       
+          };
+        },
+      })
+    ]
+})
+

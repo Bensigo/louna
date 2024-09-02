@@ -20,7 +20,7 @@
   "include": [
     ".",
     ".next/types/**/*.ts"
-  ],
+, "src/pages/api/v1/.ts"  ],
   "exclude": [
     "node_modules"
   ]

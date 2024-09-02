@@ -12,6 +12,9 @@ datasource db {
     directUrl = env("DIRECT_URL")
 }
 
+
+
+
 model Profile {
   id      String   @id @default(uuid()) @db.VarChar(256)
   name    String   @db.VarChar(256)
@@ -20,11 +23,12 @@ model Profile {
   hasPref Boolean @default(false)
   hasHealthKitAuthorize Boolean @default(false)
   preference Preference?
-  challengesCreated Challenge[]          @relation("CreatorChallenges")
-  participations    ChallengeParticipation[]
-  results ChallengeResult[]
+  challenges        Challenge[]   @relation("ChallengeCreator")
+  participations    Participant[] @relation("UserParticipations")
+  points            Int           @default(0) 
+  healthData  HealthDataLog[]
+  healthScore HealthScore[]
 }
-
 
 model Preference {
   id  String      @id @default(uuid())
@@ -39,77 +43,108 @@ model Preference {
 
   @@index([id], name: "idx_preference_id")
 }
-model ChallengeParticipation {
-  id          String    @id @default(uuid())
-  user        Profile      @relation(fields: [userId], references: [id])
-  userId      String
-  challenge   Challenge @relation(fields: [challengeId], references: [id])
-  challengeId String
-  isDone    Boolean @default(false)
-  joinedAt    DateTime  @default(now())
-}
 
-model ChallengeResult {
-  id          String    @id @default(uuid())
-  user        Profile      @relation(fields: [userId], references: [id])
-  userId      String
-  challenge   Challenge @relation(fields: [challengeId], references: [id])
-  challengeId String
-  result      Float
-  recordedAt  DateTime  @default(now())
-}
-
-enum ChallengeType {
-  BREATHWORK
-  MEDITATION
-  YOGA
-  SOCCER
-  BOXING
-  RUNNING
-  CYCLING
-  PILATES
-  HIKING
-  FASTING
-}
 model Challenge {
-  id                 String               @id @default(uuid())
-  title              String?
-  description        String?
-  creator            Profile              @relation("CreatorChallenges", fields: [creatorId], references: [id])
-  creatorId          String
-  createdAt          DateTime             @default(now())
-  imageUrl           String?
-  tempId            String
-  start          DateTime
-  isDone        Boolean @default(false)
-  end            DateTime?
-  type               ChallengeType
-  goalType           GoalType?            // Nullable for free sessions
-  goalValue          Float?               // Nullable for free sessions
-  baselineValue      Float?               // Nullable for free sessions
-  isFreeSession      Boolean              @default(false)  // Flag to indicate a free session
-  interval           Interval?            // Nullable for free sessions
-  participants     ChallengeParticipation[]
-  results            ChallengeResult[]
+  id                String          @id @default(uuid())
+  name              String
+  type              String          // e.g., Yoga, Running, Cycling, etc.
+  goalType          String          // Type of goal (e.g., distance, duration)
+  goalValue         Float           // Goal value (e.g., 5 km, 60 minutes)
+  unit              String          // Unit of measurement (e.g., km, minutes, hours)
+  duration          Int             // Duration in days
+  capacity          Int?
+  startDate         DateTime
+  endDate           DateTime
+  isPrivate         Boolean         @default(false) // Visibility of the challenge
+  creatorId         String
+  creator           Profile         @relation("ChallengeCreator", fields: [creatorId], references: [id])
+  participants      Participant[]
+  points            Int             // Points awarded for participating or achieving goals
+  status            ChallengeStatus @default(INACTIVE)
+  imageUrl          String?         // Optional image URL for challenge
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
-  @@index([creatorId], name: "idx_challenge_creator")
-  @@index([type], name: "idx_challenge_type")
-  @@index([start], name: "idx_challenge_start")
-  @@index([end], name: "idx_challenge_end")
+  @@index([creatorId])              // Index for querying challenges by creator
+  @@index([startDate, endDate])     // Index for querying challenges by date range
 }
 
-enum Interval {
-  DAILY
-  WEEKLY
-  MONTHLY
+model Participant {
+  id                String       @id @default(uuid())
+  challengeId       String
+  userId            String
+  progress          Float        @default(0) // Progress made towards the goal
+  points            Int          @default(0) // Points earned by the participant
+  joinDate          DateTime
+  completionDate    DateTime?    // When the challenge was completed
+  challenge         Challenge    @relation(fields: [challengeId], references: [id])
+  user              Profile      @relation("UserParticipations", fields: [userId], references: [id])
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([challengeId])  // Index for querying participants by challenge
+  @@index([userId])       // Index for querying participants by user
+  @@index([joinDate])     // Index for querying participants by join date
+}
+
+model HealthDataLog {
+  id                String   @id @default(cuid())
+  userId            String
+  user              Profile  @relation(fields: [userId], references: [id])
+  timestamp         DateTime
+  hrv               Float
+  rhr               Float
+  steps             Int
+  energy            Float
+  heartRate         Float
+  sleepMins         Int
+  baselineHrv       Float
+  baselineRhr       Float
+  baselineSteps     Int
+  baselineEnergy    Float
+  baselineHeartRate Float
+  baselineSleepMins Int
+    workouts        Workout[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId, timestamp])
+}
+
+model Workout {
+  id                String   @id @default(cuid())
+  name         String
+  duration     Int
+  distance     Float?
+  energyBurned Int
+  healthDataLogId     String
+  createdAt           DateTime @default(now())
+  healthDataLog       HealthDataLog @relation(fields: [healthDataLogId], references: [id], onDelete: Cascade)
+}
+
+model HealthScore {
+  id        String   @id @default(cuid())
+  userId    String
+  user      Profile  @relation(fields: [userId], references: [id])
+  timestamp DateTime
+  type      HealthScoreType
+  score    Float
+  rawScore Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, timestamp])
 }
 
 
+enum HealthScoreType {
+  Recovery
+  Wellbeing
+  Stress
+}
 
-enum GoalType {
-  STRESS_RELIEF
-  DISTANCE
-  DURATION
-  STEPS
-  CALORIES_BURN
+enum ChallengeStatus {
+  ACTIVE
+  COMPLETED
+  INACTIVE
 }

@@ -92,7 +92,7 @@ function processStressBreakdownData(hrvData: HealthSample[]): StressBreakdown[] 
     accent: "#E2E8F0",
   };
 
-const filters = ["D", "W", "M", "Y"];
+
 const hrvTreashold = {
   'Great': 70,
   'Normal': 45,
@@ -101,6 +101,7 @@ const hrvTreashold = {
 }
 
 const StressWrapper = () => {
+  const filters = ["D", "W", "M", "Y"];
   const [activeFilter, setActiveFilter] = useState<'D' |'W'| 'M'| 'Y'>("D");
   
   const [data, setData] = useState<any[]>([]);  

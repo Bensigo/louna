@@ -21,7 +21,10 @@ const defineConfig = (): ExpoConfig => ({
     bundleIdentifier: "ae.lumi.app",
     supportsTablet: true,
     usesAppleSignIn: true,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+    infoPlist: {
+      "UIBackgroundModes": [ "fetch", "remote-notification"]
+    }
   },
   android: {
     package: "your.bundle.identifier",
@@ -47,7 +50,7 @@ const defineConfig = (): ExpoConfig => ({
   ["@kingstinct/react-native-healthkit", {
     "NSHealthShareUsageDescription": "Allow app to access your health data",
     "NSHealthUpdateUsageDescription": false,  // if you have no plans to update data, you could skip adding it to your info.plist
-    "background": true // if you have no plans to use it in background mode, you could skip adding it to the entitlements
+    "background": true 
   }],
     [
       "expo-build-properties",

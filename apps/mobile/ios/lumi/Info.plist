@@ -85,5 +85,11 @@
     <string>Allow $(PRODUCT_NAME) to access your reminders</string>
     <key>NSRemindersUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your reminders</string>
+	<key>UIBackgroundModes</key>
+<array>
+    <string>location</string>
+    <string>fetch</string>
+    <string>remote-notification</string>
+</array>
 </dict>
 </plist>

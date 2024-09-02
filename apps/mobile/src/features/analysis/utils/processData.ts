@@ -2,7 +2,6 @@ import {  getGroupKey, getStartTimeFromInterval } from './util';
 import type { HealthDataPoint } from './util'
 import type { HealthDataType } from '~/integration/healthKit';
 import { eachHourOfInterval, eachDayOfInterval, eachMonthOfInterval, format } from 'date-fns';
-
 export function processDataForChart(data: HealthDataPoint[], interval: string, dataType: HealthDataType) {
   const now = new Date();
   const startDate = getStartTimeFromInterval(interval);
@@ -67,6 +66,11 @@ export function processDataForChart(data: HealthDataPoint[], interval: string, d
       formattedLabel: format(timestamp, labelFormat)
     };
   }).filter(({ value }) => value !== 0).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-  console.log({ processedData })
-  return processedData;
+
+  // Calculate average per day
+  const totalValue = processedData.reduce((acc, curr) => acc + curr.value, 0);
+  const avg = processedData.length > 0 ? totalValue / processedData.length : 0;
+
+  console.log({ processedData, avg });
+  return { processedData, avg };
 }

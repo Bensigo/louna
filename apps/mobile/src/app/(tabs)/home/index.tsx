@@ -1,12 +1,11 @@
 import React from 'react';
-import { View, Text } from 'tamagui';
+import { View } from 'tamagui';
+import HomeWrapper from '~/features/home/wrapper';
 
 const HomeScreen = () => {
   return (
-    <View flex={1} justifyContent="center" alignItems="center">
-      <Text fontSize={24} fontWeight="bold" color="black">
-        Welcome to the Home Screen
-      </Text>
+    <View flex={1} px={'$3'}>
+       <HomeWrapper />
     </View>
   );
 };
