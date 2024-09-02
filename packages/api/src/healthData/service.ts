@@ -122,11 +122,14 @@ export class HealthDataLogService {
             userId,
             timestamp: new Date(),
             ...data,
-            workouts: {
-              createMany: {
-                  data: data.workouts
-              }
-            }
+            ...(data.workouts.length ? {
+                workouts: {
+                    createMany: {
+                        data: data.workouts
+                    }
+                }
+            }: {})
+           
           },
         });
         console.log({ healthDataLog })
