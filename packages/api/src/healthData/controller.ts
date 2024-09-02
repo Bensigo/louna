@@ -16,6 +16,7 @@ export const syncHealthDataController = protectedProcedure
       // Validate input using the schema
       const validatedData = HealthDataSchema.parse(input);
       const service = new HealthDataLogService(prisma);
+      console.log({ validatedData })
       service.createHealthDataLog(userId, {
         hrv: validatedData.currentData.hrv,
         rhr: validatedData.currentData.rhr,

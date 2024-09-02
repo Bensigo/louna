@@ -128,7 +128,7 @@ export class HealthDataLogService {
           }
         },
       });
-
+      console.log({ healthDataLog })
       await this.calculateAndCreateScores(userId, healthDataLog);
 
       return healthDataLog;
@@ -169,6 +169,8 @@ export class HealthDataLogService {
       { type: HealthScoreType.Recovery, score: this.util.calculatePercentage(recoveryScore), rawScore: recoveryScore },
       { type: HealthScoreType.Wellbeing, score: this.util.calculatePercentage(wellnessScore), rawScore: wellnessScore },
     ];
+
+    console.log({ scores })
     await this.prisma.healthScore.createMany({
       data: scores.map(score => ({
         userId,
