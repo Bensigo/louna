@@ -117,7 +117,7 @@ export class HealthDataLogService {
   }) {
     try {
         console.log({ data })
-      return this.prisma.$transaction(async (prisma) => {
+      await this.prisma.$transaction(async (prisma) => {
         // Create the health data log without workouts
         const healthDataLog = await prisma.healthDataLog.create({
           data: {
@@ -134,12 +134,11 @@ export class HealthDataLogService {
             baselineSteps: data.baselineSteps,
             baselineEnergy: data.baselineEnergy,
             baselineHeartRate: data.baselineHeartRate,
-            baselineSleepMins: data.baselineSleepMins,
           },
         });
        console.log({ healthDataLog })
         // Create workouts separately if there are any
-        if (data.workouts.length > 0) {
+        if (data.workouts.length > 0 && healthDataLog?.id) {
           await prisma.workout.createMany({
             data: data.workouts.map(workout => ({
               ...workout,
