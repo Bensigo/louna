@@ -103,7 +103,7 @@ model HealthDataLog {
   baselineSteps     Int
   baselineEnergy    Float
   baselineHeartRate Float
-    workouts        Workout[]
+  workouts        Workout[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

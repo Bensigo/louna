@@ -1,7 +1,7 @@
 
 import { PrismaClient, HealthScoreType } from '@prisma/client';
 
- class UtilService {
+ export class UtilService {
  
     
    calWellnessScore({
