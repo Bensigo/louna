@@ -30,7 +30,12 @@ export const syncHealthDataController = protectedProcedure
         baselineEnergy: validatedData.baselineData.activeEnergyBurned,
         baselineHeartRate: validatedData.baselineData.heartRate,
         baselineSleepMins: 0, // Assuming baseline sleep data is not provided
-        workouts: validatedData.workouts || []
+        workouts: validatedData.workouts?.map(workout => ({
+          name: workout.name || '',
+          duration: workout.duration || 0,
+          distance: workout.distance,
+          energyBurned: workout.energyBurned || 0
+        })) || []
       });
 
       return {

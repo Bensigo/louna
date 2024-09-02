@@ -116,6 +116,7 @@ export class HealthDataLogService {
     }>;
   }) {
     try {
+        console.log({ data })
       return this.prisma.$transaction(async (prisma) => {
         // Create the health data log without workouts
         const healthDataLog = await prisma.healthDataLog.create({
