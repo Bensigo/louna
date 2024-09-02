@@ -117,9 +117,9 @@ export class HealthDataLogService {
   }) {
     try {
         console.log({ data })
-      await this.prisma.$transaction(async (prisma) => {
+      await this.prisma.$transaction(async (tx) => {
         // Create the health data log without workouts
-        const healthDataLog = await prisma.healthDataLog.create({
+        const healthDataLog = await tx.healthDataLog.create({
           data: {
             userId,
             timestamp: new Date(),
@@ -134,18 +134,23 @@ export class HealthDataLogService {
             baselineSteps: data.baselineSteps,
             baselineEnergy: data.baselineEnergy,
             baselineHeartRate: data.baselineHeartRate,
+            workouts: {
+                create: [
+                    ...data.workouts
+                ]
+            }
           },
         });
        console.log({ healthDataLog })
         // Create workouts separately if there are any
-        if (data.workouts.length > 0 && healthDataLog?.id) {
-          await prisma.workout.createMany({
-            data: data.workouts.map(workout => ({
-              ...workout,
-              healthDataLogId: healthDataLog.id,
-            })),
-          });
-        }
+        // if (data.workouts.length > 0 && healthDataLog?.id) {
+        //   await tx.workout.createMany({
+        //     data: data.workouts.map(workout => ({
+        //       ...workout,
+        //       healthDataLogId: healthDataLog.id,
+        //     })),
+        //   });
+        // }
 
         await this.calculateAndCreateScores(userId, healthDataLog);
 
@@ -158,6 +163,7 @@ export class HealthDataLogService {
   }
 
   private async calculateAndCreateScores(userId: string, healthData: any) {
+    console.log("called hhhhh")
     const stressScore = this.util.calStressScore({
       baseLineHRV: healthData.baselineHrv,
       todayHRV: healthData.hrv,
