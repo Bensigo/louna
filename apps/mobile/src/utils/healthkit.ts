@@ -98,7 +98,7 @@ export async function getData() {
 
  
       await appApi.log.syncHealthData.mutate({
-        baselineData, 
+        baselineData: baseLineData, 
         currentData,
         sleepData: totalSleepMins,
         workouts: todayWorkout?.map((workout) => ({ 

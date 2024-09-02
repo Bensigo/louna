@@ -21,13 +21,13 @@ export const CurrentDataSchema = z.object({
 
 export const SleepDataSchema = z.object({
   totalSleepMins: z.number().optional(),
-})
+}).optional()
 
 export const WorkoutSchema = z.object({
   name: z.string(),
   duration: z.number(),
   energyBurned: z.number(),
-  distance: z.number(),
+  distance: z.number().optional(),
 })
 
 export const HealthDataSchema = z.object({
