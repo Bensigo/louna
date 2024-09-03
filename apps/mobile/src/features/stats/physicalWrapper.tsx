@@ -8,6 +8,7 @@ import type {
 import { HKWorkoutActivityType } from "@kingstinct/react-native-healthkit";
 import {
 
+  ChevronRight,
   Clock1,
   Flame,
   Footprints,
@@ -35,6 +36,8 @@ import ScoreDisplay from "./components/scoreV2";
 import { api } from "~/utils/api";
 import { getStartTimeFromInterval } from "../analysis/stress";
 import TrendDisplay from "./components/trend";
+import { TouchableHighlight } from "react-native";
+import PercentageChart from "./components/scoreChart";
 
 function capitalize(data: string): string {
   return data.charAt(0).toUpperCase() + data.slice(1);
@@ -65,40 +68,45 @@ interface IconProps {
   color: string;
   fontSize: number;
 }
-
 export const BreakDownCard: React.FC<{
   icon: React.NamedExoticComponent<IconProps>;
   color: string;
   title: string;
-  value: number | string ;
+  value: number | string;
   unit: string;
   onPress: () => void;
 }> = ({ icon: Icon, color, title, value, unit, onPress }) => (
   <Card
     backgroundColor="$background"
     onPress={onPress}
+    pressStyle={{ opacity: 0.8 }}
+    animation="bouncy"
+    elevate={false}
     style={{
-      elevation: 0,
-      padding: 8,
-      height: 45,
+      padding: 12,
+      height: 60,
       width: "100%",
       marginHorizontal: 8,
-      borderRadius: 4,
+      borderRadius: 8,
+      borderWidth: 1,
     }}
   >
     <XStack justifyContent="space-between" alignItems="center">
-      <XStack alignItems="center" space={8}>
-        <Icon color={color} fontSize={30} />
-        <Text color={color} fontSize="16px">
+      <XStack alignItems="center" space={12}>
+        <Icon color={color ?? colors.high} fontSize={24} />
+        <Text color={colors.lightText} fontSize="$3" fontWeight="bold">
           {title}
         </Text>
       </XStack>
-      <Text color={colors.text.secondary} fontSize="24px" fontWeight="bold">
-        {value}{" "}
-        <Text fontSize="16px" fontWeight="normal" color={colors.text.secondary}>
-          {unit}
+      <XStack alignItems="center" space={8}>
+        <Text color={colors.lightText} fontSize="$5" fontWeight="bold">
+          {value}{" "}
+          <Text fontSize="$2" fontWeight="normal" color={colors.lightText}>
+            {unit}
+          </Text>
         </Text>
-      </Text>
+        <ChevronRight color={colors.lightText} size={16} />
+      </XStack>
     </XStack>
   </Card>
 );
@@ -297,11 +305,39 @@ const PhysicalWrapper = () => {
           unit="bpm"
         />
       </YStack>
-      <YStack gap="$2" my={"$3"}>
+      <YStack gap="$3" my={"$3"}>
         <Text fontSize="$6" fontWeight="bold">
           Trend
         </Text>
         <TrendDisplay data={trend.data ?? {}} />
+       {list.data &&  <YStack    backgroundColor="$gray1" padding={10}>
+        <XStack borderRadius="$4" padding="$1" marginBottom="$3">
+        {["D", "W", "M", "Y"].map((filter) => (
+          <TouchableHighlight
+            key={filter}
+            onPress={() => setInterval(filter as "D" | "W" | "M" | "Y")}
+            style={{ flex: 1, backgroundColor: "transparent", padding: 10 }}
+            pressStyle={{
+              backgroundColor: "transparent",
+              borderWidth: 0,
+              border: 0,
+            }}
+          >
+            <Text
+              color={
+                 activeInterval === filter
+                  ? colorScheme.primary.lightGreen
+                  : colorScheme.secondary.darkGray
+              }
+              fontWeight={activeInterval === filter ? "bold" : "normal"}
+            >
+              {filter}
+            </Text>
+          </TouchableHighlight>
+        ))}
+      </XStack>
+            <PercentageChart data={list.data }  interval={activeInterval} title="" />
+        </YStack>}
         </YStack>
      
       <YStack my={"$3"} >

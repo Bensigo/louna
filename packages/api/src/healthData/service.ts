@@ -29,8 +29,8 @@ import { PrismaClient, HealthScoreType } from '@prisma/client';
         
         // Combine the scores with weights
         const score = (HRVScore * 0.25) + (RHRScore * 0.2) + (stepsScore * 0.15) + 
-                      (energyBurnedScore * 0.15) + (heartRateScore * 0.15) + 
-                      (sleepQuality * 0.10) 
+                      (energyBurnedScore * 0.15) + (heartRateScore * 0.1) + 
+                      (sleepQuality * 0.15) 
       
        return score 
     }
@@ -45,9 +45,10 @@ import { PrismaClient, HealthScoreType } from '@prisma/client';
     
     calculatePercentage(score: number): number {
         // Adjust display percentage: 100 (baseline) now corresponds to 80%
-    // 130 (much better than baseline) still corresponds to 100%
-    // 70 (much worse than baseline) now corresponds to 40%
-      return   Math.min(Math.max((score - 70) / (130 - 70) * 60 + 40, 40), 100); 
+        // 130 (much better than baseline) still corresponds to 100%
+        // 70 (much worse than baseline) now corresponds to 30%
+        // This provides a wider range for lower scores, reducing the likelihood of many 40% scores
+        return Math.min(Math.max((score - 70) / (130 - 70) * 70 + 30, 20), 100);
     }
 
     calStressScore({
@@ -182,23 +183,28 @@ export class HealthDataLogService {
       healthData.rhr,
       healthData.sleepMins / 60 // Assuming sleepQuality is derived from sleep duration
     );
-    console.log({ recoveryScore })
+
+    
+    const totalSleepHours = healthData.sleepMins / (1000 * 60 * 60);
+    const totalSleepMins = healthData.sleepMins / (1000 * 60);
+    const sleepScore =  (totalSleepHours / 7) * 100; // ( for now we are using 7 as good sleep hr)
+
     const wellnessScore = this.util.calWellnessScore({
       avgHRV: healthData.hrv,
       avgRHR: healthData.rhr,
       avgSteps: healthData.steps,
       avgEnergyBurned: healthData.energy,
       avgHeartRate: healthData.heartRate,
-      sleepQuality: healthData.sleepMins / 60, // Assuming sleepQuality is derived from sleep duration
+      sleepQuality: sleepScore // Assuming sleepQuality is derived from sleep duration
     });
-    console.log({ wellnessScore })
+   
     const scores = [
       { type: HealthScoreType.Stress, score: this.util.calculatePercentage(stressScore), rawScore: stressScore },
       { type: HealthScoreType.Recovery, score: this.util.calculatePercentage(recoveryScore), rawScore: recoveryScore },
       { type: HealthScoreType.Wellbeing, score: this.util.calculatePercentage(wellnessScore), rawScore: wellnessScore },
     ];
 
-    console.log({ scores })
+
     await this.prisma.healthScore.createMany({
       data: scores.map(score => ({
         userId,
