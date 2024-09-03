@@ -34,6 +34,7 @@ import { calculateSleepTime, durationToHours, presentWellnessScore } from "./uti
 import ScoreDisplay from "./components/scoreV2";
 import { api } from "~/utils/api";
 import { getStartTimeFromInterval } from "../analysis/stress";
+import TrendDisplay from "./components/trend";
 
 function capitalize(data: string): string {
   return data.charAt(0).toUpperCase() + data.slice(1);
@@ -216,6 +217,30 @@ const PhysicalWrapper = () => {
   return (
     <ScrollView flex={1} px={10} py={10}>
        <ScoreDisplay score={wellnessLevel} hideInterperted />
+       <View 
+        my={'$3'}
+        backgroundColor="$gray1" // A light gray tint for the background
+        borderRadius="$4"
+        shadowColor="$gray8"
+        shadowOffset={{ width: 0, height: 2 }}
+        shadowOpacity={0.1}
+        shadowRadius={4}
+        overflow="hidden"
+        width="100%"
+        p="$4"
+        gap={"$2"}
+      >
+       
+      <YStack gap={"$2"} my={"$2"}>
+        <Text fontSize="$5" fontWeight="bold">
+          What is Wellness Score?
+        </Text>
+        <Text fontSize="$4">
+        The Wellness Score a comprehensive measure of your overall health and well-being. It’s calculated by analyzing key metrics such as your Heart Rate Variability (HRV), Resting Heart Rate (RHR), daily steps, energy burned, and sleep quality over the past 14 days.
+         By using these metrics, the score provides a stable and accurate reflection of your physical and mental health, helping you understand how well your body is responding to your lifestyle and routines.
+        </Text>
+      </YStack>
+      </View>
      <YStack gap="$2" my={"$3"}>
         <Text fontSize="$6" fontWeight="bold">
           Breakdown
@@ -272,29 +297,13 @@ const PhysicalWrapper = () => {
           unit="bpm"
         />
       </YStack>
-      <View 
-        my={'$3'}
-        backgroundColor="$gray1" // A light gray tint for the background
-        borderRadius="$4"
-        shadowColor="$gray8"
-        shadowOffset={{ width: 0, height: 2 }}
-        shadowOpacity={0.1}
-        shadowRadius={4}
-        overflow="hidden"
-        width="100%"
-        p="$4"
-        gap={"$2"}
-      >
-      <YStack gap={"$2"} my={"$2"}>
-        <Text fontSize="$5" fontWeight="bold">
-          What is Wellness Score?
+      <YStack gap="$2" my={"$3"}>
+        <Text fontSize="$6" fontWeight="bold">
+          Trend
         </Text>
-        <Text fontSize="$4">
-        The Wellness Score a comprehensive measure of your overall health and well-being. It’s calculated by analyzing key metrics such as your Heart Rate Variability (HRV), Resting Heart Rate (RHR), daily steps, energy burned, and sleep quality over the past 14 days.
-         By using these metrics, the score provides a stable and accurate reflection of your physical and mental health, helping you understand how well your body is responding to your lifestyle and routines.
-        </Text>
-      </YStack>
-      </View>
+        <TrendDisplay data={trend.data ?? {}} />
+        </YStack>
+     
       <YStack my={"$3"} >
         <Text fontSize="$6" fontWeight="bold">
           Contributing Factors
@@ -342,6 +351,7 @@ const PhysicalWrapper = () => {
           </Card>
         ))}
       </YStack>
+    
     </ScrollView>
   );
 };
