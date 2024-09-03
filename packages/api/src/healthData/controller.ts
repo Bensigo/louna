@@ -177,7 +177,7 @@ export const getTrendDataController = protectedProcedure
       orderBy: { timestamp: 'asc' },
       select: {
         timestamp: true,
-        score: true,
+        rawScore: true,
       },
     });
 
@@ -185,8 +185,8 @@ export const getTrendDataController = protectedProcedure
       return { trend: "Not enough data", scores };
     }
 
-    const firstScore = scores[0].score;
-    const lastScore = scores[scores.length - 1].score;
+    const firstScore = scores[0].rawScore;
+    const lastScore = scores[scores.length - 1].rawScore;
     const overallChange = lastScore - firstScore;
 
     let trend: string;
@@ -198,9 +198,9 @@ export const getTrendDataController = protectedProcedure
       trend = "Stable";
     }
 
-    const average = scores.reduce((sum, score) => sum + score.score, 0) / scores.length;
-    const min = Math.min(...scores.map(s => s.score));
-    const max = Math.max(...scores.map(s => s.score));
+    const average = scores.reduce((sum, score) => sum + score.rawScore, 0) / scores.length;
+    const min = Math.min(...scores.map(s => s.rawScore));
+    const max = Math.max(...scores.map(s => s.rawScore));
 
     return {
       trend,

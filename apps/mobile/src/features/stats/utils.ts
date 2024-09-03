@@ -216,7 +216,6 @@ export function interpretStressScore(rawScore: number): {
     const percentageChange = rawScore - 100;
     
     let interpretation: string;
-    console.log({ percentageChange })
     if (percentageChange > 15) {
       interpretation = "Significantly better than your baseline. Great job!";
     } else if (percentageChange > 5) {
@@ -271,7 +270,7 @@ export function interpretStressScore(rawScore: number): {
     return { score, rating, description, percentage };
 }
 
-function presentWellnessScore(score: number): { rating: string; description: string; percentage: number } {
+export function presentWellnessScore(score: number): { rating: string; description: string; percentage: number } {
     let rating: string;
     let description: string;
     let percentage: number;

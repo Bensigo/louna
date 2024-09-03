@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { router } from "expo-router";
-import  {
+import type {
   EnergyUnit,
   HKWorkout,
-  HKWorkoutActivityType,
   LengthUnit,
 } from "@kingstinct/react-native-healthkit";
+import { HKWorkoutActivityType } from "@kingstinct/react-native-healthkit";
 import {
 
   Clock1,
@@ -15,27 +15,25 @@ import {
   Moon,
 } from "@tamagui/lucide-icons";
 import {
-  addDays,
-
   endOfDay,
-
   formatDistance,
-
-  getDaysInMonth,
   setHours,
   setMinutes,
   setSeconds,
   subDays,
 
 } from "date-fns";
-import { Button, Card, ScrollView, Text, View, XStack, YStack } from "tamagui";
+import {  Card, ScrollView, Text, View, XStack, YStack } from "tamagui";
 
 import { colorScheme } from "~/constants/colors";
-import { HealthDataType, useHealthKit } from "~/integration/healthKit";
+import {  useHealthKit } from "~/integration/healthKit";
+import type { HealthDataType } from "~/integration/healthKit";
 
 
-import { accDaily, accToDaily, calculateSleepScore, calWellnessScore, durationToHours, getBaseLineValue } from "./utils";
+import { calculateSleepTime, durationToHours, presentWellnessScore } from "./utils";
 import ScoreDisplay from "./components/scoreV2";
+import { api } from "~/utils/api";
+import { getStartTimeFromInterval } from "../analysis/stress";
 
 function capitalize(data: string): string {
   return data.charAt(0).toUpperCase() + data.slice(1);
@@ -112,8 +110,13 @@ type WellnessLevel = {
   rating: string;
   description: string;
 }
+const now = new Date() 
+
 
 const PhysicalWrapper = () => {
+
+  const [activeInterval, setInterval ] = useState<"D" | "W" | "M" | "Y">("D");
+
   const { isAuthorized, getMostRecentValue, getIntervalData, getWorkout, getSleepData } =
     useHealthKit();
   const [breakDown, setBreakDown] = useState<Breakdown | null>(null);
@@ -126,6 +129,20 @@ const PhysicalWrapper = () => {
     HKWorkout<EnergyUnit, LengthUnit>[]
   >([]);
 
+
+  const [ startDate, setStartDate ] = useState<Date>(new Date())
+
+
+  const [get, trend, list ] = api.useQueries((t) => [
+     t.log.get({ type: 'Wellbeing'}),
+     t.log.trend({ type: 'Wellbeing', days: 7  }),
+     t.log.list({ type: 'Wellbeing', startDate, endDate: now})
+  ])
+
+  useEffect(() => {
+    const start = getStartTimeFromInterval(activeInterval);
+    setStartDate(start)
+  }, [activeInterval])
  
 
   const fetchPhysicalActivities = useCallback(async () => {
@@ -138,83 +155,53 @@ const PhysicalWrapper = () => {
     }
   }, [isAuthorized, getWorkout]);
 
-  useEffect(() => {
-   
-    void fetchPhysicalActivities();
-    void calScore()
-  }, [ calScore, fetchPhysicalActivities]);
+ 
 
 
-
-  const calScore = useCallback(async () => {
+  const fetchCurrentData = useCallback(async () => {
     if (!isAuthorized) return;
-    const now = new Date();
-    const startDate = subDays(now, 15);
+    const yesterday = subDays(new Date(), 1);
+    const startOfDaySleep = setHours(setMinutes(setSeconds(yesterday, 0), 0), 20);
+    const endOfDaySleep = endOfDay(new Date());
 
-    const [hrv, restingHeartRate, energyBurned, steps, heartRates] = await Promise.all([
-      getIntervalData("HRV", startDate, now),
-      getIntervalData("RHR", startDate, now),
-      getIntervalData("CALORIES", startDate, now),
-      getIntervalData("STEPS", startDate, now),
-      getIntervalData("HEART_RATE", startDate, now),
-    ]);
-
-    const [currentHrv, currentRHR, currentEnegyBurned, currentSteps, heartRate] =
+    const [currentHrv, currentRHR, currentEnergyBurned, currentSteps, heartRate, sleepData] =
       await Promise.all([
         getMostRecentValue("HRV"),
         getMostRecentValue("RHR"),
         getMostRecentValue("CALORIES"),
         getMostRecentValue("STEPS"),
         getMostRecentValue("HEART_RATE"),
+        getSleepData(startOfDaySleep, endOfDaySleep)
       ]);
 
-
-      setBreakDown({
-        steps: currentSteps,
-        energyBurned: currentEnegyBurned,
-        rhr: currentRHR,
-        hrv: currentHrv,
-        heartRate
-      });
-   
-      const yesterday = subDays(new Date(), 1);
-      const startOfDaySleep = setHours(setMinutes(setSeconds(yesterday, 0), 0), 20);
-      const endOfDaySleep = endOfDay(new Date());
-  
-      const sleepData = await getSleepData(startOfDaySleep, endOfDaySleep);
-      const defaultSleepGoal = 7; // let user set sleep goal for more accuray
-      const { score: sleepScore, totalSleepMins } = calculateSleepScore(
-        sleepData,
-        defaultSleepGoal,
-      );
-       setSleepTime(totalSleepMins)
-      if (hrv.length && restingHeartRate.length) {
-      const accHrv = accToDaily(hrv);
-      const accHR = accToDaily(heartRates);
-      const accRestingHeartRate = accToDaily(restingHeartRate);
-      const accEnergyBurned = accDaily(energyBurned);
-      const accSteps = accDaily(steps);
-      const baseLineHrv = getBaseLineValue(accHrv, 14);
-      const baseLineHR = getBaseLineValue(accHR, 14);
-      const baseLineRHR = getBaseLineValue(accRestingHeartRate, 14);
-      const baseLineEnergyBurned = getBaseLineValue(accEnergyBurned, 14);
-      const baseLineSteps = getBaseLineValue(accSteps, 14);
+    setBreakDown({
+      steps: currentSteps ?? 0,
+      energyBurned: currentEnergyBurned ?? 0,
+      rhr: currentRHR ?? 0,
+      hrv: currentHrv ?? 0,
+      heartRate: heartRate ?? 0
+    });
+   const minsSlept =  calculateSleepTime(sleepData)
+   setSleepTime(minsSlept ?? 0)
     
-      if (baseLineHrv && baseLineRHR &&  baseLineEnergyBurned && baseLineSteps &&   baseLineHR && heartRate) {
-       
-         const wellnessLevel  = calWellnessScore({
-          avgEnergyBurned: baseLineEnergyBurned,
-          avgHeartRate: baseLineHR,
-          avgHRV: baseLineHrv,
-          avgRHR: baseLineRHR,
-          avgSteps: baseLineSteps,
-          sleepQuality: sleepScore ?? 0
-         })
-      
-        setWellnessLevel(wellnessLevel)
-      }
+  }, [isAuthorized, getMostRecentValue]);
+
+
+  useEffect(() => {
+    if (get.isFetched){
+
+      const wellnessLvl = presentWellnessScore(get.data?.rawScore as number)
+       setWellnessLevel(wellnessLvl)
     }
-  }, [getIntervalData, isAuthorized]);
+  }, [get.data, get.isLoading])
+
+
+  useEffect(() => {
+   
+    void fetchPhysicalActivities();
+    void fetchCurrentData()
+  }, [ fetchCurrentData, fetchPhysicalActivities]);
+ 
 
   
 
@@ -226,12 +213,9 @@ const PhysicalWrapper = () => {
       },
     });
   };
-
   return (
     <ScrollView flex={1} px={10} py={10}>
        <ScoreDisplay score={wellnessLevel} hideInterperted />
-     
-    
      <YStack gap="$2" my={"$3"}>
         <Text fontSize="$6" fontWeight="bold">
           Breakdown

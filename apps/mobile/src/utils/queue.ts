@@ -1,23 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { getData } from './healthkit';
 
 const SYNC_QUEUE_KEY = 'health_data_sync_queue';
 
-interface QUEUE_DATA_TYPE {
-  uuid: string;
-  currentHrv?: number;
-  currentRVR?: number;
-  currentHR?: number;
-  currentEngeryBurned?: number;
-  currentStep?: number;
-  sleepMins?: number;
-  baseLineHRV?: number;
-  baseLineRHR?: number;
-  baseLineStep?: number;
-  baseLineHR?: number
-  baseLineEngeryBurned?: number;
-  date: Date
-  activities?: { name: string, distance?: number,  duration?: number, energyBurned?: number }[] // contributing activities from wellbeing
-}
+type QUEUE_DATA_TYPE = Awaited<ReturnType<typeof getData>>;
 
 export const getSyncQueue = async (): Promise<QUEUE_DATA_TYPE[]> => {
   try {

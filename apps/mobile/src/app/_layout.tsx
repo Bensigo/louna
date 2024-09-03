@@ -11,11 +11,12 @@ import * as TaskManager from "expo-task-manager";
 import { Alert } from 'react-native';
 
 import { UserProvider } from "../provider/user";
-import { TRPCProvider } from "../utils/api";
+import { appApi, TRPCProvider } from "../utils/api";
 import { supabase } from "../utils/supabase";
 import { useEffect } from "react";
 import React from "react";
 import { BACKGROUND_HEALTH_DATA_FETCH_TASK, registerBackgroundFetchAsync, unregisterBackgroundFetchAsync } from "~/utils/backgroundFetch";
+import { getData } from "~/utils/healthkit";
 
 const tamaguiConfig = createTamagui(config);
 
@@ -42,7 +43,7 @@ export default function RootLayout() {
         // Alert.alert('Error', 'Failed to set up background fetch. Please check your permissions.');
       }
     };
-
+   
     void setupBackgroundFetch();
 
     return () => {
@@ -51,6 +52,9 @@ export default function RootLayout() {
       );
     };
   }, []);
+
+
+  
 
   
 

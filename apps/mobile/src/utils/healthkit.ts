@@ -61,7 +61,7 @@ export async function getData() {
         // }
 
       const isAuthorized =  await Healthkit.requestAuthorization(identifiers);
-      console.log({ isAuthorized })
+   
       if (!isAuthorized) return;
 
       const currentData = await fetchCurrentData()
@@ -100,18 +100,18 @@ export async function getData() {
         baselineData: baseLineData, 
         currentData,
         sleepData: {
-          totalSleepMins: totalSleepMins
+          totalSleepMins: Math.round(totalSleepMins)
         },
         workouts: todayWorkout?.map((workout) => ({ 
           name: HKWorkoutActivityType[workout.workoutActivityType],
-          duration: workout?.duration,
-          distance: workout.totalDistance?.quantity,
-          energyBurned: workout.totalEnergyBurned?.quantity,
+          duration: Math.round(workout?.duration),
+          distance:Math.round(workout.totalDistance?.quantity),
+          energyBurned: Math.round(workout.totalEnergyBurned?.quantity),
 
         })) ?? []
       }
       
-      await appApi.log.syncHealthData.mutate(data)
+      return data 
 
    
     } catch (error) {
