@@ -17,7 +17,9 @@ import { useEffect } from "react";
 import React from "react";
 import { BACKGROUND_HEALTH_DATA_FETCH_TASK, registerBackgroundFetchAsync, unregisterBackgroundFetchAsync } from "~/utils/backgroundFetch";
 import { getData } from "~/utils/healthkit";
+import applyGlobalPolyfills from "~/text-encoding";
 
+applyGlobalPolyfills()
 const tamaguiConfig = createTamagui(config);
 
 export default function RootLayout() {

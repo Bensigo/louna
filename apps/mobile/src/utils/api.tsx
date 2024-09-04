@@ -52,7 +52,7 @@ export const TRPCProvider = (props: { children: React.ReactNode }) => {
         splitLink({ 
           condition: (op) => {
             console.log({ path: op.path })
-            return op.path === 'coach'
+            return op.path === 'coach.chat.chat'
           },
           true: unstable_httpBatchStreamLink({
             url: `${getBaseUrl()}/api/trpc`,

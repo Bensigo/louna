@@ -5,10 +5,27 @@ import { Send, Mic } from '@tamagui/lucide-icons';
 import aiImg from '../../../assets/lounaai.png';
 import { colorScheme } from '~/constants/colors';
 import { useAppUser } from '~/provider/user';
+import { api } from '~/utils/api';
 
 const CoachWrapper = () => {
   const [message, setMessage] = useState('');
   const user = useAppUser()
+  const [msg, setMsg] = useState('')
+
+  const  streams =  api.coach.chat.chat.useQuery()
+
+  console.log({ streams })
+
+  React.useEffect(() => {
+    const processStreams = async () => {
+      for await (const stream of streams) {
+        setMsg(prev => prev + stream)
+      }
+    }
+   void  processStreams()
+  }, [streams])
+
+ 
 
   return (
     <KeyboardAvoidingView
@@ -32,6 +49,7 @@ const CoachWrapper = () => {
           <ScrollView style={{ flex: 1 }}>
             <YStack flex={1} padding="$2" space="$2">
               {/* Chat messages would go here */}
+              <Text>{msg}</Text>
             </YStack>
           </ScrollView>
           

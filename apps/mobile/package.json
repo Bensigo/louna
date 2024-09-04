@@ -78,7 +78,8 @@
     "react-native-uuid": "^2.0.2",
     "react-native-webview": "^13.8.6",
     "superjson": "2.2.1",
-    "tamagui": "^1.108.0"
+    "tamagui": "^1.108.0",
+    "text-encoding": "^0.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
