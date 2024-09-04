@@ -2,6 +2,7 @@ import { protectedProcedure } from "../../trpc";
 
 
 export const chatController = protectedProcedure.query(async function* ({ ctx, input }) {
+    console.log("called -----------")
     const testMessage = "Hello from the backend! This is a test stream.";
     for (let i = 0; i < testMessage.length; i++) {
         await new Promise((resolve) => setTimeout(resolve, 200));
