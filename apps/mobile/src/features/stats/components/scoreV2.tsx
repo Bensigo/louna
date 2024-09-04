@@ -18,9 +18,9 @@ interface StressDisplayProps {
 }
 
 const ScoreDisplay: React.FC<StressDisplayProps> = ({ score, hideInterperted  }) => {
-  if (!score) return null;
-
-  const interpretedScore = interpretStressScore(score.score);
+  
+  if(!score)return
+  const interpretedScore = interpretStressScore(score!.score ?? 0);
 
   const size = 150;
   const strokeWidth = 10;

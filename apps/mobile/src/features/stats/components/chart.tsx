@@ -4,6 +4,7 @@ import { Card, Text, View } from "tamagui";
 import { colorScheme } from "~/constants/colors";
 
 export const Chart = ({ data, title, avg, subtitle, isBar = false }) => {
+  if (data?.length < 1)return <></>;
   const limitLabels = (data, maxLabels) => {
     const step = Math.ceil(data.length / maxLabels);
     return data.map((item, index) => ({

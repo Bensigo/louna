@@ -216,7 +216,7 @@ const PhysicalWrapper = () => {
 
   const goTo = (type: HealthDataType) => {
     router.push({
-      pathname: "/(tabs)/stats/(stats)/physical/[chart]",
+      pathname: "/(tabs)/home/(stats)/physical/[chart]",
       params: {
         type,
       },
@@ -307,10 +307,10 @@ const PhysicalWrapper = () => {
       </YStack>
       <YStack gap="$3" my={"$3"}>
         <Text fontSize="$6" fontWeight="bold">
-          Trend
+          Trends
         </Text>
-        <TrendDisplay data={trend.data ?? {}} />
-       {list.data &&  <YStack    backgroundColor="$gray1" padding={10}>
+       {trend.isFetched && <TrendDisplay data={trend.data ?? {}} />}
+       {list.isFetched &&  <YStack    backgroundColor="$gray1" padding={10}>
         <XStack borderRadius="$4" padding="$1" marginBottom="$3">
         {["D", "W", "M", "Y"].map((filter) => (
           <TouchableHighlight
@@ -336,7 +336,7 @@ const PhysicalWrapper = () => {
           </TouchableHighlight>
         ))}
       </XStack>
-            <PercentageChart data={list.data }  interval={activeInterval} title="" />
+            <PercentageChart data={list.data  ?? []}  interval={activeInterval} title="" />
         </YStack>}
         </YStack>
      
@@ -344,7 +344,7 @@ const PhysicalWrapper = () => {
         <Text fontSize="$6" fontWeight="bold">
           Contributing Factors
         </Text>
-        {physicalActivities.map((activity) => (
+        {physicalActivities.length > 0 ? physicalActivities.map((activity) => (
           <Card
             key={activity.uuid}
             elevation={0}
@@ -385,7 +385,11 @@ const PhysicalWrapper = () => {
          
             </XStack>
           </Card>
-        ))}
+        )): 
+         <View my={'$3'}>
+             <Text>No activities done yet</Text>
+         </View>
+        }
       </YStack>
     
     </ScrollView>

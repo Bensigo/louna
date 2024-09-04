@@ -1,7 +1,7 @@
 import {  StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, Tabs } from "expo-router";
-import { Activity, Home, GanttChartSquare, User } from "@tamagui/lucide-icons";
+import { Activity, Home, GanttChartSquare, User, Moon, MessageCircle } from "@tamagui/lucide-icons";
 
 import { CustomTabBar } from "~/components/customTabBar";
 import {  colorScheme } from "~/constants/colors";
@@ -48,25 +48,32 @@ export default function TabLayout() {
         }}
         tabBar={(props) => <CustomTabBar {...props} />}
       >
-        <Tabs.Screen
+        {/* <Tabs.Screen
           name="home"
           options={{
             tabBarLabel: "Home",
             tabBarIcon: ({ color }) => <Home color={color} />,
           }}
-        />
+        /> */}
         <Tabs.Screen
-          name="stats"
+          name="home"
           options={{
-            tabBarLabel: "Stats",
+            tabBarLabel: "Home",
             tabBarIcon: ({ color }) => <Activity color={color} />
           }}
         />
         <Tabs.Screen
-          name="challenges"
+          name="sleep"
           options={{
-            tabBarLabel: "Challenges",
-            tabBarIcon: ({ color }) => <GanttChartSquare color={color} />,
+            tabBarLabel: "Sleep",
+            tabBarIcon: ({ color }) => <Moon color={color} />,
+          }}
+        />
+         <Tabs.Screen
+          name="coach"
+          options={{
+            tabBarLabel: "louna",
+            tabBarIcon: ({ color }) => <MessageCircle color={color} />,
           }}
         />
         <Tabs.Screen

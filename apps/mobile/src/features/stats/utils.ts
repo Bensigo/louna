@@ -59,22 +59,7 @@ export function accDaily(data: HealthSample[]): number[] {
 
 
 
-export function calHRVScore(baseLineScore: number, todayScore: number) {
-    const score = (todayScore / baseLineScore) * 100;
-    return Math.max(0, Math.min(score, 100));  // Cap at 100 and floor at 0
-}
 
-export function calRHRScore(baseLineScore: number, todayScore: number) {
-    const score = (baseLineScore / todayScore) * 100;
-    return Math.max(0, Math.min(score, 100));  // Cap at 100 and floor at 0
-}
-
-
-
-export function calRecoveryScore(hrvScore: number, rhrScore: number, sleepScore = 60) {
-    const weightedScore = (hrvScore * 0.4) + (rhrScore * 0.3) + (sleepScore * 0.3);
-    return weightedScore;  // Cap at 100 and floor at 0
-}
 
 
 
@@ -123,23 +108,26 @@ export function calculateSleepScore(
       // Adjust display percentage: 100 (baseline) now corresponds to 80%
   // 130 (much better than baseline) still corresponds to 100%
   // 70 (much worse than baseline) now corresponds to 40%
-    return   Math.min(Math.max((score - 70) / (130 - 70) * 60 + 40, 40), 100); 
+  return Math.min(Math.max((score - 70) / (130 - 70) * 70 + 30, 20), 100);
+
   }
   
-  function presentStressScore(score: number): { rating: string; description: string; percentage: number } {
+  export function presentStressScore(score: number): { rating: string; description: string; percentage: number, score: number } {
     const percentage = calculatePercentage(score);
   
     if (score >= 130) {
       return {
         rating: "Excellent",
         description: "Your stress levels are very low. Keep up the great work!",
-        percentage
+        percentage,
+        score
       };
     } else if (score >= 115) {
       return {
         rating: "Very Good",
         description: "Your stress levels are lower than usual. You're doing well!",
-        percentage
+        percentage,
+        score
       };
     } else if (score >= 100) {
       return {
@@ -151,54 +139,26 @@ export function calculateSleepScore(
       return {
         rating: "Fair",
         description: "Your stress levels are slightly elevated. Consider some relaxation techniques.",
-        percentage
+        percentage,
+        score
       };
     } else if (score >= 70) {
       return {
         rating: "Poor",
         description: "Your stress levels are high. It's important to focus on stress management.",
-        percentage
+        percentage,
+        score
       };
     } else {
       return {
         rating: "Very Poor",
         description: "Your stress levels are very high. Please prioritize stress reduction and consider consulting a healthcare professional.",
-        percentage
+        percentage,
+        score
       };
     }
   }
   
-  export function calStressScore({
-    baseLineHRV,
-    todayHRV,
-    baseLineRHR,
-    todayRHR,
-    baselineStep,
-    todaySteps,
-    baseLineEnergyBurned,
-    todayEnergyBurned,
-  }: {
-    baseLineHRV: number;
-    todayHRV: number;
-    baseLineRHR: number;
-    todayRHR: number;
-    baselineStep: number;
-    todaySteps: number;
-    baseLineEnergyBurned: number;
-    todayEnergyBurned: number;
-  }): { score: number; rating: string; description: string; percentage: number } {
-     
-    const HRVScore = (todayHRV / baseLineHRV) * 100
-    const RHRScore = (baseLineRHR / todayRHR) * 100
-    const stepsScore = (todaySteps / baselineStep) * 100
-    const energyBurnedScore = (todayEnergyBurned / baseLineEnergyBurned) * 100
-  
-    const score = (HRVScore * 0.4) + (RHRScore * 0.25) + (stepsScore * 0.15) + (energyBurnedScore * 0.2)
-  
-    const { rating, description, percentage } = presentStressScore(score)
-  
-    return { score, rating, description, percentage };
-  }
 
 
 //   export const durationToHours = (s: number) => formatDistance(0, s * 1000, { includeSeconds: true, includeHours: true })
@@ -236,39 +196,7 @@ export function interpretStressScore(rawScore: number): {
   }
 
 
-  export function calWellnessScore({
-    avgHRV,
-    avgRHR,
-    avgSteps,
-    avgEnergyBurned,
-    avgHeartRate,
-    sleepQuality, // Assume this is a normalized score out of 100
-  }: {
-    avgHRV: number;          // Average HRV over the period
-    avgRHR: number;          // Average Resting Heart Rate over the period
-    avgSteps: number;        // Average Steps taken over the period
-    avgEnergyBurned: number; // Average Energy Burned over the period
-    avgHeartRate: number;    // Average Heart Rate over the period
-    sleepQuality: number;    // Normalized sleep quality score out of 100
-  }): { score: number; rating: string; description: string; percentage: number } {
-  
-    // Normalize each metric
-    const HRVScore = (avgHRV / 100) * 100; // Assuming 100 is the best possible HRV score
-    const RHRScore = ((100 - avgRHR) / 100) * 100; // Assuming lower is better
-    const stepsScore = (avgSteps / 10000) * 100; // Assuming 10,000 steps as a good baseline
-    const energyBurnedScore = (avgEnergyBurned / 1500) * 100; // Assuming 1500 cal as a good baseline
-    const heartRateScore = ((100 - avgHeartRate) / 100) * 100; // Assuming lower is better
-    
-    // Combine the scores with weights
-    const score = (HRVScore * 0.25) + (RHRScore * 0.2) + (stepsScore * 0.15) + 
-                  (energyBurnedScore * 0.15) + (heartRateScore * 0.15) + 
-                  (sleepQuality * 0.10) 
-  
-    // Calculate rating, description, and percentage
-    const { rating, description, percentage } = presentWellnessScore(score);
-  
-    return { score, rating, description, percentage };
-}
+
 
 export function presentWellnessScore(score: number): { rating: string; description: string; percentage: number } {
     let rating: string;

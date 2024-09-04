@@ -5,7 +5,7 @@ import {
   useSupabaseClient,
 } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+import { createTRPCProxyClient, httpBatchLink, splitLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import superjson from "superjson";
 
@@ -49,19 +49,51 @@ export const TRPCProvider = (props: { children: React.ReactNode }) => {
     api.createClient({
       transformer: superjson,
       links: [
-        httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-          async headers(header) {
-            const { data } = await supabase.auth.getSession();
-            const token = data.session?.access_token;
-            return {
-               Authorization: `Bearer ${token}`,
-              'x-trpc-source': 'expo-react',
-              "app-token": token,
-         
-            };
+        splitLink({ 
+          condition: (op) => {
+            console.log({ path: op.path })
+            return op.path === 'coach'
           },
+          true: unstable_httpBatchStreamLink({
+            url: `${getBaseUrl()}/api/trpc`,
+            async headers(header) {
+              const { data } = await supabase.auth.getSession();
+              const token = data.session?.access_token;
+              return {
+                 Authorization: `Bearer ${token}`,
+                'x-trpc-source': 'expo-react',
+                "app-token": token,
+           
+              };
+            },
+          }),
+          false:  httpBatchLink({
+            url: `${getBaseUrl()}/api/trpc`,
+            async headers(header) {
+              const { data } = await supabase.auth.getSession();
+              const token = data.session?.access_token;
+              return {
+                 Authorization: `Bearer ${token}`,
+                'x-trpc-source': 'expo-react',
+                "app-token": token,
+           
+              };
+            },
+          })
         })
+        // httpBatchLink({
+        //   url: `${getBaseUrl()}/api/trpc`,
+        //   async headers(header) {
+        //     const { data } = await supabase.auth.getSession();
+        //     const token = data.session?.access_token;
+        //     return {
+        //        Authorization: `Bearer ${token}`,
+        //       'x-trpc-source': 'expo-react',
+        //       "app-token": token,
+         
+        //     };
+        //   },
+        // })
       ]
     })
   );

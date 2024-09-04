@@ -1,9 +1,7 @@
 import { createTRPCRouter } from "../trpc";
-import { generateNewChallengeSuggestionControlloer } from "./recommendations/challenges/controller";
-import { getTipController } from "./recommendations/tips/controller";
+import { chatRouter } from "./chat/router";
 
 
 export const coachRouter = createTRPCRouter({
-    newChallengeSuggestions: generateNewChallengeSuggestionControlloer,
-    getHealthInsight: getTipController
+    chat: chatRouter
 })

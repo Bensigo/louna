@@ -1,10 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import Markdown from "react-native-markdown-display";
-import { ChevronRight, Flame, Footprints, Heart } from "@tamagui/lucide-icons";
-import { subDays } from "date-fns";
+import {  Flame, Footprints, Heart } from "@tamagui/lucide-icons";
 import {
-  Circle,
-  Progress,
   ScrollView,
   Text,
   View,
@@ -12,50 +8,24 @@ import {
   YStack,
 } from "tamagui";
 
-import { useHealthKit } from "~/integration/healthKit";
+import { HealthDataType, useHealthKit } from "~/integration/healthKit";
 import Score from "./components/score";
 import {
-  accDaily,
-  accToDaily,
-  calStressScore,
-  getBaseLineValue,
+  presentStressScore,
 } from "./utils";
 import ScoreDisplay from "./components/scoreV2";
 import { BreakDownCard } from "./physicalWrapper";
+import { api } from "~/utils/api";
+import { getStartTimeFromInterval } from "../analysis/stress";
+import { router } from "expo-router";
+import TrendDisplay from "./components/trend";
+import { TouchableHighlight } from "react-native";
+import { colorScheme } from "~/constants/colors";
+import PercentageChart from "./components/scoreChart";
 
 
 
-const StressDisplay = ({
-  score,
-}: {
-  score: {
-    score: number;
-    rating: string;
-    description: string;
-    percentage: number;
-  } | null;
-}) => {
-  if (!score) return null;
 
-  return (
-    <YStack gap="$4" backgroundColor="$red100" padding="$4" borderRadius="$4">
-      <XStack alignItems="center" space="$4">
-        <Score
-          score={score.percentage.toFixed(1)}
-          title={score.rating}
-          infoText={`you stress score is ${score.score.toFixed(2)}`}
-        />
-      </XStack>
-      <Text fontSize={16} color="$color">
-        {score.description}
-      </Text>
-      {/* <XStack alignItems="center" justifyContent="space-between">
-          <Text fontSize={14} color="$color">View Details</Text>
-          <ChevronRight size={20} color="$color" />
-        </XStack> */}
-    </YStack>
-  );
-};
 
 interface Breakdown {
     steps: number;
@@ -64,8 +34,9 @@ interface Breakdown {
     rhr: number;
   }
 
+  const now = new Date() 
 const StressWrapper = () => {
-  const { getIntervalData, getMostRecentValue, isAuthorized, getSleepData } =
+  const {  getMostRecentValue, isAuthorized } =
     useHealthKit();
   const [stressLevel, setStressLevel] = useState<{
     score: number;
@@ -74,92 +45,66 @@ const StressWrapper = () => {
     percentage: number;
   } | null>(null);
   const [breakDown, setBreakDown] = useState<Breakdown | null>(null);
+  const [ startDate, setStartDate ] = useState<Date>(new Date())
+  const [activeInterval, setInterval ] = useState<"D" | "W" | "M" | "Y">("D");
 
-  const calCulateScore = useCallback(async () => {
-    if (!isAuthorized) return;
-    const now = new Date();
-    const startDate = subDays(now, 15);
+  const [get, trend, list ] = api.useQueries((t) => [
+    t.log.get({ type: 'Stress'}),
+    t.log.trend({ type: 'Stress', days: 7  }),
+    t.log.list({ type: 'Stress', startDate, endDate: now})
+  ])
 
-    const [hrv, restingHeartRate, energyBurned, steps] = await Promise.all([
-      getIntervalData("HRV", startDate, now),
-      getIntervalData("RHR", startDate, now),
-      getIntervalData("CALORIES", startDate, now),
-      getIntervalData("STEPS", startDate, now),
-    ]);
+ useEffect(() => {
+   const start = getStartTimeFromInterval(activeInterval);
+   setStartDate(start)
+ }, [activeInterval])
 
-    const [currentHrv, currentRHR, currentEnegyBurned, currentSteps] =
+
+ const fetchCurrentData = useCallback(async () => {
+  if (!isAuthorized) return;
+
+  const [currentHrv, currentRHR, currentEnegyBurned, currentSteps] =
       await Promise.all([
         getMostRecentValue("HRV"),
         getMostRecentValue("RHR"),
         getMostRecentValue("CALORIES"),
         getMostRecentValue("STEPS"),
       ]);
-
-    if (hrv.length && restingHeartRate.length) {
-      const accHrv = accToDaily(hrv);
-      const accRestingHeartRate = accToDaily(restingHeartRate);
-      const accEnergyBurned = accDaily(energyBurned);
-      const accSteps = accDaily(steps);
-      const baseLineHrv = getBaseLineValue(accHrv, 14);
-      const baseLineRHR = getBaseLineValue(accRestingHeartRate, 14);
-      const baseLineEnergyBurned = getBaseLineValue(accEnergyBurned, 14);
-      const baseLineSteps = getBaseLineValue(accSteps, 14);
-      console.log({
-        baseLineHrv,
-        baseLineRHR,
-        baseLineEnergyBurned,
-        baseLineSteps,
-      });
-      if (baseLineHrv && baseLineRHR && currentHrv && currentRHR) {
-        const stressLevel = calStressScore({
-          todayEnergyBurned: currentEnegyBurned,
-          baseLineEnergyBurned: baseLineEnergyBurned,
-          todaySteps: currentSteps,
-          baselineStep: baseLineSteps,
-          todayHRV: currentHrv,
-          baseLineHRV: baseLineHrv,
-          todayRHR: currentRHR,
-          baseLineRHR: baseLineRHR,
-        });
-
-        setStressLevel(stressLevel);
-      }
-    }
-  }, [getIntervalData, isAuthorized]);
-
-  const fetchBreakdownData = useCallback(async () => {
-    try {
-      if (isAuthorized) {
-        const [steps, energyBurned, restingHeartRate, hrv] =
-          await Promise.all([
-            getMostRecentValue("STEPS"),
-            getMostRecentValue("CALORIES"),
-            getMostRecentValue("RHR"),
-            getMostRecentValue("HRV"),
-           
-          ]).then((values) => values.map((value) => value ?? 0));
-
-        setBreakDown({
-          steps,
-          energyBurned,
-          rhr: restingHeartRate,
-          hrv,
-        });
       
+  setBreakDown({
+    steps: currentSteps ?? 0,
+    energyBurned: currentEnegyBurned ?? 0,
+    rhr: currentRHR ?? 0,
+    hrv: currentHrv ?? 0,
 
-       
-      }
-    } catch (error) {
-      console.error("Error fetching health data:", error);
-    }
-  }, [isAuthorized, getMostRecentValue]);
+  });
+
+  
+}, [isAuthorized, getMostRecentValue]);
+
 
   useEffect(() => {
-    void calCulateScore();
-    void fetchBreakdownData()
+    void fetchCurrentData();
   }, []);
 
-  const goTo = (name: string) => {}
+
+  useEffect(() => {
+    if (get.isFetched){
+
+      const stressInfo = presentStressScore(get.data!.rawScore)
+      setStressLevel(stressInfo)  
+    }
+  }, [get.data, get.isLoading])
+
+
+  const goTo = (type: HealthDataType) => {
+    router.push({
+      pathname: "/(tabs)/home/(stats)/physical/[chart]",
+      params: {
+        type,
+      },
+    });
+  }
 
   return (
     <ScrollView flex={1} px={10} py={10}>
@@ -203,6 +148,41 @@ const StressWrapper = () => {
           value={breakDown?.hrv}
           unit="ms"
         />
+        </YStack>
+
+        <YStack gap="$3" my={"$3"}>
+        <Text fontSize="$6" fontWeight="bold">
+          Trends
+        </Text>
+       {trend.isFetched && <TrendDisplay data={trend.data ?? {}} />}
+       {list.isFetched   &&  <YStack    backgroundColor="$gray1" padding={10}>
+        <XStack borderRadius="$4" padding="$1" marginBottom="$3">
+        {["D", "W", "M", "Y"].map((filter) => (
+          <TouchableHighlight
+            key={filter}
+            onPress={() => setInterval(filter as "D" | "W" | "M" | "Y")}
+            style={{ flex: 1, backgroundColor: "transparent", padding: 10 }}
+            pressStyle={{
+              backgroundColor: "transparent",
+              borderWidth: 0,
+              border: 0,
+            }}
+          >
+            <Text
+              color={
+                 activeInterval === filter
+                  ? colorScheme.primary.lightGreen
+                  : colorScheme.secondary.darkGray
+              }
+              fontWeight={activeInterval === filter ? "bold" : "normal"}
+            >
+              {filter}
+            </Text>
+          </TouchableHighlight>
+        ))}
+      </XStack>
+            <PercentageChart data={list.data ?? []}  interval={activeInterval} title="" />
+        </YStack>}
         </YStack>
           <StressNote />
         </>
