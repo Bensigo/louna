@@ -6,8 +6,8 @@ export const chatController = protectedProcedure.query(async function* ({ ctx, i
     for (let i = 0; i < testMessage.length; i++) {
         await new Promise((resolve) => setTimeout(resolve, 200));
         console.log({ msg: testMessage[i] })
-        yield testMessage[i];
+        yield { message: testMessage[i] };
     }
     
-    yield "\n\nStream completed.";
+    yield { message: "\n\nStream completed." };
 })
