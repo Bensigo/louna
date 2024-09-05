@@ -19,6 +19,7 @@ if (config.resolver) {
   ];
   // 3. Force Metro to resolve (sub)dependencies only from the `nodeModulesPaths`
   config.resolver.disableHierarchicalLookup = true;
+
 }
 
 // @ts-expect-error - FIXME: type is mismatching?

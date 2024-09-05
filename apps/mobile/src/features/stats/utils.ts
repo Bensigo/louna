@@ -198,28 +198,32 @@ export function interpretStressScore(rawScore: number): {
 
 
 
-export function presentWellnessScore(score: number): { rating: string; description: string; percentage: number } {
+export function presentWellnessScore(score: number): { rating: string; description: string; percentage: number , score: number } {
     let rating: string;
     let description: string;
     let percentage: number;
 
+
     if (score >= 90) {
         rating = 'Excellent';
         description = 'You are in outstanding health!';
-        percentage = score;
+        percentage = calculatePercentage(score);
     } else if (score >= 70) {
         rating = 'Good';
         description = 'Your health is generally good, keep it up!';
-        percentage = score;
+        percentage = calculatePercentage(score);
+
     } else if (score >= 50) {
         rating = 'Average';
         description = 'Your health is average, consider improving in some areas.';
-        percentage = score;
+        percentage = calculatePercentage(score);
+
     } else {
         rating = 'Poor';
         description = 'Your health could use improvement. Consider reviewing your habits.';
-        percentage = score;
+        percentage = calculatePercentage(score);
+
     }
 
-    return { rating, description, percentage };
+    return { rating, description, percentage, score  };
 }

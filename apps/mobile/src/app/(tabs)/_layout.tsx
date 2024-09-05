@@ -10,17 +10,27 @@ import { useAppUser } from "~/provider/user";
 
 
 import { useEffect, useState } from "react";
+import { getData } from "~/utils/healthkit";
+import { appApi } from "~/utils/api";
 
 export default function TabLayout() {
   const user = useAppUser()
 
   useEffect(() => {
-    if (user){
-      if (!user.hasPref){
-         router.push('/(onboarding)/')
-      }
+    if (user && !user.hasPref) {
+      router.push('/(onboarding)/')
     }
-    return () => {}
+    
+    const fetchHealthData = async () => {
+      const healthData = await getData();
+      if (healthData) {
+        await appApi.log.syncHealthData.mutate(healthData);
+      }
+    };
+
+    void fetchHealthData();
+
+    // No cleanup function needed, so we can omit the return statement
   }, [user])
 
   return (

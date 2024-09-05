@@ -42,6 +42,10 @@ const defineConfig = (): ExpoConfig => ({
   //     projectId: "your-project-id",
   //   },
   // },
+  "packagerOpts": {
+    "config": "metro.config.js",
+    "sourceExts": ["js", "jsx", "ts", "tsx", "svg"]
+  },
   plugins: [
     "./expo-plugins/with-modify-gradle.js",
     "expo-apple-authentication",

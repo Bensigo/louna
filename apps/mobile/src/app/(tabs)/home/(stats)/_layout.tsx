@@ -10,7 +10,6 @@ import { ActivityIndicator } from "react-native";
 import { withLayoutContext } from "expo-router";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { View } from "tamagui";
-import { Heart, CloudRain, CloudSun, Footprints, BatteryFull, Frown } from "@tamagui/lucide-icons";
 
 import { colorScheme } from "~/constants/colors";
 

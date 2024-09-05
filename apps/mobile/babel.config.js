@@ -4,6 +4,8 @@ module.exports = function (api) {
 
   return {
     presets: [["babel-preset-expo"]],
-    plugins: [require.resolve("react-native-reanimated/plugin")],
+    plugins: [
+      [require.resolve("react-native-reanimated/plugin")],
+    ]
   };
 };

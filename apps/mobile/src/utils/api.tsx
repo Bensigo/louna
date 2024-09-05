@@ -4,6 +4,8 @@ import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import {
   useSupabaseClient,
 } from "@supabase/auth-helpers-react";
+import { createTRPCClient, httpBatchStreamLink } from '@trpc/client';
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createTRPCProxyClient, httpBatchLink, splitLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
@@ -49,25 +51,7 @@ export const TRPCProvider = (props: { children: React.ReactNode }) => {
     api.createClient({
       transformer: superjson,
       links: [
-        splitLink({ 
-          condition: (op) => {
-            console.log({ path: op.path })
-            return op.path === 'coach.chat.chat'
-          },
-          true: unstable_httpBatchStreamLink({
-            url: `${getBaseUrl()}/api/trpc`,
-            async headers(header) {
-              const { data } = await supabase.auth.getSession();
-              const token = data.session?.access_token;
-              return {
-                 Authorization: `Bearer ${token}`,
-                'x-trpc-source': 'expo-react',
-                "app-token": token,
-           
-              };
-            },
-          }),
-          false:  httpBatchLink({
+         httpBatchLink({
             url: `${getBaseUrl()}/api/trpc`,
             async headers(header) {
               const { data } = await supabase.auth.getSession();
@@ -80,7 +64,7 @@ export const TRPCProvider = (props: { children: React.ReactNode }) => {
               };
             },
           })
-        })
+        
         // httpBatchLink({
         //   url: `${getBaseUrl()}/api/trpc`,
         //   async headers(header) {
@@ -129,3 +113,23 @@ export const appApi = createTRPCProxyClient<AppRouter>({
     ]
 })
 
+
+export const trpc = createTRPCProxyClient<AppRouter>({
+    transformer: superjson,
+   links: [
+    unstable_httpBatchStreamLink({
+      url: `${getBaseUrl()}/api/trpc`,
+      textDecoder: new TextDecoder(),
+      async headers(header) {
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        return {
+           Authorization: `Bearer ${token}`,
+          'x-trpc-source': 'expo-react',
+          "app-token": token,
+     
+        };
+      },
+    })
+   ]
+})

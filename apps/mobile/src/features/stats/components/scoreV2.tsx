@@ -21,6 +21,7 @@ const ScoreDisplay: React.FC<StressDisplayProps> = ({ score, hideInterperted  })
   
   if(!score)return
   const interpretedScore = interpretStressScore(score!.score ?? 0);
+  console.log({ interpretedScore, t: score })
 
   const size = 150;
   const strokeWidth = 10;
@@ -62,7 +63,7 @@ const ScoreDisplay: React.FC<StressDisplayProps> = ({ score, hideInterperted  })
             alignmentBaseline="central"
             fill="white"
           >
-            {score.percentage.toFixed(1) + '%'}
+            {score.percentage?.toFixed(1) + '%'}
           </SVGText>
             </Svg>
             

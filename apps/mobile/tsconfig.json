@@ -6,7 +6,8 @@
       "~/*": ["./src/*"]
     },
     "jsx": "react-native",
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "types": ["react-native", "jest"]
   },
   "include": [
     "src",
@@ -14,7 +15,8 @@
     "index.tsx",
     "*.js",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "src/global.ts"
   ],
   "exclude": ["node_modules"]
 }

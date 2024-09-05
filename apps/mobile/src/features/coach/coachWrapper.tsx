@@ -5,25 +5,46 @@ import { Send, Mic } from '@tamagui/lucide-icons';
 import aiImg from '../../../assets/lounaai.png';
 import { colorScheme } from '~/constants/colors';
 import { useAppUser } from '~/provider/user';
-import { api } from '~/utils/api';
+import { api, trpc } from '~/utils/api';
+import { TRPCClientError } from '@trpc/client';
 
 const CoachWrapper = () => {
   const [message, setMessage] = useState('');
   const user = useAppUser()
   const [msg, setMsg] = useState('')
-
-  const  streams =  api.coach.chat.chat.useQuery()
-
-  console.log({ streams })
+  const [streams, setStreams] = useState<AsyncGenerator<{ message: string | undefined; }, void, unknown> | null>(null);
 
   React.useEffect(() => {
-    const processStreams = async () => {
-      for await (const stream of streams) {
-        setMsg(prev => prev + stream)
+    const fetchStreams = async () => {
+      try {
+        console.log('Fetching streams...');
+        const result = await trpc.coach.chat.chat.query();
+        console.log('Streams fetched:', result);
+        setStreams(result);
+      } catch (error) {
+        if (error instanceof TRPCClientError) {
+          console.error('TRPC Client Error:', error.message);
+          console.error('Error data:', error.data);
+        } else {
+          console.error('Unexpected error:', error);
+        }
       }
-    }
-   void  processStreams()
-  }, [streams])
+    };
+    void fetchStreams();
+  }, []);
+ 
+  React.useEffect(() => {
+    console.log({ streams })
+    const processStreams = async () => {
+      if (streams) {
+        for await (const chunk of streams) {
+          console.log({ chunk });
+          setMsg(prev => prev + (chunk.message || ''));
+        }
+      }
+    };
+    void processStreams();
+  }, [streams]);
 
  
 
